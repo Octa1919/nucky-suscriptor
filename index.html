@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Suscriptor - Nucky SaaS</title>
+    <title>Panel Suscriptor - Nucky SaaS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,34 +11,45 @@
         body { font-family: system-ui, sans-serif; background: #020617; color: white; margin:0; }
         .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #334155; }
-        .tabs { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
-        .tab { padding: 10px 16px; background: var(--gray); border-radius: 8px; cursor: pointer; font-size: 0.95em; }
-        .tab.active { background: var(--primary); color: black; font-weight: bold; }
-        .card { background: var(--gray); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin: 8px 0; }
+        .card { background: var(--gray); border-radius: 12px; padding: 25px; margin: 20px 0; }
+        input { width: 100%; padding: 14px; margin: 10px 0; background: #334155; border: none; border-radius: 10px; color: white; font-size: 1em; }
+        .btn { padding: 14px; width: 100%; border: none; border-radius: 10px; font-weight: bold; margin: 10px 0; cursor: pointer; }
         .btn-primary { background: var(--primary); color: black; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>👤 Panel Suscriptor</h1>
-            <button class="btn btn-danger" onclick="logout()">Salir</button>
+
+        <!-- Pantalla de Login -->
+        <div id="login-screen">
+            <div class="card">
+                <h2 style="text-align:center;">👤 Iniciar Sesión</h2>
+                <input type="text" id="login-user" placeholder="Usuario">
+                <input type="password" id="login-pass" placeholder="Contraseña">
+                <button class="btn btn-primary" onclick="loginSuscriptor()">Entrar</button>
+            </div>
         </div>
 
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab(0)">Inicio</div>
-            <div class="tab" onclick="switchTab(1)">Configuración</div>
-            <div class="tab" onclick="switchTab(2)">Ruleta</div>
-            <div class="tab" onclick="switchTab(3)">Usuarios</div>
-            <div class="tab" onclick="switchTab(4)">Difusión</div>
-        </div>
+        <!-- Dashboard (después del login) -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <h1>Panel Suscriptor</h1>
+                <button class="btn btn-danger" onclick="logout()">Salir</button>
+            </div>
 
-        <!-- Contenido de pestañas -->
-        <div id="tab-content">
-            <!-- Se irán llenando según la pestaña -->
-            <h2>Bienvenido a tu Panel</h2>
-            <p>Desde aquí podrás configurar tu casino, ruleta, CBU, usuarios y más.</p>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(0)">Inicio</div>
+                <div class="tab" onclick="switchTab(1)">Configuración</div>
+                <div class="tab" onclick="switchTab(2)">Ruleta</div>
+                <div class="tab" onclick="switchTab(3)">Usuarios</div>
+                <div class="tab" onclick="switchTab(4)">Difusión</div>
+            </div>
+
+            <div id="tab-content">
+                <h2>Bienvenido</h2>
+                <p>Selecciona una sección para comenzar.</p>
+            </div>
         </div>
     </div>
 
@@ -47,44 +58,51 @@
         const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentSubscriberId = null;
+        let currentSubscriber = null;
 
-        async function loadSubscriberData() {
-            // Por ahora simulamos login
-            const slug = prompt("Ingresa tu slug para probar (ej: casino-prueba):");
-            if (!slug) return;
+        async function loginSuscriptor() {
+            const username = document.getElementById('login-user').value.trim();
+            const password = document.getElementById('login-pass').value.trim();
 
-            const { data } = await _supabase
-                .from('suscriptores')
-                .select('*')
-                .eq('slug', slug)
+            if (!username || !password) return alert("Usuario y contraseña son obligatorios");
+
+            const { data, error } = await _supabase
+                .from('suscriptores_users')
+                .select('*, suscriptores(*)')
+                .eq('nombre', username)
+                .eq('password', password)
                 .single();
 
-            if (data) {
-                currentSubscriberId = data.id;
-                alert(`✅ Bienvenido, ${data.nombre_casino || data.nombre}`);
-                // Aquí cargaremos los datos según la pestaña
-            } else {
-                alert("Slug no encontrado");
+            if (error || !data) {
+                alert("Credenciales incorrectas");
+                return;
             }
+
+            currentSubscriber = data;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            alert(`✅ Bienvenido, ${data.suscriptores.nombre_casino}`);
+            switchTab(0);
         }
 
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
             const content = document.getElementById('tab-content');
             
-            if (tab === 0) content.innerHTML = `<h2>Inicio</h2><p>Panel de control de tu casino.</p>`;
-            if (tab === 1) content.innerHTML = `<h2>Configuración General</h2><p>Aquí irán logo, colores, WhatsApp, links, etc.</p>`;
-            if (tab === 2) content.innerHTML = `<h2>Configuración de Ruleta</h2><p>Aquí configurarás los premios normal y dorada.</p>`;
-            if (tab === 3) content.innerHTML = `<h2>Usuarios Jugadores</h2><p>Crear, editar y eliminar usuarios.</p>`;
-            if (tab === 4) content.innerHTML = `<h2>Difusión OneSignal</h2><p>Enviar notificaciones a tus jugadores.</p>`;
+            if (tab === 0) content.innerHTML = `<h2>Inicio</h2><p>Panel de control de ${currentSubscriber?.suscriptores?.nombre_casino || 'tu casino'}.</p>`;
+            if (tab === 1) content.innerHTML = `<h2>Configuración</h2><p>Próximamente: logo, colores, WhatsApp, etc.</p>`;
+            if (tab === 2) content.innerHTML = `<h2>Ruleta</h2><p>Próximamente: configurar premios.</p>`;
+            if (tab === 3) content.innerHTML = `<h2>Usuarios</h2><p>Próximamente: gestión de jugadores.</p>`;
+            if (tab === 4) content.innerHTML = `<h2>Difusión</h2><p>Próximamente: enviar notificaciones.</p>`;
         }
 
         function logout() {
             if (confirm("¿Cerrar sesión?")) location.reload();
         }
 
-        window.onload = loadSubscriberData;
+        // Iniciar en pantalla de login
+        window.onload = () => {};
     </script>
 </body>
 </html>
