@@ -8,8 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #a3e635;
-            --gold: #facc15;
+            --primary: #22d3ee;
+            --accent: #67e8f9;
             --dark: #0a0f1c;
             --card: #121a2e;
             --glass: rgba(18, 26, 46, 0.75);
@@ -17,7 +17,7 @@
         * { box-sizing: border-box; margin:0; padding:0; }
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #0a0f1c 0%, #1a2340 100%);
+            background: linear-gradient(135deg, #0a0f1c 0%, #1e2a4a 100%);
             color: #e2e8f0;
             min-height: 100vh;
         }
@@ -28,7 +28,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(250, 204, 21, 0.2);
+            border-bottom: 1px solid rgba(34, 211, 238, 0.3);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -36,7 +36,7 @@
         .casino-name {
             font-size: 1.45rem;
             font-weight: 700;
-            background: linear-gradient(90deg, #a3e635, #facc15);
+            background: linear-gradient(90deg, #22d3ee, #67e8f9);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -52,7 +52,6 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
         .tabs {
             display: flex;
@@ -74,9 +73,9 @@
             font-size: 0.96rem;
         }
         .tab.active {
-            background: linear-gradient(90deg, var(--primary), var(--gold));
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             color: black;
-            box-shadow: 0 0 20px rgba(163, 230, 53, 0.5);
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
             transform: scale(1.03);
         }
         .card {
@@ -85,7 +84,7 @@
             padding: 26px;
             margin: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            border: 1px solid rgba(163, 230, 53, 0.15);
+            border: 1px solid rgba(34, 211, 238, 0.15);
             backdrop-filter: blur(12px);
         }
         label {
@@ -102,14 +101,13 @@
             background: #1e2937;
             color: white;
             font-size: 1.05rem;
-            transition: border 0.3s;
         }
         input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.2);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
         }
         .btn-primary {
-            background: linear-gradient(90deg, var(--primary), var(--gold));
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             color: black;
             font-weight: 700;
             border: none;
@@ -118,12 +116,9 @@
             margin-top: 12px;
             cursor: pointer;
             font-size: 1.05rem;
-            box-shadow: 0 6px 20px rgba(163, 230, 53, 0.4);
-            transition: transform 0.2s;
+            box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
+        .btn-primary:hover { transform: translateY(-2px); }
         .user-item {
             background: #1e2937;
             padding: 18px;
@@ -135,7 +130,6 @@
         .user-item:hover {
             background: #334155;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(163, 230, 53, 0.2);
         }
         .modal {
             display: none;
@@ -152,7 +146,7 @@
             width: 92%;
             max-width: 480px;
             border-radius: 24px;
-            padding: 28px;
+            padding: 32px 28px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
     </style>
@@ -174,20 +168,19 @@
 
     <div id="tab-content" class="container"></div>
 
-    <!-- Modal Nuevo Usuario -->
+    <!-- Modal Crear Usuario -->
     <div id="modal-nuevo-usuario" class="modal">
         <div class="modal-content">
-            <h2>Crear Nuevo Usuario</h2>
+            <h2 style="margin-bottom:20px;">Crear Nuevo Usuario</h2>
             <input type="text" id="new-username" placeholder="Nombre de usuario">
             <input type="text" id="new-password" placeholder="Contraseña">
             <input type="text" id="new-telefono" placeholder="Teléfono (opcional)">
             <button class="btn-primary" onclick="crearNuevoUsuario()">Crear Usuario</button>
-            <button onclick="hideNewUserModal()" style="background:#334155;color:white;margin-top:8px;">Cancelar</button>
+            <button onclick="hideNewUserModal()" style="background:#334155; color:white; padding:16px; border-radius:14px; margin-top:8px; width:100%; font-weight:600;">Cancelar</button>
         </div>
     </div>
 
     <script>
-        // === TU CÓDIGO FUNCIONAL (sin cambios) ===
         const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -197,16 +190,13 @@
             const username = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value.trim();
             if (!username || !password) return alert("Usuario y contraseña son obligatorios");
-
             const { data, error } = await _supabase
                 .from('suscriptores_users')
                 .select('*, suscriptores(id)')
                 .eq('nombre', username)
                 .eq('password', password)
                 .single();
-
             if (error || !data) return alert("Credenciales incorrectas");
-
             currentSubscriberId = data.suscriptores.id;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
@@ -267,16 +257,15 @@
             }
         }
 
-        // === Resto de funciones (guardar, usuarios, etc.) ===
         async function guardarConfig() {
             if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
             const nombre = document.getElementById('nombre-casino').value.trim();
             const whatsapp = document.getElementById('whatsapp').value.trim();
             const { error } = await _supabase.from('suscriptores').update({ nombre_casino: nombre || null, whatsapp: whatsapp || null }).eq('id', currentSubscriberId);
             if (error) alert("Error: " + error.message); else alert("✅ Configuración General guardada");
-        }
-
-        async function guardarRuleta() {
+        } 
+        
+        async function guardarRuleta() { 
             if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
             const normal = document.getElementById('premios-normal').value.trim();
             const dorada = document.getElementById('premios-dorada').value.trim();
@@ -289,7 +278,6 @@
             });
             if (error) alert("Error: " + error.message); else alert("✅ Configuración de Ruleta guardada");
         }
-
         async function cargarUsuarios() {
             const div = document.getElementById('lista-usuarios');
             div.innerHTML = "<p>Cargando...</p>";
@@ -305,10 +293,9 @@
                 </div>
             `).join('');
         }
-
         function showNewUserModal() { document.getElementById('modal-nuevo-usuario').style.display = 'flex'; }
         function hideNewUserModal() { document.getElementById('modal-nuevo-usuario').style.display = 'none'; }
-        async function crearNuevoUsuario() {
+        async function crearNuevoUsuario() { 
             const username = document.getElementById('new-username').value.trim();
             const password = document.getElementById('new-password').value.trim();
             const telefono = document.getElementById('new-telefono').value.trim();
