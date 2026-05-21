@@ -71,12 +71,30 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.96rem;
+            position: relative;
+            overflow: hidden;
         }
         .tab.active {
             background: linear-gradient(90deg, var(--primary), var(--accent));
             color: black;
             box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
-            transform: scale(1.03);
+        }
+        /* EFECTO PLATEADO BRILLANTE */
+        .tab.active::before,
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 40%;
+            height: 300%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+            transform: skewX(-25deg);
+            animation: shine 2.5s linear infinite;
+        }
+        @keyframes shine {
+            0%   { transform: translateX(-150%) skewX(-25deg); }
+            100% { transform: translateX(300%) skewX(-25deg); }
         }
         .card {
             background: var(--glass);
@@ -87,12 +105,7 @@
             border: 1px solid rgba(34, 211, 238, 0.15);
             backdrop-filter: blur(12px);
         }
-        label {
-            display: block;
-            margin: 18px 0 8px;
-            font-size: 0.92rem;
-            color: #cbd5e1;
-        }
+        label { display: block; margin: 18px 0 8px; font-size: 0.92rem; color: #cbd5e1; }
         input {
             width: 100%;
             padding: 16px 18px;
@@ -117,8 +130,9 @@
             cursor: pointer;
             font-size: 1.05rem;
             box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-primary:hover { transform: translateY(-2px); }
         .user-item {
             background: #1e2937;
             padding: 18px;
@@ -152,6 +166,7 @@
     </style>
 </head>
 <body>
+    <!-- Header, tabs y contenido igual que antes -->
     <div class="header">
         <div class="casino-name" id="casino-name">Nucky Casino</div>
         <button class="btn-salir" onclick="logout()">
