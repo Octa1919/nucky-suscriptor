@@ -65,18 +65,12 @@
         }
         input, textarea { 
             width: 100%; 
-            padding: 14px 16px; 
+            padding: 14px; 
             background: #334155; 
             border: 1px solid #475569; 
             border-radius: 12px; 
             color: white; 
             font-size: 1em; 
-            box-sizing: border-box;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.2);
         }
         .btn { 
             padding: 14px; 
@@ -85,9 +79,10 @@
             border-radius: 12px; 
             cursor: pointer; 
             font-weight: bold; 
-            margin-top: 25px; 
+            margin-top: 20px; 
         }
         .btn-primary { background: var(--primary); color: black; }
+        .btn-danger { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
@@ -100,8 +95,8 @@
         <div class="tabs">
             <div class="tab" onclick="switchTab(0)">Inicio</div>
             <div class="tab" onclick="switchTab(1)">Configuración</div>
-            <div class="tab active" onclick="switchTab(2)">Ruleta</div>
-            <div class="tab" onclick="switchTab(3)">Usuarios</div>
+            <div class="tab" onclick="switchTab(2)">Ruleta</div>
+            <div class="tab active" onclick="switchTab(3)">Usuarios</div>
             <div class="tab" onclick="switchTab(4)">Difusión</div>
         </div>
 
@@ -113,36 +108,57 @@
         const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let currentSubscriberId = null; // Se cargará después del login
+
         async function switchTab(tab) {
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
             const content = document.getElementById('tab-content');
 
-            if (tab === 2) { // Ruleta
+            if (tab === 3) { // Usuarios
                 content.innerHTML = `
                     <div class="card">
-                        <h2>🎰 Configuración de Ruleta</h2>
-                        
-                        <label>Premios Ruleta Normal (separados por coma)</label>
-                        <input type="text" id="premios-normal" placeholder="3000,5000,8000,10000,15000,20000">
-
-                        <label>Premios Ruleta Dorada (separados por coma)</label>
-                        <input type="text" id="premios-dorada" placeholder="15000,25000,40000,50000,100000">
-
-                        <label>Días para activar Ruleta Dorada</label>
-                        <input type="number" id="dias-dorada" value="7" min="1">
-
-                        <button class="btn btn-primary" onclick="guardarRuleta()">Guardar Configuración de Ruleta</button>
+                        <h2>👥 Gestión de Usuarios</h2>
+                        <button class="btn btn-primary" onclick="showNewUserModal()">+ Nuevo Usuario</button>
+                        <div id="lista-usuarios" style="margin-top:20px;"></div>
                     </div>
                 `;
-            } else if (tab === 1) {
-                content.innerHTML = `<h2>Configuración General</h2><p>Ya configurada anteriormente.</p>`;
+                cargarUsuarios();
+            } else if (tab === 2) {
+                content.innerHTML = `... Ruleta anterior ...`;
             } else {
                 content.innerHTML = `<h2>Sección en desarrollo</h2>`;
             }
         }
 
-        async function guardarRuleta() {
-            alert("✅ Configuración de Ruleta guardada correctamente");
+        async function cargarUsuarios() {
+            // Simulación por ahora (después filtraremos por currentSubscriberId)
+            const { data } = await _supabase.from('usuarios').select('*').limit(20);
+            const div = document.getElementById('lista-usuarios');
+            div.innerHTML = data.map(u => `
+                <div style="background:#334155; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>${u.username}</strong><br>
+                        <small>${u.telefono || 'Sin teléfono'}</small>
+                    </div>
+                    <button class="btn btn-danger" style="padding:6px 12px; font-size:0.85em;" onclick="eliminarUsuario('${u.id}')">Eliminar</button>
+                </div>
+            `).join('');
+        }
+
+        function showNewUserModal() {
+            const username = prompt("Nombre de usuario:");
+            const telefono = prompt("Teléfono (opcional):");
+            if (username) {
+                alert(`Usuario "${username}" creado (en desarrollo)`);
+                cargarUsuarios();
+            }
+        }
+
+        function eliminarUsuario(id) {
+            if (confirm("¿Eliminar este usuario?")) {
+                alert("Usuario eliminado (en desarrollo)");
+                cargarUsuarios();
+            }
         }
 
         function logout() {
@@ -150,7 +166,7 @@
         }
 
         window.onload = () => {
-            switchTab(2);
+            switchTab(3); // Abre directamente en Usuarios
         };
     </script>
 </body>
