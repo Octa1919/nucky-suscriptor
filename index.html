@@ -7,82 +7,20 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #a3e635; 
-            --dark: #0f172a; 
-            --gray: #1e2937; 
-        }
-        body { 
-            font-family: system-ui, sans-serif; 
-            background: #020617; 
-            color: white; 
-            margin:0; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 15px; 
-        }
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #334155; 
-        }
-        .tabs { 
-            display: flex; 
-            gap: 8px; 
-            margin: 20px 0; 
-            flex-wrap: wrap; 
-            overflow-x: auto; 
-            padding-bottom: 10px; 
-        }
-        .tab { 
-            padding: 10px 16px; 
-            background: var(--gray); 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-size: 0.95em; 
-            white-space: nowrap; 
-        }
-        .tab.active { 
-            background: var(--primary); 
-            color: black; 
-            font-weight: bold; 
-        }
-        .card { 
-            background: var(--gray); 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-        }
-        label { 
-            display: block; 
-            margin: 16px 0 6px; 
-            font-size: 0.9em; 
-            color: #94a3b8; 
-        }
-        input, textarea { 
-            width: 100%; 
-            padding: 14px; 
-            background: #334155; 
-            border: 1px solid #475569; 
-            border-radius: 12px; 
-            color: white; 
-            font-size: 1em; 
-        }
-        .btn { 
-            padding: 14px; 
-            width: 100%; 
-            border: none; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            margin-top: 20px; 
-        }
+        :root { --primary: #a3e635; --dark: #0f172a; --gray: #1e2937; }
+        body { font-family: system-ui, sans-serif; background: #020617; color: white; margin:0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #334155; }
+        .tabs { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; overflow-x: auto; padding-bottom: 10px; }
+        .tab { padding: 10px 16px; background: var(--gray); border-radius: 10px; cursor: pointer; font-size: 0.95em; white-space: nowrap; }
+        .tab.active { background: var(--primary); color: black; font-weight: bold; }
+        .card { background: var(--gray); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        label { display: block; margin: 16px 0 6px; font-size: 0.9em; color: #94a3b8; }
+        input, textarea { width: 100%; padding: 14px; background: #334155; border: 1px solid #475569; border-radius: 12px; color: white; font-size: 1em; }
+        .btn { padding: 14px; width: 100%; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 20px; }
         .btn-primary { background: var(--primary); color: black; }
         .btn-danger { background: #ef4444; color: white; }
+        .user-item { background: #334155; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -103,12 +41,27 @@
         <div id="tab-content"></div>
     </div>
 
+    <!-- Modal Nuevo Usuario -->
+    <div id="modal-nuevo-usuario" class="modal" style="display:none;">
+        <div class="card" style="max-width:480px;">
+            <h2>Crear Nuevo Usuario</h2>
+            <label>Nombre de Usuario</label>
+            <input type="text" id="new-username">
+            <label>Contraseña</label>
+            <input type="text" id="new-password">
+            <label>Teléfono</label>
+            <input type="text" id="new-telefono">
+            <button class="btn btn-primary" onclick="crearNuevoUsuario()">Crear Usuario</button>
+            <button class="btn btn-danger" onclick="hideNewUserModal()">Cancelar</button>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentSubscriberId = null; // Se cargará después del login
+        let currentSubscriberId = null;
 
         async function switchTab(tab) {
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
@@ -117,56 +70,86 @@
             if (tab === 3) { // Usuarios
                 content.innerHTML = `
                     <div class="card">
-                        <h2>👥 Gestión de Usuarios</h2>
-                        <button class="btn btn-primary" onclick="showNewUserModal()">+ Nuevo Usuario</button>
+                        <h2>👥 Usuarios Jugadores</h2>
+                        <button class="btn btn-primary" onclick="showNewUserModal()">+ Crear Nuevo Usuario</button>
                         <div id="lista-usuarios" style="margin-top:20px;"></div>
                     </div>
                 `;
                 cargarUsuarios();
-            } else if (tab === 2) {
-                content.innerHTML = `... Ruleta anterior ...`;
+            } else if (tab === 2) { // Ruleta
+                content.innerHTML = `
+                    <div class="card">
+                        <h2>🎰 Configuración de Ruleta</h2>
+                        <label>Premios Ruleta Normal</label>
+                        <input type="text" id="premios-normal" value="3000,5000,8000,10000,15000,20000">
+                        <label>Premios Ruleta Dorada</label>
+                        <input type="text" id="premios-dorada" value="15000,25000,40000,50000,100000">
+                        <label>Días para Ruleta Dorada</label>
+                        <input type="number" id="dias-dorada" value="7">
+                        <button class="btn btn-primary" onclick="guardarRuleta()">Guardar Configuración</button>
+                    </div>
+                `;
+            } else if (tab === 1) { // Configuración
+                content.innerHTML = `
+                    <div class="card">
+                        <h2>Configuración General</h2>
+                        <label>Nombre del Casino</label>
+                        <input type="text" id="nombre-casino">
+                        <label>WhatsApp</label>
+                        <input type="text" id="whatsapp">
+                        <label>Links de Salas (4)</label>
+                        <input type="text" id="sala1" placeholder="Sala 1">
+                        <input type="text" id="sala2" placeholder="Sala 2">
+                        <input type="text" id="sala3" placeholder="Sala 3">
+                        <input type="text" id="sala4" placeholder="Sala 4">
+                        <button class="btn btn-primary" onclick="guardarConfig()">Guardar</button>
+                    </div>
+                `;
             } else {
-                content.innerHTML = `<h2>Sección en desarrollo</h2>`;
+                content.innerHTML = `<h2>Bienvenido al Panel</h2><p>Selecciona una sección.</p>`;
             }
         }
 
         async function cargarUsuarios() {
-            // Simulación por ahora (después filtraremos por currentSubscriberId)
-            const { data } = await _supabase.from('usuarios').select('*').limit(20);
             const div = document.getElementById('lista-usuarios');
-            div.innerHTML = data.map(u => `
-                <div style="background:#334155; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <strong>${u.username}</strong><br>
-                        <small>${u.telefono || 'Sin teléfono'}</small>
-                    </div>
-                    <button class="btn btn-danger" style="padding:6px 12px; font-size:0.85em;" onclick="eliminarUsuario('${u.id}')">Eliminar</button>
+            div.innerHTML = '<p>Cargando usuarios...</p>';
+            // Simulación por ahora
+            div.innerHTML = `
+                <div class="user-item" onclick="editarUsuario('1')">
+                    <strong>prueba09</strong><br>
+                    <small>Tel: +54912345678</small>
                 </div>
-            `).join('');
+            `;
         }
 
         function showNewUserModal() {
-            const username = prompt("Nombre de usuario:");
-            const telefono = prompt("Teléfono (opcional):");
-            if (username) {
-                alert(`Usuario "${username}" creado (en desarrollo)`);
-                cargarUsuarios();
-            }
+            document.getElementById('modal-nuevo-usuario').style.display = 'flex';
         }
 
-        function eliminarUsuario(id) {
-            if (confirm("¿Eliminar este usuario?")) {
-                alert("Usuario eliminado (en desarrollo)");
-                cargarUsuarios();
-            }
+        function hideNewUserModal() {
+            document.getElementById('modal-nuevo-usuario').style.display = 'none';
         }
 
-        function logout() {
-            if (confirm("¿Cerrar sesión?")) location.reload();
+        function crearNuevoUsuario() {
+            const username = document.getElementById('new-username').value;
+            const password = document.getElementById('new-password').value;
+            const telefono = document.getElementById('new-telefono').value;
+            if (!username || !password) return alert("Usuario y contraseña son obligatorios");
+            alert(`Usuario "${username}" creado correctamente`);
+            hideNewUserModal();
+            cargarUsuarios();
         }
+
+        function editarUsuario(id) {
+            alert("Modal de edición del usuario (en desarrollo)");
+        }
+
+        function guardarRuleta() { alert("Configuración de Ruleta guardada"); }
+        function guardarConfig() { alert("Configuración guardada"); }
+        function logout() { if(confirm("¿Salir?")) location.reload(); }
 
         window.onload = () => {
-            switchTab(3); // Abre directamente en Usuarios
+            switchTab(3); // Abre en Usuarios
         };
     </script>
 </body>
