@@ -217,6 +217,7 @@
 
     let currentSubscriberId = null;
 
+    // ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
@@ -232,7 +233,7 @@
         if (error || !data) return alert("Credenciales incorrectas");
 
         currentSubscriberId = data.suscriptores.id;
-        console.log("✅ Subscriber ID cargado correctamente:", currentSubscriberId);
+        console.log("✅ Subscriber ID cargado:", currentSubscriberId);
 
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
@@ -252,15 +253,37 @@
         }
     }
 
+    // ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
-        if (tab === 0) {
+        if (tab === 0) { // Vivo
             content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando resultados en vivo...</div></div>`;
-        } else if (tab === 1) {
-            content.innerHTML = `... (tu código de Configuración) ...`;
-        } else if (tab === 2) {
+        } 
+        else if (tab === 1) { // Configurar
+            content.innerHTML = `
+                <div class="card">
+                    <h2>⚙️ Configuración General</h2>
+                    <label>Nombre del Casino</label>
+                    <input type="text" id="nombre-casino">
+                    <label>WhatsApp de atención</label>
+                    <input type="text" id="whatsapp">
+                    <button class="btn-primary" onclick="guardarConfig()">Guardar Configuración General</button>
+                </div>
+                <div class="card">
+                    <h2>🎰 Configuración de Ruleta</h2>
+                    <label>Premios Ruleta Normal (separados por coma)</label>
+                    <input type="text" id="premios-normal" placeholder="3000,5000,8000...">
+                    <label>Premios Ruleta Dorada</label>
+                    <input type="text" id="premios-dorada" placeholder="15000,25000,40000...">
+                    <label>Días para activar Ruleta Dorada</label>
+                    <input type="number" id="dias-dorada" value="7" min="1">
+                    <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
+                </div>
+            `;
+        } 
+        else if (tab === 2) { // Usuarios
             content.innerHTML = `
                 <div class="card">
                     <h2>👥 Usuarios Jugadores</h2>
@@ -269,20 +292,40 @@
                 </div>
             `;
             cargarUsuarios();
-        } else if (tab === 3) {
-            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
+        } 
+        else if (tab === 3) { // Difu
+            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente: envía notificaciones y difusiones a tus jugadores.</p></div>`;
         }
     }
 
+    // ==================== GUARDADO ====================
+    async function guardarConfig() {
+        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
+        const nombre = document.getElementById('nombre-casino').value.trim();
+        const whatsapp = document.getElementById('whatsapp').value.trim();
+        const { error } = await _supabase.from('suscriptores').update({ nombre_casino: nombre || null, whatsapp: whatsapp || null }).eq('id', currentSubscriberId);
+        if (error) alert("Error: " + error.message); else alert("✅ Configuración General guardada");
+    }
+
+    async function guardarRuleta() {
+        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
+        const normal = document.getElementById('premios-normal').value.trim();
+        const dorada = document.getElementById('premios-dorada').value.trim();
+        const dias = parseInt(document.getElementById('dias-dorada').value) || 7;
+        const { error } = await _supabase.from('config_ruleta').upsert({
+            subscriber_id: currentSubscriberId,
+            premios_normal: normal ? normal.split(',').map(p => p.trim()) : [],
+            premios_dorada: dorada ? dorada.split(',').map(p => p.trim()) : [],
+            dias_dorada: dias
+        });
+        if (error) alert("Error: " + error.message); else alert("✅ Configuración de Ruleta guardada");
+    }
+
+    // ==================== USUARIOS ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
         div.innerHTML = "<p>Cargando usuarios...</p>";
-
-        if (!currentSubscriberId) {
-            div.innerHTML = "<p>Error: No se detectó el suscriptor.</p>";
-            return;
-        }
 
         const { data, error } = await _supabase
             .from('usuarios')
@@ -291,7 +334,7 @@
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error("Error al cargar usuarios:", error);
+            console.error(error);
             div.innerHTML = "<p>Error al cargar usuarios</p>";
             return;
         }
@@ -321,9 +364,7 @@
     }
 
     async function crearNuevoUsuario() {
-        if (!currentSubscriberId) {
-            return alert("Error: No se detectó el suscriptor. Vuelve a iniciar sesión.");
-        }
+        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor. Vuelve a iniciar sesión.");
 
         const username = document.getElementById('new-username').value.trim();
         const password = document.getElementById('new-password').value.trim();
@@ -331,23 +372,19 @@
 
         if (!username || !password) return alert("Usuario y contraseña son obligatorios");
 
-        console.log("Creando usuario con subscriber_id =", currentSubscriberId);
-
-        const { data, error } = await _supabase.from('usuarios').insert({
+        const { error } = await _supabase.from('usuarios').insert({
             subscriber_id: currentSubscriberId,
             username: username,
             password: password,
             telefono: telefono || null
-        }).select();
+        });
 
         if (error) {
-            console.error("Error al insertar usuario:", error);
-            alert("Error al crear usuario: " + error.message);
+            alert("Error: " + error.message);
         } else {
-            console.log("✅ Usuario creado correctamente:", data);
             alert(`✅ Usuario "${username}" creado`);
             hideNewUserModal();
-            await cargarUsuarios();   // ← Actualiza la lista inmediatamente
+            await cargarUsuarios();
         }
     }
 
