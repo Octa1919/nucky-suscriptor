@@ -7,173 +7,34 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #22d3ee;
-            --accent: #67e8f9;
-            --dark: #0a0f1c;
-            --card: #121a2e;
-            --glass: rgba(18, 26, 46, 0.75);
-        }
+        :root { --primary: #22d3ee; --accent: #67e8f9; --dark: #0a0f1c; --card: #121a2e; --glass: rgba(18, 26, 46, 0.75); }
         * { box-sizing: border-box; margin:0; padding:0; }
-        body {
-            font-family: system-ui, sans-serif;
-            background: linear-gradient(135deg, #0a0f1c 0%, #1e2a4a 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-        }
-        .header {
-            background: rgba(10, 15, 28, 0.95);
-            backdrop-filter: blur(16px);
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(34, 211, 238, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .casino-name {
-            font-size: 1.45rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #22d3ee, #67e8f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .btn-salir {
-            background: #ef4444;
-            color: white;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .tabs {
-            display: flex;
-            background: rgba(18, 26, 46, 0.85);
-            padding: 8px;
-            border-radius: 20px;
-            margin: 20px 20px 10px;
-            gap: 6px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-        .tab {
-            flex: 1;
-            padding: 13px 10px;
-            text-align: center;
-            border-radius: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.93rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .tab.active {
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            color: black;
-            box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
-        }
-        .tab.active::before {
-            content: '';
-            position: absolute;
-            top: -80%;
-            left: -200%;
-            width: 60%;
-            height: 400%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
-            transform: skewX(-25deg);
-            animation: shine 1.6s linear infinite;
-        }
-        @keyframes shine {
-            0% { transform: translateX(-200%) skewX(-25deg); }
-            100% { transform: translateX(400%) skewX(-25deg); }
-        }
-        .card {
-            background: var(--glass);
-            border-radius: 24px;
-            padding: 26px;
-            margin: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            border: 1px solid rgba(34, 211, 238, 0.15);
-            backdrop-filter: blur(12px);
-        }
-        /* TARJETAS DE USUARIOS - MEJORADAS */
-        .user-item {
-            background: #1e2937;
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border: 1px solid rgba(34, 211, 238, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .user-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(34, 211, 238, 0.3);
-            border-color: var(--primary);
-        }
-        .user-item strong {
-            font-size: 1.15rem;
-            display: block;
-        }
+        body { font-family: system-ui, sans-serif; background: linear-gradient(135deg, #0a0f1c, #1e2a4a); color: #e2e8f0; min-height: 100vh; }
+        .header { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(16px); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(34, 211, 238, 0.3); position: sticky; top: 0; z-index: 100; }
+        .casino-name { font-size: 1.45rem; font-weight: 700; background: linear-gradient(90deg, #22d3ee, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-salir { background: #ef4444; color: white; border: none; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tabs { display: flex; background: rgba(18, 26, 46, 0.85); padding: 8px; border-radius: 20px; margin: 20px 20px 10px; gap: 6px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .tab { flex: 1; padding: 13px 10px; text-align: center; border-radius: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.93rem; position: relative; overflow: hidden; }
+        .tab.active { background: linear-gradient(90deg, var(--primary), var(--accent)); color: black; box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+        .tab.active::before { content: ''; position: absolute; top: -80%; left: -200%; width: 60%; height: 400%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent); transform: skewX(-25deg); animation: shine 1.6s linear infinite; }
+        @keyframes shine { 0% { transform: translateX(-200%) skewX(-25deg); } 100% { transform: translateX(400%) skewX(-25deg); } }
+        .card { background: var(--glass); border-radius: 24px; padding: 26px; margin: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(34, 211, 238, 0.15); backdrop-filter: blur(12px); }
+        .user-item { background: #1e2937; padding: 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(34, 211, 238, 0.1); transition: all 0.3s ease; cursor: pointer; }
+        .user-item:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.3); }
         label { display: block; margin: 18px 0 8px; font-size: 0.92rem; color: #cbd5e1; }
-        input {
-            width: 100%;
-            padding: 16px 18px;
-            border-radius: 14px;
-            border: 1px solid #334155;
-            background: #1e2937;
-            color: white;
-            font-size: 1.05rem;
-        }
+        input { width: 100%; padding: 16px 18px; border-radius: 14px; border: 1px solid #334155; background: #1e2937; color: white; font-size: 1.05rem; }
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2); }
-        .btn-primary {
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            color: black;
-            font-weight: 700;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
-            margin-top: 12px;
-            cursor: pointer;
-            font-size: 1.05rem;
-            box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
-            transition: transform 0.08s ease;
-        }
+        .btn-primary { background: linear-gradient(90deg, var(--primary), var(--accent)); color: black; font-weight: 700; border: none; padding: 16px; border-radius: 14px; margin-top: 12px; cursor: pointer; font-size: 1.05rem; box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4); transition: transform 0.08s ease; }
         .btn-primary:active { transform: scale(0.88) translateY(4px) !important; }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: var(--card);
-            width: 92%;
-            max-width: 480px;
-            border-radius: 24px;
-            padding: 32px 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: var(--card); width: 92%; max-width: 480px; border-radius: 24px; padding: 32px 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal button { width: 100%; padding: 16px; border-radius: 14px; font-weight: 700; font-size: 1.05rem; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <!-- Header y tabs (igual que antes) -->
     <div class="header">
         <div class="casino-name" id="casino-name">Nucky Casino</div>
-        <button class="btn-salir" onclick="logout()">
-            <i class="fas fa-sign-out-alt"></i>
-        </button>
+        <button class="btn-salir" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 
     <div class="tabs">
@@ -193,7 +54,20 @@
             <input type="text" id="new-password" placeholder="Contraseña">
             <input type="text" id="new-telefono" placeholder="Teléfono (opcional)">
             <button class="btn-primary" onclick="crearNuevoUsuario()">Crear Usuario</button>
-            <button onclick="hideNewUserModal()" style="background:#334155; color:white;">Cancelar</button>
+            <button onclick="hideNewUserModal()" style="background:#334155;color:white;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Editar Usuario -->
+    <div id="modal-editar-usuario" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:24px;">Editar Usuario</h2>
+            <input type="text" id="edit-username" placeholder="Nombre de usuario">
+            <input type="text" id="edit-password" placeholder="Contraseña">
+            <input type="text" id="edit-telefono" placeholder="Teléfono">
+            <button class="btn-primary" onclick="guardarEdicionUsuario()">Guardar Cambios</button>
+            <button onclick="eliminarUsuarioActual()" style="background:#ef4444;color:white;margin-top:8px;">Eliminar Usuario</button>
+            <button onclick="hideEditarModal()" style="background:#334155;color:white;margin-top:8px;">Cancelar</button>
         </div>
     </div>
     
@@ -201,8 +75,8 @@
         const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
+        let usuarioAEditarId = null;
      
    async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
@@ -280,8 +154,7 @@
     async function guardarConfig() { if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor"); /* tu código anterior */ }
     async function guardarRuleta() { if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor"); /* tu código anterior */ }
 
-   // ==================== CARGAR USUARIOS CON TARJETAS Y BUSCADOR ====================
- async function cargarUsuarios() {
+async function cargarUsuarios() {
             const div = document.getElementById('lista-usuarios');
             if (!div) return;
             div.innerHTML = "<p>Cargando usuarios...</p>";
@@ -298,13 +171,59 @@
             }
 
             div.innerHTML = data.map(u => `
-                <div class="user-item" onclick="editarUsuario('${u.id}')">
+                <div class="user-item" onclick="abrirModalEditar('${u.id}', '${u.username}', '${u.password || ''}', '${u.telefono || ''}')">
                     <strong style="font-size:1.2rem;">${u.username}</strong>
-                    <div style="margin-top:8px;color:#94a3b8;">
-                        ${u.telefono ? u.telefono : '<em>Sin teléfono registrado</em>'}
+                    <div style="margin-top:8px; font-size:0.95rem;">
+                        <strong>Contraseña:</strong> ${u.password || '—'}<br>
+                        <strong>Teléfono:</strong> ${u.telefono || 'Sin teléfono registrado'}
                     </div>
                 </div>
             `).join('');
+        }
+
+    function abrirModalEditar(id, username, password, telefono) {
+            usuarioAEditarId = id;
+            document.getElementById('edit-username').value = username;
+            document.getElementById('edit-password').value = password;
+            document.getElementById('edit-telefono').value = telefono;
+            document.getElementById('modal-editar-usuario').style.display = 'flex';
+        }
+
+        function hideEditarModal() {
+            document.getElementById('modal-editar-usuario').style.display = 'none';
+            usuarioAEditarId = null;
+        }
+
+        async function guardarEdicionUsuario() {
+            if (!usuarioAEditarId) return;
+            const username = document.getElementById('edit-username').value.trim();
+            const password = document.getElementById('edit-password').value.trim();
+            const telefono = document.getElementById('edit-telefono').value.trim();
+
+            const { error } = await _supabase
+                .from('usuarios')
+                .update({ username, password, telefono: telefono || null })
+                .eq('id', usuarioAEditarId);
+
+            if (error) alert("Error: " + error.message);
+            else {
+                alert("✅ Usuario actualizado");
+                hideEditarModal();
+                await cargarUsuarios();
+            }
+        }
+
+        async function eliminarUsuarioActual() {
+            if (!usuarioAEditarId) return;
+            if (!confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.")) return;
+
+            const { error } = await _supabase.from('usuarios').delete().eq('id', usuarioAEditarId);
+            if (error) alert("Error: " + error.message);
+            else {
+                alert("✅ Usuario eliminado");
+                hideEditarModal();
+                await cargarUsuarios();
+            }
         }
     
     function showNewUserModal() {
