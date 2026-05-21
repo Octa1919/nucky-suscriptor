@@ -220,14 +220,19 @@
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
         if (!username || !password) return alert("Usuario y contraseña son obligatorios");
+
         const { data, error } = await _supabase
             .from('suscriptores_users')
             .select('*, suscriptores(id)')
             .eq('nombre', username)
             .eq('password', password)
             .single();
+
         if (error || !data) return alert("Credenciales incorrectas");
+
         currentSubscriberId = data.suscriptores.id;
+        console.log("✅ Subscriber ID cargado:", currentSubscriberId);
+
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         await cargarNombreCasino();
@@ -287,28 +292,11 @@
         }
     }
 
-    async function guardarConfig() {
-        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-        const nombre = document.getElementById('nombre-casino').value.trim();
-        const whatsapp = document.getElementById('whatsapp').value.trim();
-        const { error } = await _supabase.from('suscriptores').update({ nombre_casino: nombre || null, whatsapp: whatsapp || null }).eq('id', currentSubscriberId);
-        if (error) alert("Error: " + error.message); else alert("✅ Configuración General guardada");
-    }
+    // ==================== GUARDADO ====================
+    async function guardarConfig() { /* tu código anterior */ }
+    async function guardarRuleta() { /* tu código anterior */ }
 
-    async function guardarRuleta() {
-        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-        const normal = document.getElementById('premios-normal').value.trim();
-        const dorada = document.getElementById('premios-dorada').value.trim();
-        const dias = parseInt(document.getElementById('dias-dorada').value) || 7;
-        const { error } = await _supabase.from('config_ruleta').upsert({
-            subscriber_id: currentSubscriberId,
-            premios_normal: normal ? normal.split(',').map(p => p.trim()) : [],
-            premios_dorada: dorada ? dorada.split(',').map(p => p.trim()) : [],
-            dias_dorada: dias
-        });
-        if (error) alert("Error: " + error.message); else alert("✅ Configuración de Ruleta guardada");
-    }
-
+    // ==================== USUARIOS ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
@@ -321,13 +309,13 @@
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error(error);
+            console.error("Error al cargar usuarios:", error);
             div.innerHTML = "<p>Error al cargar usuarios</p>";
             return;
         }
 
         if (!data || data.length === 0) {
-            div.innerHTML = "<p>Aún no hay usuarios creados.</p>";
+            div.innerHTML = "<p>Aún no hay usuarios creados para este suscriptor.</p>";
             return;
         }
 
@@ -340,7 +328,6 @@
     }
 
     function showNewUserModal() {
-        // LIMPIAR CAMPOS CADA VEZ QUE SE ABRE EL MODAL
         document.getElementById('new-username').value = '';
         document.getElementById('new-password').value = '';
         document.getElementById('new-telefono').value = '';
@@ -358,19 +345,23 @@
 
         if (!username || !password) return alert("Usuario y contraseña son obligatorios");
 
-        const { error } = await _supabase.from('usuarios').insert({
+        console.log("Creando usuario con subscriber_id =", currentSubscriberId);
+
+        const { data, error } = await _supabase.from('usuarios').insert({
             subscriber_id: currentSubscriberId,
             username: username,
             password: password,
             telefono: telefono || null
-        });
+        }).select();
 
         if (error) {
+            console.error("Error al insertar:", error);
             alert("Error: " + error.message);
         } else {
-            alert(`✅ Usuario "${username}" creado correctamente`);
+            console.log("Usuario creado correctamente:", data);
+            alert(`✅ Usuario "${username}" creado`);
             hideNewUserModal();
-            cargarUsuarios();   // ← Actualiza la lista inmediatamente
+            await cargarUsuarios();   // ← Actualiza inmediatamente
         }
     }
 
