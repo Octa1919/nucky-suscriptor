@@ -8,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #a3e635; --dark: #0f172a; --gray: #1e2937; }
+        * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; background: #020617; color: white; margin:0; }
         .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #334155; }
@@ -103,7 +104,7 @@
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
             const content = document.getElementById('tab-content');
 
-            if (tab === 3) { // Usuarios
+            if (tab === 3) {
                 content.innerHTML = `
                     <div class="card">
                         <h2>👥 Usuarios Jugadores</h2>
