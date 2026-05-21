@@ -18,6 +18,7 @@
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #334155; border: none; border-radius: 8px; color: white; }
         .btn { padding: 14px; width: 100%; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px 0; }
         .btn-primary { background: var(--primary); color: black; }
+        label { display: block; margin: 15px 0 5px; font-size: 0.9em; color: #94a3b8; }
     </style>
 </head>
 <body>
@@ -35,18 +36,7 @@
             <div class="tab" onclick="switchTab(4)">Difusión</div>
         </div>
 
-        <div id="tab-content">
-            <!-- Configuración -->
-            <div class="card">
-                <h2>Configuración General</h2>
-                <input type="text" id="nombre-casino" placeholder="Nombre del Casino">
-                <input type="text" id="whatsapp" placeholder="WhatsApp de atención">
-                <input type="text" id="telegram" placeholder="Telegram (opcional)">
-                <input type="text" id="instagram" placeholder="Instagram (opcional)">
-                <textarea id="link-salas" placeholder="Links de las salas de juego (uno por línea)"></textarea>
-                <button class="btn btn-primary" onclick="guardarConfiguracion()">Guardar Configuración</button>
-            </div>
-        </div>
+        <div id="tab-content"></div>
     </div>
 
     <script>
@@ -56,32 +46,43 @@
 
         let currentSubscriberId = null;
 
-        async function loginSuscriptor() {
-            // ... (mantengo el login anterior)
-        }
-
         async function switchTab(tab) {
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
             const content = document.getElementById('tab-content');
-            content.innerHTML = `<h2>Cargando...</h2>`;
 
             if (tab === 1) { // Configuración
                 content.innerHTML = `
                     <div class="card">
                         <h2>Configuración General</h2>
+                        <label>Nombre del Casino</label>
                         <input type="text" id="nombre-casino" placeholder="Nombre del Casino">
-                        <input type="text" id="whatsapp" placeholder="WhatsApp de atención (+549...)">
-                        <input type="text" id="telegram" placeholder="Telegram (opcional)">
-                        <input type="text" id="instagram" placeholder="Instagram (opcional)">
-                        <textarea id="link-salas" placeholder="Links de salas (uno por línea)" rows="4"></textarea>
+
+                        <label>WhatsApp de atención (+549...)</label>
+                        <input type="text" id="whatsapp" placeholder="+5492478425018">
+
+                        <label>Telegram (opcional)</label>
+                        <input type="text" id="telegram" placeholder="https://t.me/...">
+
+                        <label>Instagram (opcional)</label>
+                        <input type="text" id="instagram" placeholder="https://instagram.com/...">
+
+                        <label>Links de Salas de Juego (4 en total)</label>
+                        <input type="text" id="sala1" placeholder="Sala 1 - Link">
+                        <input type="text" id="sala2" placeholder="Sala 2 - Link">
+                        <input type="text" id="sala3" placeholder="Sala 3 - Link">
+                        <input type="text" id="sala4" placeholder="Sala 4 - Link">
+
                         <button class="btn btn-primary" onclick="guardarConfiguracion()">Guardar Cambios</button>
                     </div>
                 `;
+            } else {
+                content.innerHTML = `<h2>Sección en desarrollo</h2>`;
             }
         }
 
         async function guardarConfiguracion() {
-            alert("✅ Configuración guardada (función en desarrollo)");
+            alert("✅ Configuración guardada (próximamente se guardará en la base de datos)");
+            // Aquí más adelante guardaremos en Supabase
         }
 
         function logout() {
@@ -90,7 +91,7 @@
 
         window.onload = () => {
             // Simular login por ahora
-            currentSubscriberId = "prueba-id"; // Cambiar después
+            currentSubscriberId = "prueba-id";
             switchTab(1);
         };
     </script>
