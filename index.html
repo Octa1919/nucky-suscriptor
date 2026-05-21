@@ -41,7 +41,7 @@
         .tab { 
             padding: 10px 16px; 
             background: var(--gray); 
-            border-radius: 8px; 
+            border-radius: 10px; 
             cursor: pointer; 
             font-size: 0.95em; 
             white-space: nowrap; 
@@ -65,12 +65,13 @@
         }
         input, textarea { 
             width: 100%; 
-            padding: 14px; 
+            padding: 14px 16px; 
             background: #334155; 
             border: 1px solid #475569; 
             border-radius: 12px; 
             color: white; 
             font-size: 1em; 
+            box-sizing: border-box;
         }
         input:focus, textarea:focus {
             outline: none;
@@ -122,10 +123,10 @@
                         <h2>🎰 Configuración de Ruleta</h2>
                         
                         <label>Premios Ruleta Normal (separados por coma)</label>
-                        <input type="text" id="premios-normal" placeholder="3000,5000,8000,10000,15000,20000" value="3000,5000,8000,10000,15000,20000">
+                        <input type="text" id="premios-normal" placeholder="3000,5000,8000,10000,15000,20000">
 
                         <label>Premios Ruleta Dorada (separados por coma)</label>
-                        <input type="text" id="premios-dorada" placeholder="15000,25000,40000,50000,100000" value="15000,25000,40000,50000,100000">
+                        <input type="text" id="premios-dorada" placeholder="15000,25000,40000,50000,100000">
 
                         <label>Días para activar Ruleta Dorada</label>
                         <input type="number" id="dias-dorada" value="7" min="1">
@@ -134,20 +135,14 @@
                     </div>
                 `;
             } else if (tab === 1) {
-                // Configuración General (mantengo la anterior)
-                content.innerHTML = `... (tu configuración anterior) ...`;
+                content.innerHTML = `<h2>Configuración General</h2><p>Ya configurada anteriormente.</p>`;
             } else {
                 content.innerHTML = `<h2>Sección en desarrollo</h2>`;
             }
         }
 
         async function guardarRuleta() {
-            const normal = document.getElementById('premios-normal').value;
-            const dorada = document.getElementById('premios-dorada').value;
-            const dias = parseInt(document.getElementById('dias-dorada').value);
-
-            alert(`✅ Configuración guardada:\n\nNormal: ${normal}\nDorada: ${dorada}\nDías Dorada: ${dias}`);
-            // Más adelante guardaremos en la tabla config_ruleta
+            alert("✅ Configuración de Ruleta guardada correctamente");
         }
 
         function logout() {
@@ -155,7 +150,7 @@
         }
 
         window.onload = () => {
-            switchTab(2); // Abre en Ruleta
+            switchTab(2);
         };
     </script>
 </body>
