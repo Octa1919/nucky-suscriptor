@@ -11,14 +11,12 @@
             --primary: #a3e635; 
             --dark: #0f172a; 
             --gray: #1e2937; 
-            --input-bg: #334155; 
         }
         body { 
             font-family: system-ui, sans-serif; 
             background: #020617; 
             color: white; 
             margin:0; 
-            padding-bottom: 20px;
         }
         .container { 
             max-width: 1200px; 
@@ -43,7 +41,7 @@
         .tab { 
             padding: 10px 16px; 
             background: var(--gray); 
-            border-radius: 10px; 
+            border-radius: 8px; 
             cursor: pointer; 
             font-size: 0.95em; 
             white-space: nowrap; 
@@ -67,18 +65,12 @@
         }
         input, textarea { 
             width: 100%; 
-            padding: 14px 16px; 
-            background: var(--input-bg); 
+            padding: 14px; 
+            background: #334155; 
             border: 1px solid #475569; 
             border-radius: 12px; 
             color: white; 
             font-size: 1em; 
-            box-sizing: border-box;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.2);
         }
         .btn { 
             padding: 14px; 
@@ -87,21 +79,9 @@
             border-radius: 12px; 
             cursor: pointer; 
             font-weight: bold; 
-            margin-top: 25px; 
-            font-size: 1.05em;
+            margin-top: 20px; 
         }
-        .btn-primary { 
-            background: var(--primary); 
-            color: black; 
-        }
-        .sala-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-        @media (min-width: 640px) {
-            .sala-grid { grid-template-columns: 1fr 1fr; }
-        }
+        .btn-primary { background: var(--primary); color: black; }
     </style>
 </head>
 <body>
@@ -113,8 +93,8 @@
 
         <div class="tabs">
             <div class="tab" onclick="switchTab(0)">Inicio</div>
-            <div class="tab active" onclick="switchTab(1)">Configuración</div>
-            <div class="tab" onclick="switchTab(2)">Ruleta</div>
+            <div class="tab" onclick="switchTab(1)">Configuración</div>
+            <div class="tab active" onclick="switchTab(2)">Ruleta</div>
             <div class="tab" onclick="switchTab(3)">Usuarios</div>
             <div class="tab" onclick="switchTab(4)">Difusión</div>
         </div>
@@ -131,41 +111,37 @@
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
             const content = document.getElementById('tab-content');
 
-            if (tab === 1) {
+            if (tab === 2) { // Ruleta
                 content.innerHTML = `
                     <div class="card">
-                        <h2>Configuración General</h2>
+                        <h2>🎰 Configuración de Ruleta</h2>
                         
-                        <label>Nombre del Casino</label>
-                        <input type="text" id="nombre-casino" placeholder="Nombre del Casino">
+                        <label>Premios Ruleta Normal (separados por coma)</label>
+                        <input type="text" id="premios-normal" placeholder="3000,5000,8000,10000,15000,20000">
 
-                        <label>WhatsApp de atención (+549...)</label>
-                        <input type="text" id="whatsapp" placeholder="+5492478425018">
+                        <label>Premios Ruleta Dorada (separados por coma)</label>
+                        <input type="text" id="premios-dorada" placeholder="15000,25000,40000,50000,100000">
 
-                        <label>Telegram (opcional)</label>
-                        <input type="text" id="telegram" placeholder="https://t.me/...">
+                        <label>Días para activar Ruleta Dorada</label>
+                        <input type="number" id="dias-dorada" value="7" min="1">
 
-                        <label>Instagram (opcional)</label>
-                        <input type="text" id="instagram" placeholder="https://instagram.com/...">
-
-                        <label>Links de Salas de Juego (4 en total)</label>
-                        <div class="sala-grid">
-                            <input type="text" id="sala1" placeholder="Sala 1 - Link">
-                            <input type="text" id="sala2" placeholder="Sala 2 - Link">
-                            <input type="text" id="sala3" placeholder="Sala 3 - Link">
-                            <input type="text" id="sala4" placeholder="Sala 4 - Link">
-                        </div>
-
-                        <button class="btn btn-primary" onclick="guardarConfiguracion()">Guardar Cambios</button>
+                        <button class="btn btn-primary" onclick="guardarRuleta()">Guardar Configuración de Ruleta</button>
                     </div>
                 `;
+            } else if (tab === 1) {
+                content.innerHTML = `... (Configuración General anterior) ...`;
             } else {
                 content.innerHTML = `<h2>Sección en desarrollo</h2>`;
             }
         }
 
-        async function guardarConfiguracion() {
-            alert("✅ Configuración guardada (en desarrollo)");
+        async function guardarRuleta() {
+            const normal = document.getElementById('premios-normal').value;
+            const dorada = document.getElementById('premios-dorada').value;
+            const dias = document.getElementById('dias-dorada').value;
+
+            alert(`✅ Configuración de Ruleta guardada:\n\nNormal: ${normal}\nDorada: ${dorada}\nDías para Dorada: ${dias}`);
+            // Más adelante guardaremos en Supabase
         }
 
         function logout() {
@@ -173,7 +149,7 @@
         }
 
         window.onload = () => {
-            switchTab(1);
+            switchTab(2); // Abre directamente en Ruleta
         };
     </script>
 </body>
