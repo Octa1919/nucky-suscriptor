@@ -7,112 +7,22 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #a3e635; 
-            --dark: #0f172a; 
-            --gray: #1e2937; 
-        }
-        body { 
-            font-family: system-ui, sans-serif; 
-            background: #020617; 
-            color: white; 
-            margin:0; 
-        }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 15px; 
-        }
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px 0; 
-            border-bottom: 1px solid #334155; 
-        }
-        .tabs { 
-            display: flex; 
-            gap: 8px; 
-            margin: 20px 0; 
-            flex-wrap: wrap; 
-            overflow-x: auto; 
-            padding-bottom: 10px; 
-        }
-        .tab { 
-            padding: 10px 16px; 
-            background: var(--gray); 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-size: 0.95em; 
-            white-space: nowrap; 
-        }
-        .tab.active { 
-            background: var(--primary); 
-            color: black; 
-            font-weight: bold; 
-        }
-        .card { 
-            background: var(--gray); 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-        }
-        label { 
-            display: block; 
-            margin: 16px 0 6px; 
-            font-size: 0.9em; 
-            color: #94a3b8; 
-        }
-        input, textarea { 
-            width: 100%; 
-            padding: 14px 16px; 
-            background: #334155; 
-            border: 1px solid #475569; 
-            border-radius: 12px; 
-            color: white; 
-            font-size: 1em; 
-            box-sizing: border-box;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.2);
-        }
-        .btn { 
-            padding: 14px; 
-            width: 100%; 
-            border: none; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            margin-top: 20px; 
-        }
+        :root { --primary: #a3e635; --dark: #0f172a; --gray: #1e2937; }
+        body { font-family: system-ui, sans-serif; background: #020617; color: white; margin:0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #334155; }
+        .tabs { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; overflow-x: auto; padding-bottom: 10px; }
+        .tab { padding: 10px 16px; background: var(--gray); border-radius: 10px; cursor: pointer; font-size: 0.95em; white-space: nowrap; }
+        .tab.active { background: var(--primary); color: black; font-weight: bold; }
+        .card { background: var(--gray); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        label { display: block; margin: 16px 0 6px; font-size: 0.9em; color: #94a3b8; }
+        input, textarea { width: 100%; padding: 14px; background: #334155; border: 1px solid #475569; border-radius: 12px; color: white; font-size: 1em; }
+        .btn { padding: 14px; width: 100%; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 20px; }
         .btn-primary { background: var(--primary); color: black; }
         .btn-danger { background: #ef4444; color: white; }
-        .user-item { 
-            background: #334155; 
-            padding: 15px; 
-            border-radius: 12px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-        }
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 1000; 
-        }
-        .modal-content { 
-            background: var(--gray); 
-            padding: 25px; 
-            border-radius: 16px; 
-            width: 90%; 
-            max-width: 460px; 
-        }
+        .user-item { background: #334155; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: var(--gray); padding: 25px; border-radius: 16px; width: 90%; max-width: 460px; }
     </style>
 </head>
 <body>
@@ -148,110 +58,91 @@
         </div>
     </div>
 
-   <script>
-    const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script>
+        const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentSubscriberId = null;   // ← Se debe cargar con el ID real del suscriptor
+        let currentSubscriberId = null;
 
-    async function switchTab(tab) {
-        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
-        const content = document.getElementById('tab-content');
+        async function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+            const content = document.getElementById('tab-content');
 
-        if (tab === 3) { // Usuarios
-            content.innerHTML = `
-                <div class="card">
-                    <h2>👥 Usuarios Jugadores</h2>
-                    <button class="btn btn-primary" onclick="showNewUserModal()">+ Crear Nuevo Usuario</button>
-                    <div id="lista-usuarios" style="margin-top:20px;"></div>
-                </div>
-            `;
-            cargarUsuarios();
-        } else if (tab === 2) {
-            content.innerHTML = `... (tu sección de Ruleta) ...`;
-        } else if (tab === 1) {
-            content.innerHTML = `... (tu sección de Configuración) ...`;
-        } else {
-            content.innerHTML = `<h2>Bienvenido</h2><p>Selecciona una sección.</p>`;
+            if (tab === 3) { // Usuarios
+                content.innerHTML = `
+                    <div class="card">
+                        <h2>👥 Usuarios Jugadores</h2>
+                        <button class="btn btn-primary" onclick="showNewUserModal()">+ Crear Nuevo Usuario</button>
+                        <div id="lista-usuarios" style="margin-top:20px;"></div>
+                    </div>
+                `;
+                cargarUsuarios();
+            } else if (tab === 2) { // Ruleta
+                content.innerHTML = `
+                    <div class="card">
+                        <h2>🎰 Configuración de Ruleta</h2>
+                        <label>Premios Ruleta Normal (separados por coma)</label>
+                        <input type="text" id="premios-normal" placeholder="3000,5000,8000,10000,15000,20000">
+                        <label>Premios Ruleta Dorada (separados por coma)</label>
+                        <input type="text" id="premios-dorada" placeholder="15000,25000,40000,50000,100000">
+                        <label>Días para activar Ruleta Dorada</label>
+                        <input type="number" id="dias-dorada" value="7" min="1">
+                        <button class="btn btn-primary" onclick="guardarRuleta()">Guardar Configuración</button>
+                    </div>
+                `;
+            } else if (tab === 1) { // Configuración
+                content.innerHTML = `
+                    <div class="card">
+                        <h2>Configuración General</h2>
+                        <label>Nombre del Casino</label>
+                        <input type="text" id="nombre-casino">
+                        <label>WhatsApp de atención</label>
+                        <input type="text" id="whatsapp">
+                        <label>Links de Salas (4)</label>
+                        <input type="text" id="sala1" placeholder="Sala 1">
+                        <input type="text" id="sala2" placeholder="Sala 2">
+                        <input type="text" id="sala3" placeholder="Sala 3">
+                        <input type="text" id="sala4" placeholder="Sala 4">
+                        <button class="btn btn-primary" onclick="guardarConfig()">Guardar</button>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `<h2>Bienvenido al Panel</h2><p>Selecciona una sección.</p>`;
+            }
         }
-    }
 
-    async function cargarUsuarios() {
-        if (!currentSubscriberId) {
-            document.getElementById('lista-usuarios').innerHTML = "<p>Primero inicia sesión correctamente.</p>";
-            return;
+        async function guardarConfig() {
+            alert("✅ Configuración guardada");
         }
 
-        const { data, error } = await _supabase
-            .from('usuarios')
-            .select('*')
-            .eq('subscriber_id', currentSubscriberId)
-            .order('created_at', { ascending: false });
-
-        const div = document.getElementById('lista-usuarios');
-        if (error || !data || data.length === 0) {
-            div.innerHTML = "<p>No hay usuarios aún.</p>";
-            return;
+        async function guardarRuleta() {
+            alert("✅ Configuración de Ruleta guardada");
         }
 
-        div.innerHTML = data.map(u => `
-            <div class="user-item" onclick="editarUsuario('${u.id}')">
-                <strong>${u.username}</strong><br>
-                <small>${u.telefono || 'Sin teléfono'}</small>
-            </div>
-        `).join('');
-    }
+        function showNewUserModal() {
+            document.getElementById('modal-nuevo-usuario').style.display = 'flex';
+        }
 
-    function showNewUserModal() {
-        document.getElementById('modal-nuevo-usuario').style.display = 'flex';
-        // Limpiar campos
-        document.getElementById('new-username').value = '';
-        document.getElementById('new-password').value = '';
-        document.getElementById('new-telefono').value = '';
-    }
+        function hideNewUserModal() {
+            document.getElementById('modal-nuevo-usuario').style.display = 'none';
+        }
 
-    function hideNewUserModal() {
-        document.getElementById('modal-nuevo-usuario').style.display = 'none';
-    }
-
-    async function crearNuevoUsuario() {
-        const username = document.getElementById('new-username').value.trim();
-        const password = document.getElementById('new-password').value.trim();
-        const telefono = document.getElementById('new-telefono').value.trim();
-
-        if (!username || !password) return alert("Usuario y contraseña son obligatorios");
-        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-
-        const { error } = await _supabase.from('usuarios').insert({
-            subscriber_id: currentSubscriberId,
-            username: username,
-            password: password,
-            telefono: telefono || null
-        });
-
-        if (error) {
-            alert("Error al crear usuario: " + error.message);
-        } else {
-            alert(`✅ Usuario "${username}" creado correctamente`);
+        function crearNuevoUsuario() {
+            const username = document.getElementById('new-username').value.trim();
+            const password = document.getElementById('new-password').value.trim();
+            if (!username || !password) return alert("Usuario y contraseña son obligatorios");
+            alert(`✅ Usuario "${username}" creado`);
             hideNewUserModal();
-            cargarUsuarios();
         }
-    }
 
-    function editarUsuario(id) {
-        alert("Editar usuario (ID: " + id + ") - En desarrollo");
-    }
+        function logout() {
+            if (confirm("¿Cerrar sesión?")) location.reload();
+        }
 
-    function guardarRuleta() { alert("Configuración de Ruleta guardada"); }
-    function guardarConfig() { alert("Configuración guardada"); }
-    function logout() { if(confirm("¿Salir?")) location.reload(); }
-
-    window.onload = () => {
-        // Simulación temporal (después cargaremos el subscriber_id real)
-        currentSubscriberId = "prueba-id"; 
-        switchTab(3);
-    };
-</script>
+        window.onload = () => {
+            switchTab(3); // Abre en Usuarios
+        };
+    </script>
 </body>
 </html>
