@@ -292,9 +292,9 @@
             const whatsapp = document.getElementById('whatsapp').value.trim();
             const { error } = await _supabase.from('suscriptores').update({ nombre_casino: nombre || null, whatsapp: whatsapp || null }).eq('id', currentSubscriberId);
             if (error) alert("Error: " + error.message); else alert("✅ Configuración General guardada");
-        } 
-        
-        async function guardarRuleta() { 
+        }
+
+        async function guardarRuleta() {
             if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
             const normal = document.getElementById('premios-normal').value.trim();
             const dorada = document.getElementById('premios-dorada').value.trim();
@@ -307,7 +307,7 @@
             });
             if (error) alert("Error: " + error.message); else alert("✅ Configuración de Ruleta guardada");
         }
-        
+
         async function cargarUsuarios() {
             const div = document.getElementById('lista-usuarios');
             div.innerHTML = "<p>Cargando...</p>";
@@ -323,17 +323,26 @@
                 </div>
             `).join('');
         }
-        
+
         function showNewUserModal() { document.getElementById('modal-nuevo-usuario').style.display = 'flex'; }
         function hideNewUserModal() { document.getElementById('modal-nuevo-usuario').style.display = 'none'; }
-        async function crearNuevoUsuario() { 
+        async function crearNuevoUsuario() {
             const username = document.getElementById('new-username').value.trim();
             const password = document.getElementById('new-password').value.trim();
             const telefono = document.getElementById('new-telefono').value.trim();
             if (!username || !password) return alert("Usuario y contraseña son obligatorios");
-            const { error } = await _supabase.from('usuarios').insert({ subscriber_id: currentSubscriberId, username, password, telefono: telefono || null });
+            const { error } = await _supabase.from('usuarios').insert({
+                subscriber_id: currentSubscriberId,
+                username: username,
+                password: password,
+                telefono: telefono || null
+            });
             if (error) alert("Error: " + error.message);
-            else { alert(`✅ Usuario "${username}" creado`); hideNewUserModal(); cargarUsuarios(); }
+            else {
+                alert(`✅ Usuario "${username}" creado`);
+                hideNewUserModal();
+                cargarUsuarios();
+            }
         }
         function editarUsuario(id) { alert("Editar usuario (en desarrollo)"); }
         function logout() { if(confirm("¿Cerrar sesión?")) location.reload(); }
