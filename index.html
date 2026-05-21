@@ -79,18 +79,17 @@
             color: black;
             box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
         }
-        /* EFECTO PLATEADO MÁS EXAGERADO */
-        .tab.active::before,
-        .btn-primary::before {
+        /* LUZ PLATEADA SOLO EN PESTAÑAS */
+        .tab.active::before {
             content: '';
             position: absolute;
             top: -80%;
             left: -200%;
             width: 60%;
             height: 400%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
             transform: skewX(-25deg);
-            animation: shine 1.8s linear infinite;
+            animation: shine 1.6s linear infinite;
         }
         @keyframes shine {
             0%   { transform: translateX(-200%) skewX(-25deg); }
@@ -130,8 +129,10 @@
             cursor: pointer;
             font-size: 1.05rem;
             box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
-            position: relative;
-            overflow: hidden;
+            transition: transform 0.15s ease;
+        }
+        .btn-primary:active {
+            transform: scale(0.95);
         }
         .user-item {
             background: #1e2937;
@@ -163,7 +164,6 @@
             padding: 32px 28px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
-        /* Botones del modal del mismo tamaño */
         .modal button {
             width: 100%;
             padding: 16px;
@@ -184,7 +184,7 @@
 
     <div class="tabs">
         <div class="tab active" onclick="switchTab(0)">Vivo</div>
-        <div class="tab" onclick="switchTab(1)">Configuración</div>
+        <div class="tab" onclick="switchTab(1)">Configurar</div>
         <div class="tab" onclick="switchTab(2)">Usuarios</div>
         <div class="tab" onclick="switchTab(3)">Difu</div>
     </div>
