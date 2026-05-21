@@ -77,9 +77,7 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
-    let usuarioAEditarId = null;
 
-    // ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
@@ -109,7 +107,6 @@
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
 
-    // ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
@@ -153,7 +150,6 @@
         }
     }
 
-    // ==================== USUARIOS ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
@@ -178,12 +174,12 @@
         if (termino) {
             filtered = data.filter(u => 
                 (u.username && u.username.toLowerCase().includes(termino)) ||
-                (u.telefono && u.telefono.includes(termino))
+                (u.telefono && u.telefono.toLowerCase().includes(termino))
             );
         }
 
         div.innerHTML = filtered.map(u => `
-            <div class="user-item" onclick="abrirModalEditar('${u.id}', '${u.username}', '${u.password || ''}', '${u.telefono || ''}')">
+            <div class="user-item" onclick="editarUsuario('${u.id}')">
                 <strong style="font-size:1.2rem;">${u.username}</strong>
                 <div style="margin-top:8px; font-size:0.95rem;">
                     <strong>Contraseña:</strong> ${u.password || '—'}<br>
@@ -193,53 +189,6 @@
         `).join('');
     }
 
-    // ==================== MODAL EDITAR ====================
-    function abrirModalEditar(id, username, password, telefono) {
-        usuarioAEditarId = id;
-        document.getElementById('edit-username').value = username;
-        document.getElementById('edit-password').value = password;
-        document.getElementById('edit-telefono').value = telefono;
-        document.getElementById('modal-editar-usuario').style.display = 'flex';
-    }
-
-    function hideEditarModal() {
-        document.getElementById('modal-editar-usuario').style.display = 'none';
-        usuarioAEditarId = null;
-    }
-
-    async function guardarEdicionUsuario() {
-        if (!usuarioAEditarId) return;
-        const username = document.getElementById('edit-username').value.trim();
-        const password = document.getElementById('edit-password').value.trim();
-        const telefono = document.getElementById('edit-telefono').value.trim();
-
-        const { error } = await _supabase
-            .from('usuarios')
-            .update({ username, password, telefono: telefono || null })
-            .eq('id', usuarioAEditarId);
-
-        if (error) alert("Error: " + error.message);
-        else {
-            alert("✅ Usuario actualizado");
-            hideEditarModal();
-            await cargarUsuarios();
-        }
-    }
-
-    async function eliminarUsuarioActual() {
-        if (!usuarioAEditarId) return;
-        if (!confirm("¿Eliminar este usuario permanentemente?")) return;
-
-        const { error } = await _supabase.from('usuarios').delete().eq('id', usuarioAEditarId);
-        if (error) alert("Error: " + error.message);
-        else {
-            alert("✅ Usuario eliminado");
-            hideEditarModal();
-            await cargarUsuarios();
-        }
-    }
-
-    // ==================== CREAR USUARIO ====================
     function showNewUserModal() {
         document.getElementById('new-username').value = '';
         document.getElementById('new-password').value = '';
@@ -276,7 +225,7 @@
     }
 
     function editarUsuario(id) {
-        // Esta función ya no se usa directamente, se llama desde la tarjeta
+        alert("Editar usuario (en desarrollo)");
     }
 
     function logout() {
