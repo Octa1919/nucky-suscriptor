@@ -8,7 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #a3e635; --dark: #0f172a; --gray: #1e2937; }
-        * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; background: #020617; color: white; margin:0; }
         .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #334155; }
@@ -37,10 +36,27 @@
             border-radius: 12px; 
             cursor: pointer; 
             font-weight: bold; 
-            margin-top: 25px; 
+            margin-top: 20px; 
         }
         .btn-primary { background: var(--primary); color: black; }
         .btn-danger { background: #ef4444; color: white; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
+        }
+        .modal-content { 
+            background: var(--gray); 
+            padding: 25px; 
+            border-radius: 16px; 
+            width: 90%; 
+            max-width: 460px; 
+        }
     </style>
 </head>
 <body>
@@ -62,7 +78,7 @@
     </div>
 
     <!-- Modal Nuevo Usuario -->
-    <div id="modal-nuevo-usuario" class="modal" style="display:none;">
+    <div id="modal-nuevo-usuario" class="modal">
         <div class="modal-content">
             <h2>Crear Nuevo Usuario</h2>
             <label>Nombre de Usuario</label>
@@ -96,20 +112,20 @@
                     </div>
                 `;
                 cargarUsuarios();
-            } else if (tab === 2) { // Ruleta
+            } else if (tab === 2) {
                 content.innerHTML = `
                     <div class="card">
                         <h2>🎰 Configuración de Ruleta</h2>
-                        <label>Premios Ruleta Normal (separados por coma)</label>
+                        <label>Premios Ruleta Normal</label>
                         <input type="text" id="premios-normal" placeholder="3000,5000,8000,10000,15000,20000">
-                        <label>Premios Ruleta Dorada (separados por coma)</label>
+                        <label>Premios Ruleta Dorada</label>
                         <input type="text" id="premios-dorada" placeholder="15000,25000,40000,50000,100000">
                         <label>Días para activar Ruleta Dorada</label>
                         <input type="number" id="dias-dorada" value="7" min="1">
                         <button class="btn btn-primary" onclick="guardarRuleta()">Guardar Configuración</button>
                     </div>
                 `;
-            } else if (tab === 1) { // Configuración
+            } else if (tab === 1) {
                 content.innerHTML = `
                     <div class="card">
                         <h2>Configuración General</h2>
