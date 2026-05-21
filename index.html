@@ -72,19 +72,19 @@
         </div>
     </div>
 
-  <script>
+ <script>
     const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
     const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
-
-    async function loginSuscriptor() {
+     
+   async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
         if (!username || !password) return alert("Usuario y contraseña son obligatorios");
-
-        const { data, error } = await _supabase
+       
+      const { data, error } = await _supabase
             .from('suscriptores_users')
             .select('*, suscriptores(id)')
             .eq('nombre', username)
@@ -92,7 +92,7 @@
             .single();
 
         if (error || !data) return alert("Credenciales incorrectas");
-
+       
         currentSubscriberId = data.suscriptores.id;
         localStorage.setItem('subscriber_id', currentSubscriberId);
         console.log("✅ Subscriber ID guardado:", currentSubscriberId);
@@ -103,7 +103,7 @@
         switchTab(0);
     }
 
-    async function cargarNombreCasino() {
+  async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
         const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
@@ -112,9 +112,10 @@
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
-
-        if (tab === 0) content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando...</div></div>`;
-        else if (tab === 1) {
+        
+        if (tab === 0) {
+            content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando...</div></div>`;
+        } else if (tab === 1) {
             content.innerHTML = `
                 <div class="card">
                     <h2>⚙️ Configuración General</h2>
@@ -130,15 +131,22 @@
                     <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
                 </div>
             `;
-        } else if (tab === 2) {
+       } else if (tab === 2) {   // ← USUARIOS MEJORADO
             content.innerHTML = `
                 <div class="card">
                     <h2>👥 Usuarios Jugadores</h2>
+                    <input type="text" id="buscador-usuarios" placeholder="🔎 Buscar por usuario o teléfono..." 
+                           style="margin-bottom:20px; padding:14px 16px; border-radius:12px; width:100%;">
                     <button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">+ Crear Nuevo Usuario</button>
                     <div id="lista-usuarios"></div>
                 </div>
             `;
             cargarUsuarios();
+            // Activar buscador en tiempo real
+            setTimeout(() => {
+                const buscador = document.getElementById('buscador-usuarios');
+                if (buscador) buscador.addEventListener('input', () => cargarUsuarios());
+            }, 300);
         } else if (tab === 3) {
             content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
         }
@@ -147,9 +155,14 @@
     async function guardarConfig() { if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor"); /* tu código anterior */ }
     async function guardarRuleta() { if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor"); /* tu código anterior */ }
 
+   // ==================== CARGAR USUARIOS CON TARJETAS Y BUSCADOR ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
+
+        const termino = document.getElementById('buscador-usuarios') ? 
+                        document.getElementById('buscador-usuarios').value.toLowerCase().trim() : '';
+
         div.innerHTML = "<p>Cargando usuarios...</p>";
 
         const { data, error } = await _supabase
@@ -158,16 +171,31 @@
             .eq('subscriber_id', currentSubscriberId)
             .order('created_at', { ascending: false });
 
-        if (error) { console.error(error); div.innerHTML = "<p>Error al cargar</p>"; return; }
-        if (!data || data.length === 0) {
-            div.innerHTML = "<p>Aún no hay usuarios creados para este suscriptor.</p>";
+        if (error) {
+            div.innerHTML = "<p>Error al cargar usuarios</p>";
             return;
         }
 
-        div.innerHTML = data.map(u => `
+        let usuariosFiltrados = data || [];
+
+        if (termino) {
+            usuariosFiltrados = usuariosFiltrados.filter(u => 
+                (u.username && u.username.toLowerCase().includes(termino)) ||
+                (u.telefono && u.telefono.includes(termino))
+            );
+        }
+
+        if (usuariosFiltrados.length === 0) {
+            div.innerHTML = `<p style="text-align:center; padding:30px 0; color:#94a3b8;">${termino ? 'No se encontraron usuarios' : 'Aún no hay usuarios creados para este suscriptor.'}</p>`;
+            return;
+        }
+
+        div.innerHTML = usuariosFiltrados.map(u => `
             <div class="user-item" onclick="editarUsuario('${u.id}')">
-                <strong>${u.username}</strong><br>
-                <small>${u.telefono || 'Sin teléfono'}</small>
+                <strong style="font-size:1.1rem;">${u.username}</strong>
+                <div style="margin-top:8px; color:#94a3b8; font-size:0.95rem;">
+                    ${u.telefono ? u.telefono : '<em>Sin teléfono</em>'}
+                </div>
             </div>
         `).join('');
     }
