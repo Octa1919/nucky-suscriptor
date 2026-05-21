@@ -77,6 +77,7 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
+    let usuarioAEditarId = null;
 
     // ==================== LOGIN ====================
     async function loginSuscriptor() {
@@ -104,25 +105,18 @@
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
-        const { data } = await _supabase
-            .from('suscriptores')
-            .select('nombre_casino')
-            .eq('id', currentSubscriberId)
-            .single();
-        if (data && data.nombre_casino) {
-            document.getElementById('casino-name').textContent = data.nombre_casino;
-        }
+        const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
+        if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
 
-    // ==================== CAMBIO DE PESTAÑAS ====================
+    // ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
-        if (tab === 0) { // Vivo
-            content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando resultados en vivo...</div></div>`;
-        } 
-        else if (tab === 1) { // Configurar
+        if (tab === 0) {
+            content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando...</div></div>`;
+        } else if (tab === 1) {
             content.innerHTML = `
                 <div class="card">
                     <h2>⚙️ Configuración General</h2>
@@ -143,8 +137,7 @@
                     <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
                 </div>
             `;
-        } 
-        else if (tab === 2) { // Usuarios
+        } else if (tab === 2) {
             content.innerHTML = `
                 <div class="card">
                     <h2>👥 Usuarios Jugadores</h2>
@@ -155,40 +148,9 @@
                 </div>
             `;
             cargarUsuarios();
-        } 
-        else if (tab === 3) { // Difu
-            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente: envía notificaciones y difusiones a tus jugadores.</p></div>`;
+        } else if (tab === 3) {
+            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
         }
-    }
-
-    // ==================== GUARDADO ====================
-    async function guardarConfig() {
-        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-        const nombre = document.getElementById('nombre-casino').value.trim();
-        const whatsapp = document.getElementById('whatsapp').value.trim();
-        const { error } = await _supabase
-            .from('suscriptores')
-            .update({ nombre_casino: nombre || null, whatsapp: whatsapp || null })
-            .eq('id', currentSubscriberId);
-        if (error) alert("Error: " + error.message);
-        else alert("✅ Configuración General guardada");
-    }
-
-    async function guardarRuleta() {
-        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-        const normal = document.getElementById('premios-normal').value.trim();
-        const dorada = document.getElementById('premios-dorada').value.trim();
-        const dias = parseInt(document.getElementById('dias-dorada').value) || 7;
-        const { error } = await _supabase
-            .from('config_ruleta')
-            .upsert({
-                subscriber_id: currentSubscriberId,
-                premios_normal: normal ? normal.split(',').map(p => p.trim()) : [],
-                premios_dorada: dorada ? dorada.split(',').map(p => p.trim()) : [],
-                dias_dorada: dias
-            });
-        if (error) alert("Error: " + error.message);
-        else alert("✅ Configuración de Ruleta guardada");
     }
 
     // ==================== USUARIOS ====================
@@ -221,7 +183,7 @@
         }
 
         div.innerHTML = filtered.map(u => `
-            <div class="user-item" onclick="editarUsuario('${u.id}')">
+            <div class="user-item" onclick="abrirModalEditar('${u.id}', '${u.username}', '${u.password || ''}', '${u.telefono || ''}')">
                 <strong style="font-size:1.2rem;">${u.username}</strong>
                 <div style="margin-top:8px; font-size:0.95rem;">
                     <strong>Contraseña:</strong> ${u.password || '—'}<br>
@@ -231,6 +193,53 @@
         `).join('');
     }
 
+    // ==================== MODAL EDITAR ====================
+    function abrirModalEditar(id, username, password, telefono) {
+        usuarioAEditarId = id;
+        document.getElementById('edit-username').value = username;
+        document.getElementById('edit-password').value = password;
+        document.getElementById('edit-telefono').value = telefono;
+        document.getElementById('modal-editar-usuario').style.display = 'flex';
+    }
+
+    function hideEditarModal() {
+        document.getElementById('modal-editar-usuario').style.display = 'none';
+        usuarioAEditarId = null;
+    }
+
+    async function guardarEdicionUsuario() {
+        if (!usuarioAEditarId) return;
+        const username = document.getElementById('edit-username').value.trim();
+        const password = document.getElementById('edit-password').value.trim();
+        const telefono = document.getElementById('edit-telefono').value.trim();
+
+        const { error } = await _supabase
+            .from('usuarios')
+            .update({ username, password, telefono: telefono || null })
+            .eq('id', usuarioAEditarId);
+
+        if (error) alert("Error: " + error.message);
+        else {
+            alert("✅ Usuario actualizado");
+            hideEditarModal();
+            await cargarUsuarios();
+        }
+    }
+
+    async function eliminarUsuarioActual() {
+        if (!usuarioAEditarId) return;
+        if (!confirm("¿Eliminar este usuario permanentemente?")) return;
+
+        const { error } = await _supabase.from('usuarios').delete().eq('id', usuarioAEditarId);
+        if (error) alert("Error: " + error.message);
+        else {
+            alert("✅ Usuario eliminado");
+            hideEditarModal();
+            await cargarUsuarios();
+        }
+    }
+
+    // ==================== CREAR USUARIO ====================
     function showNewUserModal() {
         document.getElementById('new-username').value = '';
         document.getElementById('new-password').value = '';
@@ -267,7 +276,7 @@
     }
 
     function editarUsuario(id) {
-        alert("Editar usuario (en desarrollo)");
+        // Esta función ya no se usa directamente, se llama desde la tarjeta
     }
 
     function logout() {
@@ -277,5 +286,3 @@
 
     window.onload = () => {};
 </script>
-</body>
-</html>
