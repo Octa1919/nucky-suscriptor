@@ -21,6 +21,7 @@
         .btn { padding: 14px; width: 100%; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 20px; }
         .btn-primary { background: var(--primary); color: black; }
         .btn-danger { background: #ef4444; color: white; }
+        .user-item { background: #334155; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: var(--gray); padding: 25px; border-radius: 16px; width: 90%; max-width: 460px; }
     </style>
@@ -28,7 +29,7 @@
 <body>
     <div class="container">
 
-        <!-- Login Screen -->
+        <!-- Login -->
         <div id="login-screen">
             <div class="card">
                 <h2 style="text-align:center;">👤 Iniciar Sesión</h2>
@@ -106,7 +107,7 @@
             document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
             const content = document.getElementById('tab-content');
 
-            if (tab === 3) {
+            if (tab === 3) { // Usuarios
                 content.innerHTML = `
                     <div class="card">
                         <h2>👥 Usuarios Jugadores</h2>
@@ -115,7 +116,7 @@
                     </div>
                 `;
                 cargarUsuarios();
-            } else if (tab === 2) {
+            } else if (tab === 2) { // Ruleta
                 content.innerHTML = `
                     <div class="card">
                         <h2>🎰 Configuración de Ruleta</h2>
@@ -128,7 +129,7 @@
                         <button class="btn btn-primary" onclick="guardarRuleta()">Guardar Configuración</button>
                     </div>
                 `;
-            } else if (tab === 1) {
+            } else if (tab === 1) { // Configuración
                 content.innerHTML = `
                     <div class="card">
                         <h2>Configuración General</h2>
@@ -149,16 +150,62 @@
             }
         }
 
+        // ==================== GUARDADO REAL ====================
         async function guardarConfig() {
             if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-            // ... (guardado de configuración)
-            alert("✅ Configuración guardada");
+            const nombre = document.getElementById('nombre-casino').value.trim();
+            const whatsapp = document.getElementById('whatsapp').value.trim();
+
+            const { error } = await _supabase
+                .from('suscriptores')
+                .update({ nombre_casino: nombre || null, whatsapp: whatsapp || null })
+                .eq('id', currentSubscriberId);
+
+            if (error) alert("Error: " + error.message);
+            else alert("✅ Configuración General guardada");
         }
 
         async function guardarRuleta() {
             if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-            // ... (guardado de ruleta)
-            alert("✅ Configuración de Ruleta guardada");
+            const normal = document.getElementById('premios-normal').value.trim();
+            const dorada = document.getElementById('premios-dorada').value.trim();
+            const dias = parseInt(document.getElementById('dias-dorada').value) || 7;
+
+            const { error } = await _supabase
+                .from('config_ruleta')
+                .upsert({
+                    subscriber_id: currentSubscriberId,
+                    premios_normal: normal ? normal.split(',').map(p => p.trim()) : [],
+                    premios_dorada: dorada ? dorada.split(',').map(p => p.trim()) : [],
+                    dias_dorada: dias
+                });
+
+            if (error) alert("Error: " + error.message);
+            else alert("✅ Configuración de Ruleta guardada");
+        }
+
+        // ==================== USUARIOS ====================
+        async function cargarUsuarios() {
+            const div = document.getElementById('lista-usuarios');
+            div.innerHTML = "<p>Cargando...</p>";
+
+            const { data } = await _supabase
+                .from('usuarios')
+                .select('*')
+                .eq('subscriber_id', currentSubscriberId)
+                .order('created_at', { ascending: false });
+
+            if (!data || data.length === 0) {
+                div.innerHTML = "<p>Aún no hay usuarios creados.</p>";
+                return;
+            }
+
+            div.innerHTML = data.map(u => `
+                <div class="user-item" onclick="editarUsuario('${u.id}')">
+                    <strong>${u.username}</strong><br>
+                    <small>${u.telefono || 'Sin teléfono'}</small>
+                </div>
+            `).join('');
         }
 
         function showNewUserModal() {
@@ -172,19 +219,27 @@
         async function crearNuevoUsuario() {
             const username = document.getElementById('new-username').value.trim();
             const password = document.getElementById('new-password').value.trim();
+            const telefono = document.getElementById('new-telefono').value.trim();
+
             if (!username || !password) return alert("Usuario y contraseña son obligatorios");
 
             const { error } = await _supabase.from('usuarios').insert({
                 subscriber_id: currentSubscriberId,
                 username: username,
-                password: password
+                password: password,
+                telefono: telefono || null
             });
 
             if (error) alert("Error: " + error.message);
             else {
                 alert(`✅ Usuario "${username}" creado`);
                 hideNewUserModal();
+                cargarUsuarios();
             }
+        }
+
+        function editarUsuario(id) {
+            alert("Editar usuario (en desarrollo)");
         }
 
         function logout() {
