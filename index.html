@@ -117,7 +117,7 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
         }
-        /* BOTONES NORMALES - HUNDIMIENTO INSTANTÁNEO */
+        /* BOTONES NORMALES - HUNDIMIENTO INSTANTÁNEO Y FUERTE */
         .btn-primary {
             background: linear-gradient(90deg, var(--primary), var(--accent));
             color: black;
@@ -129,11 +129,12 @@
             cursor: pointer;
             font-size: 1.05rem;
             box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
-            transition: transform 0.08s ease;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn-primary:active,
-        .btn-primary.pressed {
-            transform: scale(0.88) translateY(4px) !important;
+        .btn-primary:active {
+            transform: scale(0.85) translateY(4px) !important;
             box-shadow: 0 2px 8px rgba(34, 211, 238, 0.3) !important;
         }
         .modal button {
@@ -143,11 +144,10 @@
             font-weight: 700;
             font-size: 1.05rem;
             margin-top: 10px;
-            transition: transform 0.08s ease;
+            transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .modal button:active,
-        .modal button.pressed {
-            transform: scale(0.88) translateY(4px) !important;
+        .modal button:active {
+            transform: scale(0.85) translateY(4px) !important;
         }
         .user-item {
             background: #1e2937;
@@ -216,7 +216,6 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let currentSubscriberId = null;
 
-        // ==================== LOGIN Y FUNCIONES ANTERIORES ====================
         async function loginSuscriptor() {
             const username = document.getElementById('login-user').value.trim();
             const password = document.getElementById('login-pass').value.trim();
@@ -286,6 +285,16 @@
             } else if (tab === 3) {
                 content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente: envía notificaciones y difusiones a tus jugadores.</p></div>`;
             }
+            initPressEffects(); // ← Se vuelve a aplicar el efecto a los nuevos botones
+        }
+
+        function initPressEffects() {
+            document.querySelectorAll('.btn-primary, .modal button').forEach(btn => {
+                btn.addEventListener('touchstart', () => btn.classList.add('pressed'), { passive: true });
+                btn.addEventListener('touchend', () => btn.classList.remove('pressed'), { passive: true });
+                btn.addEventListener('mousedown', () => btn.classList.add('pressed'));
+                btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
+            });
         }
 
         async function guardarConfig() {
