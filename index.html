@@ -137,28 +137,16 @@
             `;
             cargarResultadosVivo();
         }
-        else if (tab === 1) { // Configurar
-            content.innerHTML = `
-                <div class="card">
-                    <h2>⚙️ Configuración General</h2>
-                    <label>Nombre del Casino</label>
-                    <input type="text" id="nombre-casino">
-                    <label>WhatsApp de atención</label>
-                    <input type="text" id="whatsapp">
-                    <button class="btn-primary" onclick="guardarConfig()">Guardar Configuración General</button>
-                </div>
-                <div class="card">
-                    <h2>🎰 Configuración de Ruleta</h2>
-                    <label>Premios Ruleta Normal (separados por coma)</label>
-                    <input type="text" id="premios-normal" placeholder="3000,5000,8000...">
-                    <label>Premios Ruleta Dorada</label>
-                    <input type="text" id="premios-dorada" placeholder="15000,25000,40000...">
-                    <label>Días para activar Ruleta Dorada</label>
-                    <input type="number" id="dias-dorada" value="7" min="1">
-                    <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
-                </div>
-            `;
-        }
+       else if (tab === 1) { // CBU (nueva pestaña)
+        content.innerHTML = `
+            <div class="card">
+                <h2 style="margin-bottom:28px;">🏦 Mis CBU</h2>
+                <button class="btn-primary" onclick="showNuevoCbuModal()" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button>
+                <div id="lista-cbus"></div>
+            </div>
+        `;
+        cargarCbus();
+    }
         else if (tab === 2) { // Usuarios
             content.innerHTML = `
                 <div class="card">
@@ -464,6 +452,61 @@
         location.reload();
     }
 
+    // ==================== CBU ====================
+async function cargarCbus() {
+    const div = document.getElementById('lista-cbus');
+    if (!div) return;
+    div.innerHTML = "<p>Cargando CBUs...</p>";
+
+    const { data, error } = await _supabase
+        .from('cbus')
+        .select('*')
+        .eq('subscriber_id', currentSubscriberId)
+        .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        div.innerHTML = "<p>Aún no tienes CBUs registrados.</p>";
+        return;
+    }
+
+    div.innerHTML = data.map(c => `
+        <div class="user-item" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <strong>${c.alias_nombre}</strong><br>
+                <small>${c.banco} • ${c.cbu}</small>
+            </div>
+            <label class="switch">
+                <input type="checkbox" ${c.activo ? 'checked' : ''} onchange="toggleCbuActivo('${c.id}', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+    `).join('');
+}
+
+async function toggleCbuActivo(id, activo) {
+    await _supabase.from('cbus').update({ activo }).eq('id', id);
+    cargarCbus();
+}
+
+function showNuevoCbuModal() {
+    // Aquí puedes crear un modal simple o usar alert por ahora
+    const cbu = prompt("Ingrese el CBU:");
+    const alias = prompt("Ingrese alias/nombre (ej: Caja Ahorro):");
+    const banco = prompt("Ingrese banco (ej: Banco Nación):");
+    if (!cbu || !alias || !banco) return;
+
+    _supabase.from('cbus').insert({
+        subscriber_id: currentSubscriberId,
+        cbu: cbu,
+        alias_nombre: alias,
+        banco: banco,
+        activo: true
+    }).then(() => {
+        alert("✅ CBU agregado");
+        cargarCbus();
+    });
+}
+    
     window.onload = () => {
         if (currentSubscriberId) {
             document.getElementById('login-screen').style.display = 'none';
