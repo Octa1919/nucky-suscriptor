@@ -79,7 +79,6 @@
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
 
-    // ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
@@ -109,7 +108,6 @@
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
 
-    // ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
@@ -153,7 +151,7 @@
         }
     }
 
-    // ==================== CARGAR USUARIOS CON BUSCADOR ====================
+    // ==================== BUSCADOR CORREGIDO ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
@@ -173,16 +171,6 @@
             div.innerHTML = "<p>Aún no hay usuarios creados para este suscriptor.</p>";
             return;
         }
-
-        // Buscador en tiempo real
-            const buscador = document.getElementById('buscador-usuarios');
-            if (buscador) {
-                buscador.addEventListener('input', () => cargarUsuarios());
-            }
-        } else if (tab === 3) {
-            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
-        }
-    }
 
         let filtered = data;
         if (termino) {
