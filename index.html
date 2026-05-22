@@ -79,7 +79,7 @@
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
 
-    // ==================== LOGIN ====================
+ // ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
@@ -100,7 +100,7 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         await cargarNombreCasino();
-        switchTab(0);
+        switchTab(0);   // ← Carga automáticamente la pestaña Vivo
     }
 
     async function cargarNombreCasino() {
@@ -108,7 +108,7 @@
         const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
-
+    
     // ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
@@ -167,7 +167,7 @@
         }
     }
 
-// ==================== VIVO - TARJETAS REFINADAS (cyan) ====================
+// ==================== VIVO - TARJETAS FUNCIONALES ====================
     async function cargarResultadosVivo() {
         const div = document.getElementById('lista-en-vivo');
         if (!div) return;
@@ -206,6 +206,23 @@
                 </div>
             </div>
         `).join('');
+    }
+
+    // ==================== BOTONES FUNCIONALES VIVO ====================
+    async function marcarEntregado(id) {
+        if (confirm("¿Marcar este premio como entregado?")) {
+            const { error } = await _supabase.from('premios_ruleta').delete().eq('id', id);
+            if (error) alert("Error al entregar");
+            else cargarResultadosVivo();
+        }
+    }
+
+    async function denegarPremio(id) {
+        if (confirm("¿Denegar este premio?")) {
+            const { error } = await _supabase.from('premios_ruleta').delete().eq('id', id);
+            if (error) alert("Error al denegar");
+            else cargarResultadosVivo();
+        }
     }
     
     async function cargarUsuarios() {
