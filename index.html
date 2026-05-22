@@ -146,12 +146,19 @@
                 </div>
             `;
             cargarUsuarios();
+
+            // ← BUSCADOR EN TIEMPO REAL (se vuelve a adjuntar cada vez)
+            setTimeout(() => {
+                const buscador = document.getElementById('buscador-usuarios');
+                if (buscador) {
+                    buscador.addEventListener('input', cargarUsuarios);
+                }
+            }, 100);
         } else if (tab === 3) {
             content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
         }
     }
 
-    // ==================== BUSCADOR CORREGIDO ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
@@ -226,7 +233,6 @@
         }
     }
 
-    // ==================== EDITAR USUARIO ====================
     function abrirModalEditar(id, username, password, telefono) {
         usuarioAEditarId = id;
         document.getElementById('edit-username').value = username;
