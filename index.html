@@ -110,7 +110,7 @@
     }
 
     // ==================== PESTAÑAS ====================
-    async function switchTab(tab) {
+   async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
@@ -167,7 +167,7 @@
         }
     }
 
-// ==================== VIVO - TARJETAS PREMIUM (estilo similar a la App original) ====================
+// ==================== VIVO - TARJETAS REFINADAS ====================
     async function cargarResultadosVivo() {
         const div = document.getElementById('lista-en-vivo');
         if (!div) return;
@@ -186,17 +186,20 @@
         }
 
         div.innerHTML = data.map(p => `
-            <div class="user-item" style="margin-bottom:20px; border: 2px solid #facc15; background:#1e2937;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div class="user-item" style="margin-bottom:20px; border: 2px solid #facc15; background: linear-gradient(180deg, #1e2937, #16213e);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <strong style="font-size:1.25rem;">${p.usuario}</strong>
                     <small style="color:#facc15;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
                 </div>
-                <div style="background:#334155; border: 2px dashed #facc15; border-radius:12px; padding:12px; text-align:center; margin-bottom:12px;">
-                    <span style="font-size:1.35rem; font-weight:700; color:#facc15;">#${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}</span>
+                
+                <div style="background:#1e2937; border: 2px dashed #facc15; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#facc15;">
+                    #${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}
                 </div>
-                <div style="font-size:1.1rem; margin-bottom:16px;">
+                
+                <div style="font-size:1.1rem; margin-bottom:18px;">
                     <strong>Premio:</strong> ${p.premio}
                 </div>
+                
                 <div style="display:flex; gap:12px;">
                     <button onclick="denegarPremio('${p.id}')" style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">Denegar</button>
                     <button onclick="marcarEntregado('${p.id}')" style="flex:1; background:#facc15; color:#000; padding:14px; border-radius:12px; font-weight:700;">Entregar</button>
