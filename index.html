@@ -162,46 +162,14 @@
         }
     }
 
-    // ==================== VIVO - RESULTADOS EN TIEMPO REAL ====================
+    // ==================== VIVO (por ahora placeholder) ====================
     async function cargarResultadosVivo() {
         const div = document.getElementById('lista-en-vivo');
         div.innerHTML = "<p>Cargando resultados en vivo...</p>";
-
-        const { data, error } = await _supabase
-            .from('premios_ruleta')   // Cambia el nombre de la tabla si es diferente
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(20);
-
-        if (error || !data || data.length === 0) {
-            div.innerHTML = "<p>Aún no hay resultados de ruleta.</p>";
-            return;
-        }
-
-        div.innerHTML = data.map(p => `
-            <div class="user-item" style="margin-bottom:16px;">
-                <strong>${p.username}</strong><br>
-                <span style="color:var(--primary);">${p.premio}</span><br>
-                <small>Código: <strong>${p.codigo || '—'}</strong></small><br>
-                <small>${new Date(p.created_at).toLocaleString('es-AR')}</small>
-                <div style="margin-top:12px;">
-                    <button class="btn-primary" onclick="marcarEntregado('${p.id}')" style="margin-right:8px;">Entregar</button>
-                    <button onclick="denegarPremio('${p.id}')" style="background:#ef4444;color:white;padding:10px 16px;border-radius:12px;">Denegar</button>
-                </div>
-            </div>
-        `).join('');
+        // Aquí más adelante cargaremos los premios reales
     }
 
-            // Buscador en tiempo real
-            const buscador = document.getElementById('buscador-usuarios');
-            if (buscador) {
-                buscador.addEventListener('input', () => cargarUsuarios());
-            }
-        } else if (tab === 3) {
-            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
-        }
-    }
-
+    // ==================== USUARIOS ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
@@ -276,6 +244,7 @@
         }
     }
 
+    // ==================== EDITAR USUARIO ====================
     function abrirModalEditar(id, username, password, telefono) {
         usuarioAEditarId = id;
         document.getElementById('edit-username').value = username;
