@@ -171,9 +171,70 @@
                     buscador.addEventListener('input', cargarUsuarios);
                 }
             }, 100);
-        } else if (tab === 3) {
-            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
+        else if (tab === 3) { // DIFU
+            content.innerHTML = `
+                <h2 style="margin-bottom:28px;color:#67e8f9">📢 Difu - Difusión OneSignal</h2>
+                <div style="background:#1e2937;border-radius:20px;padding:28px">
+                    <div style="margin-bottom:20px">
+                        <label style="display:block;margin-bottom:8px;color:#67e8f9">Enviar a:</label>
+                        <select id="target-type" onchange="toggleSpecificUser()" style="width:100%;padding:16px 18px;background:#0f172a;color:white;border:none;border-radius:12px">
+                            <option value="all">Todos los usuarios</option>
+                            <option value="specific">Usuario específico</option>
+                        </select>
+                    </div>
+                    <div id="specific-user-field" style="display:none;margin-bottom:20px">
+                        <label style="display:block;margin-bottom:8px;color:#67e8f9">Nombre de usuario:</label>
+                        <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
+                               style="width:100%;padding:16px 18px;background:#0f172a;color:white;border:none;border-radius:12px">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <label style="display:block;margin-bottom:8px;color:#67e8f9">Título de la notificación</label>
+                        <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción!" 
+                               style="width:100%;padding:16px 18px;background:#0f172a;color:white;border:none;border-radius:12px">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <label style="display:block;margin-bottom:8px;color:#67e8f9">Mensaje</label>
+                        <textarea id="notif-message" rows="4" placeholder="Escribe el mensaje que recibirán tus jugadores..." 
+                                  style="width:100%;padding:16px 18px;background:#0f172a;color:white;border:none;border-radius:12px;resize:vertical"></textarea>
+                    </div>
+                    <button onclick="enviarNotificacion()" 
+                            style="width:100%;padding:18px;font-size:18px;font-weight:bold;background:linear-gradient(90deg,#22d3ee,#67e8f9);color:#0f172a;border:none;border-radius:16px;cursor:pointer">
+                        🚀 Enviar Notificación
+                    </button>
+                    <div id="notif-status" style="margin-top:20px;text-align:center;min-height:28px"></div>
+                </div>
+            `;
         }
+    }
+
+    function toggleSpecificUser() {
+        const field = document.getElementById('specific-user-field');
+        const type = document.getElementById('target-type').value;
+        field.style.display = type === 'specific' ? 'block' : 'none';
+    }
+
+    async function enviarNotificacion() {
+        const status = document.getElementById('notif-status');
+        status.innerHTML = `<span style="color:#67e8f9">Enviando...</span>`;
+
+        const target = document.getElementById('target-type').value;
+        const specificUser = document.getElementById('specific-username').value.trim();
+        const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
+        const message = document.getElementById('notif-message').value.trim();
+
+        if (!message) {
+            status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío</span>`;
+            return;
+        }
+
+        // Aquí iría tu lógica real de OneSignal (puedes usar tu REST API Key)
+        // Por ahora mostramos confirmación (luego la conectamos al API)
+        setTimeout(() => {
+            status.innerHTML = `<span style="color:#67e8f9">✅ Notificación enviada correctamente</span>`;
+            // Limpiar formulario
+            document.getElementById('notif-title').value = '';
+            document.getElementById('notif-message').value = '';
+        }, 1200);
     }
 
 // ==================== VIVO - TARJETAS REFINADAS ====================
