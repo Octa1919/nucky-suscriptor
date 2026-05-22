@@ -32,17 +32,29 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="casino-name" id="casino-name">Nucky Casino</div>
-        <button class="btn-salir" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+   <div class="header">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <h1 id="casino-name" style="margin:0; font-size:1.4rem; color:white;">Nucky Casino</h1>
     </div>
 
+    <!-- Botón Configurar movido al header -->
+    <button onclick="showConfigModal()" 
+            style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
+        ⚙️ Configurar
+    </button>
+
+    <button onclick="logout()" 
+            style="background:#ef4444; color:white; border:none; width:42px; height:42px; border-radius:50%; font-size:20px; cursor:pointer;">
+        ✕
+    </button>
+</div>
+
     <div class="tabs">
-        <div class="tab active" onclick="switchTab(0)">Vivo</div>
-        <div class="tab" onclick="switchTab(1)">Configurar</div>
-        <div class="tab" onclick="switchTab(2)">Usuarios</div>
-        <div class="tab" onclick="switchTab(3)">Difu</div>
-    </div>
+    <div class="tab" onclick="switchTab(0)">Vivo</div>
+    <div class="tab" onclick="switchTab(1)">CBU</div>
+    <div class="tab" onclick="switchTab(2)">Usuarios</div>
+    <div class="tab" onclick="switchTab(3)">Difu</div>
+</div>
 
     <div id="tab-content" class="container"></div>
 
@@ -69,6 +81,27 @@
             <button onclick="eliminarUsuarioActual()" style="background:#ef4444;color:white;margin-top:8px;">Eliminar Usuario</button>
             <button onclick="hideEditarModal()" style="background:#334155;color:white;margin-top:8px;">Cancelar</button>
         </div>
+
+        <!-- Modal Agregar CBU -->
+<div id="modal-nuevo-cbu" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div style="background:#1e2937; max-width:380px; width:90%; border-radius:20px; padding:30px; color:white;">
+        <h2 style="margin-bottom:24px; text-align:center;">🏦 Agregar Nuevo CBU</h2>
+        
+        <label style="display:block; margin-bottom:6px; color:#67e8f9;">CBU</label>
+        <input type="text" id="nuevo-cbu" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
+
+        <label style="display:block; margin-bottom:6px; color:#67e8f9;">Nombre / Alias</label>
+        <input type="text" id="nuevo-alias" placeholder="Ej: Caja Ahorro Principal" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
+
+        <label style="display:block; margin-bottom:6px; color:#67e8f9;">Banco</label>
+        <input type="text" id="nuevo-banco" placeholder="Ej: Banco Nación" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:24px;">
+
+        <div style="display:flex; gap:12px;">
+            <button onclick="hideNuevoCbuModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
+            <button onclick="agregarNuevoCbu()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar CBU</button>
+        </div>
+    </div>
+</div>
     </div>
     
 <script>
@@ -124,9 +157,9 @@
     }
 
     // ==================== TABS ====================
-    async function switchTab(tab) {
-        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
-        const content = document.getElementById('tab-content');
+   async function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+    const content = document.getElementById('tab-content');
 
         if (tab === 0) { // Vivo
             content.innerHTML = `
@@ -137,11 +170,11 @@
             `;
             cargarResultadosVivo();
         }
-       else if (tab === 1) { // CBU (nueva pestaña)
+       else if (tab === 1) { // CBU
         content.innerHTML = `
             <div class="card">
                 <h2 style="margin-bottom:28px;">🏦 Mis CBU</h2>
-                <button class="btn-primary" onclick="showNuevoCbuModal()" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button>
+                <button onclick="showNuevoCbuModal()" class="btn-primary" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button>
                 <div id="lista-cbus"></div>
             </div>
         `;
