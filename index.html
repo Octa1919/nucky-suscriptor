@@ -114,16 +114,9 @@
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
-        if (tab === 0) { // Vivo
-            content.innerHTML = `
-                <div class="card">
-                    <h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
-                    <div id="lista-en-vivo">Cargando resultados en vivo...</div>
-                </div>
-            `;
-            cargarResultadosVivo();
-        } 
-        else if (tab === 1) { // Configurar
+        if (tab === 0) {
+            content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando...</div></div>`;
+        } else if (tab === 1) {
             content.innerHTML = `
                 <div class="card">
                     <h2>⚙️ Configuración General</h2>
@@ -144,8 +137,7 @@
                     <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
                 </div>
             `;
-        } 
-        else if (tab === 2) { // Usuarios
+        } else if (tab === 2) {
             content.innerHTML = `
                 <div class="card">
                     <h2>👥 Usuarios Jugadores</h2>
@@ -156,20 +148,12 @@
                 </div>
             `;
             cargarUsuarios();
-        } 
-        else if (tab === 3) { // Difu
+        } else if (tab === 3) {
             content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
         }
     }
 
-    // ==================== VIVO (por ahora placeholder) ====================
-    async function cargarResultadosVivo() {
-        const div = document.getElementById('lista-en-vivo');
-        div.innerHTML = "<p>Cargando resultados en vivo...</p>";
-        // Aquí más adelante cargaremos los premios reales
-    }
-
-    // ==================== USUARIOS ====================
+    // ==================== USUARIOS CON BUSCADOR CORREGIDO ====================
     async function cargarUsuarios() {
         const div = document.getElementById('lista-usuarios');
         if (!div) return;
