@@ -92,11 +92,11 @@
             .eq('password', password)
             .single();
 
-       if (error || !data) return alert("Credenciales incorrectas");
-        
+        if (error || !data) return alert("Credenciales incorrectas");
+
         currentSubscriberId = data.suscriptores.id;
         localStorage.setItem('subscriber_id', currentSubscriberId);
-        
+
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         await cargarNombreCasino();
@@ -114,8 +114,8 @@
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
-       if (tab === 0) { // Vivo
-            ccontent.innerHTML = `
+        if (tab === 0) { // Vivo
+            content.innerHTML = `
                 <div class="card">
                     <h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
                     <div id="lista-en-vivo">Cargando resultados en vivo...</div>
@@ -143,7 +143,7 @@
                     <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
                 </div>
             `;
-       } else if (tab === 2) {
+        } else if (tab === 2) {
             content.innerHTML = `
                 <div class="card">
                     <h2>👥 Usuarios Jugadores</h2>
@@ -167,19 +167,26 @@
         }
     }
 
-    // ==================== VIVO - RESULTADOS EN TIEMPO REAL ====================
+// ==================== VIVO - RESULTADOS EN TIEMPO REAL ====================
     async function cargarResultadosVivo() {
         const div = document.getElementById('lista-en-vivo');
+        if (!div) return;
         div.innerHTML = "<p>Cargando resultados en vivo...</p>";
 
         const { data, error } = await _supabase
             .from('premios_ruleta')
             .select('*')
-            .eq('subscriber_id', currentSubscriberId)   // ← Solo del suscriptor actual
+            .eq('subscriber_id', currentSubscriberId)
             .order('created_at', { ascending: false })
             .limit(20);
 
-        if (error || !data || data.length === 0) {
+        if (error) {
+            console.error(error);
+            div.innerHTML = "<p>Error al cargar resultados.</p>";
+            return;
+        }
+
+        if (!data || data.length === 0) {
             div.innerHTML = "<p>Aún no hay resultados de ruleta para este suscriptor.</p>";
             return;
         }
@@ -187,7 +194,7 @@
         div.innerHTML = data.map(p => `
             <div class="user-item" style="margin-bottom:16px;">
                 <strong>${p.usuario}</strong><br>
-                <span style="color:var(--primary);">${p.premio}</span><br>
+                <span style="color:var(--primary); font-weight:600;">${p.premio}</span><br>
                 <small>Código: <strong>${p.codigo || '—'}</strong></small><br>
                 <small>${new Date(p.created_at).toLocaleString('es-AR')}</small>
                 <div style="margin-top:12px;">
