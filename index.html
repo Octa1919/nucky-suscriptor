@@ -79,7 +79,7 @@
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
 
- // ==================== LOGIN ====================
+// ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
@@ -100,7 +100,7 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         await cargarNombreCasino();
-        switchTab(0);   // ← Carga automáticamente la pestaña Vivo
+        switchTab(0);   // ← Carga automáticamente Vivo
     }
 
     async function cargarNombreCasino() {
@@ -167,7 +167,7 @@
         }
     }
 
-// ==================== VIVO - TARJETAS FUNCIONALES ====================
+// ==================== VIVO - TARJETAS REFINADAS ====================
     async function cargarResultadosVivo() {
         const div = document.getElementById('lista-en-vivo');
         if (!div) return;
@@ -208,20 +208,18 @@
         `).join('');
     }
 
-    // ==================== BOTONES FUNCIONALES VIVO ====================
+// ==================== BOTONES VIVO ====================
     async function marcarEntregado(id) {
-        if (confirm("¿Marcar este premio como entregado?")) {
-            const { error } = await _supabase.from('premios_ruleta').delete().eq('id', id);
-            if (error) alert("Error al entregar");
-            else cargarResultadosVivo();
+        if (confirm("¿Marcar como entregado y quitar de la lista?")) {
+            await _supabase.from('premios_ruleta').delete().eq('id', id);
+            cargarResultadosVivo();
         }
     }
 
     async function denegarPremio(id) {
-        if (confirm("¿Denegar este premio?")) {
-            const { error } = await _supabase.from('premios_ruleta').delete().eq('id', id);
-            if (error) alert("Error al denegar");
-            else cargarResultadosVivo();
+        if (confirm("¿Denegar este premio y quitar de la lista?")) {
+            await _supabase.from('premios_ruleta').delete().eq('id', id);
+            cargarResultadosVivo();
         }
     }
     
