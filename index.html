@@ -110,14 +110,14 @@
     }
 
     // ==================== PESTAÑAS ====================
-   async function switchTab(tab) {
+    async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
         if (tab === 0) { // Vivo
             content.innerHTML = `
                 <div class="card">
-                    <h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
+                    <h2 style="margin-bottom:28px;"><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
                     <div id="lista-en-vivo">Cargando resultados en vivo...</div>
                 </div>
             `;
@@ -167,7 +167,7 @@
         }
     }
 
-// ==================== VIVO - TARJETAS REFINADAS ====================
+// ==================== VIVO - TARJETAS REFINADAS (cyan) ====================
     async function cargarResultadosVivo() {
         const div = document.getElementById('lista-en-vivo');
         if (!div) return;
@@ -186,13 +186,13 @@
         }
 
         div.innerHTML = data.map(p => `
-            <div class="user-item" style="margin-bottom:20px; border: 2px solid #facc15; background: linear-gradient(180deg, #1e2937, #16213e);">
+            <div class="user-item" style="margin-bottom:24px; border: 2px solid #22d3ee; background: linear-gradient(180deg, #1e2937, #16213e);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <strong style="font-size:1.25rem;">${p.usuario}</strong>
-                    <small style="color:#facc15;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
+                    <small style="color:#67e8f9;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
                 </div>
                 
-                <div style="background:#1e2937; border: 2px dashed #facc15; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#facc15;">
+                <div style="background:#1e2937; border: 2px dashed #22d3ee; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#67e8f9;">
                     #${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}
                 </div>
                 
@@ -202,7 +202,7 @@
                 
                 <div style="display:flex; gap:12px;">
                     <button onclick="denegarPremio('${p.id}')" style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">Denegar</button>
-                    <button onclick="marcarEntregado('${p.id}')" style="flex:1; background:#facc15; color:#000; padding:14px; border-radius:12px; font-weight:700;">Entregar</button>
+                    <button onclick="marcarEntregado('${p.id}')" style="flex:1; background:#22d3ee; color:#000; padding:14px; border-radius:12px; font-weight:700;">Entregar</button>
                 </div>
             </div>
         `).join('');
