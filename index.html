@@ -79,6 +79,7 @@
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
 
+    // ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
@@ -108,13 +109,21 @@
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
 
+    // ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
-        if (tab === 0) {
-            content.innerHTML = `<div class="card"><h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando...</div></div>`;
-        } else if (tab === 1) {
+        if (tab === 0) { // Vivo
+            content.innerHTML = `
+                <div class="card">
+                    <h2><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
+                    <div id="lista-en-vivo">Cargando resultados en vivo...</div>
+                </div>
+            `;
+            cargarResultadosVivo();
+        } 
+        else if (tab === 1) { // Configurar
             content.innerHTML = `
                 <div class="card">
                     <h2>⚙️ Configuración General</h2>
@@ -135,7 +144,8 @@
                     <button class="btn-primary" onclick="guardarRuleta()">Guardar Ruleta</button>
                 </div>
             `;
-        } else if (tab === 2) {
+        } 
+        else if (tab === 2) { // Usuarios
             content.innerHTML = `
                 <div class="card">
                     <h2>👥 Usuarios Jugadores</h2>
@@ -146,6 +156,41 @@
                 </div>
             `;
             cargarUsuarios();
+        } 
+        else if (tab === 3) { // Difu
+            content.innerHTML = `<div class="card"><h2>📢 Difusión OneSignal</h2><p>Próximamente...</p></div>`;
+        }
+    }
+
+    // ==================== VIVO - RESULTADOS EN TIEMPO REAL ====================
+    async function cargarResultadosVivo() {
+        const div = document.getElementById('lista-en-vivo');
+        div.innerHTML = "<p>Cargando resultados en vivo...</p>";
+
+        const { data, error } = await _supabase
+            .from('premios_ruleta')   // Cambia el nombre de la tabla si es diferente
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        if (error || !data || data.length === 0) {
+            div.innerHTML = "<p>Aún no hay resultados de ruleta.</p>";
+            return;
+        }
+
+        div.innerHTML = data.map(p => `
+            <div class="user-item" style="margin-bottom:16px;">
+                <strong>${p.username}</strong><br>
+                <span style="color:var(--primary);">${p.premio}</span><br>
+                <small>Código: <strong>${p.codigo || '—'}</strong></small><br>
+                <small>${new Date(p.created_at).toLocaleString('es-AR')}</small>
+                <div style="margin-top:12px;">
+                    <button class="btn-primary" onclick="marcarEntregado('${p.id}')" style="margin-right:8px;">Entregar</button>
+                    <button onclick="denegarPremio('${p.id}')" style="background:#ef4444;color:white;padding:10px 16px;border-radius:12px;">Denegar</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
             // Buscador en tiempo real
             const buscador = document.getElementById('buscador-usuarios');
