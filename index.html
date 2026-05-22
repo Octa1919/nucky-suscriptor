@@ -33,19 +33,18 @@
 </head>
 <body>
    <div class="header">
-    <div style="display:flex; align-items:center; gap:12px;">
-        <h1 id="casino-name" style="margin:0; font-size:1.4rem; color:white;">Nucky Casino</h1>
-    </div>
-
-    <!-- Botón Configurar movido al header -->
+    <h1 id="casino-name" style="margin:0; font-size:1.4rem; color:white;">Nucky Casino</h1>
+    
+    <!-- Botón Configurar (ahora funcional) -->
     <button onclick="showConfigModal()" 
             style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
         ⚙️ Configurar
     </button>
 
+    <!-- Botón Cerrar Sesión con ícono correcto -->
     <button onclick="logout()" 
-            style="background:#ef4444; color:white; border:none; width:42px; height:42px; border-radius:50%; font-size:20px; cursor:pointer;">
-        ✕
+            style="background:#ef4444; color:white; border:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+        <i class="fas fa-sign-out-alt"></i>
     </button>
 </div>
 
@@ -99,6 +98,33 @@
         <div style="display:flex; gap:12px;">
             <button onclick="hideNuevoCbuModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
             <button onclick="agregarNuevoCbu()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar CBU</button>
+        </div>
+
+        <!-- Modal Configurar -->
+<div id="modal-config" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div style="background:#1e2937; max-width:420px; width:90%; border-radius:20px; padding:30px; color:white;">
+        <h2 style="margin-bottom:24px; text-align:center;">⚙️ Configuración</h2>
+        
+        <h3 style="margin:20px 0 10px; color:#67e8f9;">Configuración General</h3>
+        <label>Nombre del Casino</label>
+        <input type="text" id="config-nombre" style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
+        
+        <label>WhatsApp de atención</label>
+        <input type="text" id="config-whatsapp" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
+
+        <h3 style="margin:20px 0 10px; color:#67e8f9;">Configuración de Ruleta</h3>
+        <label>Premios Ruleta Normal (separados por coma)</label>
+        <input type="text" id="config-premios-normal" placeholder="3000,5000,8000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
+        
+        <label>Premios Ruleta Dorada</label>
+        <input type="text" id="config-premios-dorada" placeholder="15000,25000,40000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
+        
+        <label>Días para activar Ruleta Dorada</label>
+        <input type="number" id="config-dias-dorada" value="7" min="1" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
+
+        <div style="display:flex; gap:12px;">
+            <button onclick="hideConfigModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
+            <button onclick="guardarConfigCompleta()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Todo</button>
         </div>
     </div>
 </div>
