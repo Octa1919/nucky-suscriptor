@@ -79,6 +79,15 @@
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
 
+    // ==================== FUNCIÓN PARA COPIAR AL PORTAPAPELES ====================
+    function copiarAlPortapapeles(texto) {
+        navigator.clipboard.writeText(texto).then(() => {
+            alert("✅ Copiado al portapapeles: " + texto);
+        }).catch(() => {
+            alert("No se pudo copiar (intenta de nuevo)");
+        });
+    }
+    
 // ==================== LOGIN ====================
     async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
