@@ -109,7 +109,7 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         await cargarNombreCasino();
-        switchTab(0);   // ← Carga automáticamente Vivo
+        switchTab(0);
     }
 
     async function cargarNombreCasino() {
@@ -118,7 +118,7 @@
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
     
-    // ==================== PESTAÑAS ====================
+// ==================== PESTAÑAS ====================
     async function switchTab(tab) {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
@@ -197,11 +197,12 @@
         div.innerHTML = data.map(p => `
             <div class="user-item" style="margin-bottom:24px; border: 2px solid #22d3ee; background: linear-gradient(180deg, #1e2937, #16213e);">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <strong style="font-size:1.25rem;">${p.usuario}</strong>
+                    <strong onclick="copiarAlPortapapeles('${p.usuario}')" style="font-size:1.25rem; cursor:pointer;">${p.usuario}</strong>
                     <small style="color:#67e8f9;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
                 </div>
                 
-                <div style="background:#1e2937; border: 2px dashed #22d3ee; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#67e8f9;">
+                <div onclick="copiarAlPortapapeles('${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}')" 
+                     style="background:#1e2937; border: 2px dashed #22d3ee; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#67e8f9; cursor:pointer;">
                     #${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}
                 </div>
                 
@@ -216,7 +217,7 @@
             </div>
         `).join('');
     }
-
+    
 // ==================== BOTONES VIVO ====================
     async function marcarEntregado(id) {
         if (confirm("¿Marcar como entregado y quitar de la lista?")) {
