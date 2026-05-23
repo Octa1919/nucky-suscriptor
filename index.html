@@ -64,6 +64,7 @@
             <button onclick="hideNewUserModal()" style="background:#334155;color:white;">Cancelar</button>
         </div>
     </div>
+    
     <!-- Modal Editar Usuario -->
     <div id="modal-editar-usuario" class="modal">
         <div class="modal-content">
@@ -75,6 +76,8 @@
             <button onclick="eliminarUsuarioActual()" style="background:#ef4444;color:white;margin-top:8px;">Eliminar Usuario</button>
             <button onclick="hideEditarModal()" style="background:#334155;color:white;margin-top:8px;">Cancelar</button>
         </div>
+    </div>
+    
         <!-- Modal Agregar CBU -->
 <div id="modal-nuevo-cbu" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
     <div style="background:#1e2937; max-width:380px; width:90%; border-radius:20px; padding:30px; color:white;">
@@ -90,6 +93,8 @@
             <button onclick="hideNuevoCbuModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
             <button onclick="agregarNuevoCbu()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar CBU</button>
         </div>
+    </div>
+    
         <!-- Modal Configurar -->
 <div id="modal-config" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
     <div style="background:#1e2937; max-width:420px; width:90%; border-radius:20px; padding:30px; color:white;">
@@ -308,28 +313,28 @@
     }
     
  // ==================== ENVÍO REAL A ONESIGNAL ====================
-    async function enviarNotificacion() {
+  async function enviarNotificacion() {
         const status = document.getElementById('notif-status');
         status.innerHTML = `<span style="color:#67e8f9">Enviando notificación...</span>`;
-        
-    const target = document.getElementById('target-type').value;
+
+        const target = document.getElementById('target-type').value;
         const specificUser = document.getElementById('specific-username').value.trim();
         const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
         const message = document.getElementById('notif-message').value.trim();
-        
-    if (!message) {
+
+        if (!message) {
             status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío</span>`;
             return;
         }
-        
-    const payload = {
+
+        const payload = {
             app_id: "f1d17c3e-a156-4a64-a288-c1a4f04f686d",
             headings: { "es": title },
             contents: { "es": message },
             url: "https://nucky-corp.vercel.app"
         };
-        
-    if (target === "all") {
+
+        if (target === "all") {
             payload.filters = [{ "field": "tag", "key": "subscriber_id", "relation": "=", "value": currentSubscriberId }];
         } else if (target === "specific" && specificUser) {
             payload.include_external_user_ids = [specificUser];
@@ -337,8 +342,8 @@
             status.innerHTML = `<span style="color:#ef4444">Debe ingresar un usuario específico</span>`;
             return;
         }
-        
-    try {
+
+        try {
             const response = await fetch("https://api.onesignal.com/api/v1/notifications", {
                 method: "POST",
                 headers: {
@@ -347,19 +352,18 @@
                 },
                 body: JSON.stringify(payload)
             });
-        
-        const result = await response.json();
-        
-       if (response.ok) {
+
+            const result = await response.json();
+
+            if (response.ok) {
                 status.innerHTML = `<span style="color:#67e8f9">✅ Notificación enviada correctamente</span>`;
-            // Limpiar formulario
-            document.getElementById('notif-title').value = '';
+                document.getElementById('notif-title').value = '';
                 document.getElementById('notif-message').value = '';
                 if (target === "specific") document.getElementById('specific-username').value = '';
             } else {
                 status.innerHTML = `<span style="color:#ef4444">Error: ${result.errors ? result.errors[0] : 'Desconocido'}</span>`;
             }
-    } catch (err) {
+        } catch (err) {
             status.innerHTML = `<span style="color:#ef4444">Error de conexión</span>`;
             console.error(err);
         }
