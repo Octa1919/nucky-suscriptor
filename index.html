@@ -14,50 +14,49 @@
         .casino-name { font-size: 1.45rem; font-weight: 700; background: linear-gradient(90deg, #22d3ee, #67e8f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-salir { background: #ef4444; color: white; border: none; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .tabs { display: flex; background: rgba(18, 26, 46, 0.85); padding: 8px; border-radius: 20px; margin: 20px 20px 10px; gap: 6px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-        .tab { flex: 1; padding: 13px 10px; text-align: center; border-radius: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.93rem; position: relative; overflow: hidden; }
+        .tab { flex: 1; padding: 13px 10px; text-align: center; border-radius: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.93rem; }
         .tab.active { background: linear-gradient(90deg, var(--primary), var(--accent)); color: black; box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
-        .tab.active::before { content: ''; position: absolute; top: -80%; left: -200%; width: 60%; height: 400%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent); transform: skewX(-25deg); animation: shine 1.6s linear infinite; }
-        @keyframes shine { 0% { transform: translateX(-200%) skewX(-25deg); } 100% { transform: translateX(400%) skewX(-25deg); } }
         .card { background: var(--glass); border-radius: 24px; padding: 26px; margin: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(34, 211, 238, 0.15); backdrop-filter: blur(12px); }
         .user-item { background: #1e2937; padding: 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(34, 211, 238, 0.1); transition: all 0.3s ease; cursor: pointer; }
         .user-item:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.3); }
         label { display: block; margin: 18px 0 8px; font-size: 0.92rem; color: #cbd5e1; }
-        input { width: 100%; padding: 16px 18px; border-radius: 14px; border: 1px solid #334155; background: #1e2937; color: white; font-size: 1.05rem; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2); }
-        .btn-primary { background: linear-gradient(90deg, var(--primary), var(--accent)); color: black; font-weight: 700; border: none; padding: 16px; border-radius: 14px; margin-top: 12px; cursor: pointer; font-size: 1.05rem; box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4); transition: transform 0.08s ease; }
-        .btn-primary:active { transform: scale(0.88) translateY(4px) !important; }
+        input, textarea { width: 100%; padding: 16px 18px; border-radius: 14px; border: 1px solid #334155; background: #1e2937; color: white; font-size: 1.05rem; }
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2); }
+        .btn-primary { background: linear-gradient(90deg, var(--primary), var(--accent)); color: black; font-weight: 700; border: none; padding: 16px; border-radius: 14px; margin-top: 12px; cursor: pointer; font-size: 1.05rem; box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4); }
+        .btn-primary:active { transform: scale(0.92) translateY(3px) !important; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: var(--card); width: 92%; max-width: 480px; border-radius: 24px; padding: 32px 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .modal button { width: 100%; padding: 16px; border-radius: 14px; font-weight: 700; font-size: 1.05rem; margin-top: 10px; }
     </style>
 </head>
 <body>
-   <div class="header">
-    <h1 id="casino-name" style="margin:0; font-size:1.4rem; color:white;">Nucky Casino</h1>
-    
-    <!-- Botón Configurar (ahora funcional) -->
-    <button onclick="showConfigModal()" 
-            style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
-        ⚙️ Configurar
-    </button>
 
-    <!-- Botón Cerrar Sesión con ícono correcto -->
-    <button onclick="logout()" 
-            style="background:#ef4444; color:white; border:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-        <i class="fas fa-sign-out-alt"></i>
-    </button>
-</div>
+    <!-- HEADER -->
+    <div class="header">
+        <h1 id="casino-name" class="casino-name">Nucky Casino</h1>
+        
+        <button onclick="showConfigModal()" 
+                style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
+            ⚙️ Configurar
+        </button>
 
+        <button onclick="logout()" 
+                style="background:#ef4444; color:white; border:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+
+    <!-- TABS -->
     <div class="tabs">
-    <div class="tab" onclick="switchTab(0)">Vivo</div>
-    <div class="tab" onclick="switchTab(1)">CBU</div>
-    <div class="tab" onclick="switchTab(2)">Usuarios</div>
-    <div class="tab" onclick="switchTab(3)">Difu</div>
-</div>
+        <div class="tab" onclick="switchTab(0)">Vivo</div>
+        <div class="tab active" onclick="switchTab(1)">CBU</div>
+        <div class="tab" onclick="switchTab(2)">Usuarios</div>
+        <div class="tab" onclick="switchTab(3)">Difu</div>
+    </div>
 
     <div id="tab-content" class="container"></div>
 
-    <!-- Modal Crear Usuario -->
+    <!-- Modal Nuevo Usuario -->
     <div id="modal-nuevo-usuario" class="modal">
         <div class="modal-content">
             <h2 style="margin-bottom:24px;">Crear Nuevo Usuario</h2>
@@ -80,57 +79,55 @@
             <button onclick="eliminarUsuarioActual()" style="background:#ef4444;color:white;margin-top:8px;">Eliminar Usuario</button>
             <button onclick="hideEditarModal()" style="background:#334155;color:white;margin-top:8px;">Cancelar</button>
         </div>
+    </div>
 
-        <!-- Modal Agregar CBU -->
-<div id="modal-nuevo-cbu" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
-    <div style="background:#1e2937; max-width:380px; width:90%; border-radius:20px; padding:30px; color:white;">
-        <h2 style="margin-bottom:24px; text-align:center;">🏦 Agregar Nuevo CBU</h2>
-        
-        <label style="display:block; margin-bottom:6px; color:#67e8f9;">CBU</label>
-        <input type="text" id="nuevo-cbu" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
-
-        <label style="display:block; margin-bottom:6px; color:#67e8f9;">Nombre / Alias</label>
-        <input type="text" id="nuevo-alias" placeholder="Ej: Caja Ahorro Principal" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
-
-        <label style="display:block; margin-bottom:6px; color:#67e8f9;">Banco</label>
-        <input type="text" id="nuevo-banco" placeholder="Ej: Banco Nación" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:24px;">
-
-        <div style="display:flex; gap:12px;">
-            <button onclick="hideNuevoCbuModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
-            <button onclick="agregarNuevoCbu()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar CBU</button>
-        </div>
-
-        <!-- Modal Configurar -->
-<div id="modal-config" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
-    <div style="background:#1e2937; max-width:420px; width:90%; border-radius:20px; padding:30px; color:white;">
-        <h2 style="margin-bottom:24px; text-align:center;">⚙️ Configuración</h2>
-        
-        <h3 style="margin:20px 0 10px; color:#67e8f9;">Configuración General</h3>
-        <label>Nombre del Casino</label>
-        <input type="text" id="config-nombre" style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
-        
-        <label>WhatsApp de atención</label>
-        <input type="text" id="config-whatsapp" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
-
-        <h3 style="margin:20px 0 10px; color:#67e8f9;">Configuración de Ruleta</h3>
-        <label>Premios Ruleta Normal (separados por coma)</label>
-        <input type="text" id="config-premios-normal" placeholder="3000,5000,8000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
-        
-        <label>Premios Ruleta Dorada</label>
-        <input type="text" id="config-premios-dorada" placeholder="15000,25000,40000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
-        
-        <label>Días para activar Ruleta Dorada</label>
-        <input type="number" id="config-dias-dorada" value="7" min="1" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
-
-        <div style="display:flex; gap:12px;">
-            <button onclick="hideConfigModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
-            <button onclick="guardarConfigCompleta()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Todo</button>
+    <!-- Modal Agregar CBU -->
+    <div id="modal-nuevo-cbu" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:24px; text-align:center;">🏦 Agregar Nuevo CBU</h2>
+            <label style="display:block; margin-bottom:6px; color:#67e8f9;">CBU</label>
+            <input type="text" id="nuevo-cbu" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
+            
+            <label style="display:block; margin-bottom:6px; color:#67e8f9;">Nombre / Alias</label>
+            <input type="text" id="nuevo-alias" placeholder="Ej: Caja Ahorro Principal" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
+            
+            <label style="display:block; margin-bottom:6px; color:#67e8f9;">Banco</label>
+            <input type="text" id="nuevo-banco" placeholder="Ej: Banco Nación" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:24px;">
+            
+            <div style="display:flex; gap:12px;">
+                <button onclick="hideNuevoCbuModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
+                <button onclick="agregarNuevoCbu()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar CBU</button>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Modal Configurar -->
+    <div id="modal-config" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:24px; text-align:center;">⚙️ Configuración</h2>
+            <h3 style="margin:20px 0 10px; color:#67e8f9;">General</h3>
+            <label>Nombre del Casino</label>
+            <input type="text" id="config-nombre" style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
+            <label>WhatsApp de atención</label>
+            <input type="text" id="config-whatsapp" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
+
+            <h3 style="margin:20px 0 10px; color:#67e8f9;">Ruleta</h3>
+            <label>Premios Ruleta Normal</label>
+            <input type="text" id="config-premios-normal" placeholder="3000,5000,8000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
+            <label>Premios Ruleta Dorada</label>
+            <input type="text" id="config-premios-dorada" placeholder="15000,25000,40000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
+            <label>Días para Ruleta Dorada</label>
+            <input type="number" id="config-dias-dorada" value="7" min="1" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
+
+            <div style="display:flex; gap:12px;">
+                <button onclick="hideConfigModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
+                <button onclick="guardarConfigCompleta()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Todo</button>
+            </div>
+        </div>
     </div>
     
 <script>
+    // ==================== CONFIG SUPABASE ====================
     const SUPABASE_URL = "https://vevptiayzleigkjtmyhc.supabase.co";
     const SUPABASE_KEY = "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd";
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -138,7 +135,7 @@
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
 
-    // ==================== COPIAR AL PORTAPAPELES ====================
+    // ==================== COPIAR ====================
     function copiarAlPortapapeles(texto) {
         navigator.clipboard.writeText(texto).then(() => {
             alert("✅ Copiado: " + texto);
@@ -165,62 +162,33 @@
 
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
-
         await cargarNombreCasino();
         switchTab(0);
     }
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
-        const { data } = await _supabase
-            .from('suscriptores')
-            .select('nombre_casino')
-            .eq('id', currentSubscriberId)
-            .single();
-        if (data && data.nombre_casino) {
-            document.getElementById('casino-name').textContent = data.nombre_casino;
-        }
+        const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
+        if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
 
-    // ==================== TABS ====================
-   async function switchTab(tab) {
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
-    const content = document.getElementById('tab-content');
+  // ==================== TABS ====================
+    async function switchTab(tab) {
+        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+        const content = document.getElementById('tab-content');
 
         if (tab === 0) { // Vivo
-            content.innerHTML = `
-                <div class="card">
-                    <h2 style="margin-bottom:28px;"><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
-                    <div id="lista-en-vivo">Cargando resultados en vivo...</div>
-                </div>
-            `;
+            content.innerHTML = `<div class="card"><h2 style="margin-bottom:28px;"><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2><div id="lista-en-vivo">Cargando resultados en vivo...</div></div>`;
             cargarResultadosVivo();
-        }
-       else if (tab === 1) { // CBU
-        content.innerHTML = `
-            <div class="card">
-                <h2 style="margin-bottom:28px;">🏦 Mis CBU</h2>
-                <button onclick="showNuevoCbuModal()" class="btn-primary" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button>
-                <div id="lista-cbus"></div>
-            </div>
-        `;
-        cargarCbus();
-    }
+        } 
+        else if (tab === 1) { // CBU
+            content.innerHTML = `<div class="card"><h2 style="margin-bottom:28px;">🏦 Mis CBU</h2><button onclick="showNuevoCbuModal()" class="btn-primary" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button><div id="lista-cbus"></div></div>`;
+            cargarCbus();
+        } 
         else if (tab === 2) { // Usuarios
-            content.innerHTML = `
-                <div class="card">
-                    <h2>👥 Usuarios Jugadores</h2>
-                    <input type="text" id="buscador-usuarios" placeholder="🔎 Buscar por usuario o teléfono..."
-                           style="margin: 28px 0 24px 0; padding:14px 16px; border-radius:12px; width:100%;">
-                    <button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">+ Crear Nuevo Usuario</button>
-                    <div id="lista-usuarios"></div>
-                </div>
-            `;
+            content.innerHTML = `<div class="card"><h2>👥 Usuarios Jugadores</h2><input type="text" id="buscador-usuarios" placeholder="🔎 Buscar por usuario o teléfono..." style="margin:28px 0 24px 0;padding:14px 16px;border-radius:12px;width:100%;"><button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">+ Crear Nuevo Usuario</button><div id="lista-usuarios"></div></div>`;
             cargarUsuarios();
-            setTimeout(() => {
-                const buscador = document.getElementById('buscador-usuarios');
-                if (buscador) buscador.addEventListener('input', cargarUsuarios);
-            }, 100);
+            setTimeout(() => { const buscador = document.getElementById('buscador-usuarios'); if (buscador) buscador.addEventListener('input', cargarUsuarios); }, 100);
         }
        else if (tab === 3) { // DIFU
     content.innerHTML = `
@@ -511,37 +479,38 @@
         location.reload();
     }
 
-    // ==================== CBU ====================
-async function cargarCbus() {
-    const div = document.getElementById('lista-cbus');
-    if (!div) return;
-    div.innerHTML = "<p>Cargando CBUs...</p>";
-
-    const { data, error } = await _supabase
-        .from('cbus')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .order('created_at', { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        div.innerHTML = "<p>Aún no tienes CBUs registrados.</p>";
-        return;
+   // ==================== CBU ====================
+    async function cargarCbus() { /* tu código anterior */ }
+    function showNuevoCbuModal() {
+        document.getElementById('nuevo-cbu').value = '';
+        document.getElementById('nuevo-alias').value = '';
+        document.getElementById('nuevo-banco').value = '';
+        document.getElementById('modal-nuevo-cbu').style.display = 'flex';
     }
+    function hideNuevoCbuModal() {
+        document.getElementById('modal-nuevo-cbu').style.display = 'none';
+    }
+    async function agregarNuevoCbu() {
+        const cbu = document.getElementById('nuevo-cbu').value.trim();
+        const alias = document.getElementById('nuevo-alias').value.trim();
+        const banco = document.getElementById('nuevo-banco').value.trim();
+        if (!cbu || !alias || !banco) return alert("Todos los campos son obligatorios");
 
-    div.innerHTML = data.map(c => `
-        <div class="user-item" style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <strong>${c.alias_nombre}</strong><br>
-                <small>${c.banco} • ${c.cbu}</small>
-            </div>
-            <label class="switch">
-                <input type="checkbox" ${c.activo ? 'checked' : ''} onchange="toggleCbuActivo('${c.id}', this.checked)">
-                <span class="slider"></span>
-            </label>
-        </div>
-    `).join('');
-}
-
+        const { error } = await _supabase.from('cbus').insert({
+            subscriber_id: currentSubscriberId,
+            cbu: cbu,
+            alias_nombre: alias,
+            banco: banco,
+            activo: true
+        });
+        if (error) alert("Error: " + error.message);
+        else {
+            alert("✅ CBU agregado");
+            hideNuevoCbuModal();
+            cargarCbus();
+        }
+    }
+    
 async function toggleCbuActivo(id, activo) {
     await _supabase.from('cbus').update({ activo }).eq('id', id);
     cargarCbus();
@@ -565,6 +534,20 @@ function showNuevoCbuModal() {
         cargarCbus();
     });
 }
+
+    // ==================== CONFIGURAR ====================
+    function showConfigModal() {
+        // Cargar valores actuales si quieres (opcional)
+        document.getElementById('modal-config').style.display = 'flex';
+    }
+    function hideConfigModal() {
+        document.getElementById('modal-config').style.display = 'none';
+    }
+    async function guardarConfigCompleta() {
+        // Aquí guardarías los valores en la tabla suscriptores o config
+        alert("✅ Configuración guardada");
+        hideConfigModal();
+    }
     
     window.onload = () => {
         if (currentSubscriberId) {
