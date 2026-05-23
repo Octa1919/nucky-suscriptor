@@ -52,6 +52,17 @@
     <div class="tab" onclick="switchTab(2)">Usuarios</div>
     <div class="tab" onclick="switchTab(3)">Difu</div>
 </div>
+    <div id="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px;">
+    <!-- Tu formulario de login aquí -->
+    <h1>Iniciar Sesión</h1>
+    <input id="login-user" placeholder="Usuario" type="text"><br>
+    <input id="login-pass" placeholder="Contraseña" type="password"><br>
+    <button onclick="loginSuscriptor()">Ingresar</button>
+</div>
+
+<div id="dashboard" style="display:none;">
+    <!-- Todo el contenido del dashboard (header, tabs, tab-content, etc.) -->
+</div>
     <div id="tab-content" class="container"></div>
     <!-- Modal Crear Usuario -->
     <div id="modal-nuevo-usuario" class="modal">
@@ -527,17 +538,10 @@
         }
     }
     
-         function logout() {
+            function logout() {
         localStorage.removeItem('subscriber_id');
         currentSubscriberId = null;
-        
-        // Forzar el cambio de pantallas
-        document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'flex';
-        
-        // Limpiar campos de login
-        if (document.getElementById('login-user')) document.getElementById('login-user').value = '';
-        if (document.getElementById('login-pass')) document.getElementById('login-pass').value = '';
+        location.reload();   // ← Esta es la forma más confiable por ahora
     }
 
     window.onload = () => {
@@ -547,7 +551,7 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             cargarNombreCasino();
-            switchTab(1); // Abre en CBU por defecto
+            switchTab(1); // Abre en CBU
         } else {
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('dashboard').style.display = 'none';
