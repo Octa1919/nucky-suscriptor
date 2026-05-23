@@ -529,15 +529,27 @@
     
     function logout() {
         localStorage.removeItem('subscriber_id');
-        location.reload();
+        currentSubscriberId = null;
+        
+        // Forzar el cambio de pantallas
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        
+        // Limpiar campos de login
+        if (document.getElementById('login-user')) document.getElementById('login-user').value = '';
+        if (document.getElementById('login-pass')) document.getElementById('login-pass').value = '';
     }
-    
+
     window.onload = () => {
+        currentSubscriberId = localStorage.getItem('subscriber_id');
+        
         if (currentSubscriberId) {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             cargarNombreCasino();
-            switchTab(1); // Abre directamente en CBU
+            switchTab(1); // Abre en CBU por defecto
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
         }
     };
-</script>
