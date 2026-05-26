@@ -32,10 +32,17 @@
     </style>
 </head>
 <body>
-  <div class="header">
-    <h1 id="casino-name" style="margin:0; font-size:1.4rem; color:white;">Nucky Casino</h1>
+ <!-- HEADER CORREGIDO -->
+<div class="header" style="position: sticky; top: 0; z-index: 100; background: rgba(10, 15, 28, 0.98); backdrop-filter: blur(16px);">
+    <h1 id="casino-name" style="margin:0; font-size:1.45rem; color:white; font-weight:700;">Nucky Casino</h1>
+    
+    <!-- Botón Configurar -->
+    <button onclick="showConfigModal()" 
+            style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
+        ⚙️ Configurar
+    </button>
 
-    <!-- Menú Hamburguesa -->
+    <!-- Botón Hamburguesa -->
     <button onclick="toggleHamburgerMenu()" 
             style="background:#1e2937; color:white; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px;">
         <i class="fas fa-bars"></i>
@@ -65,12 +72,6 @@
     }
     .menu-item:hover { background: #1e2937; }
 </style>
-   
-    <!-- Botón Configurar (ahora funcional) -->
-    <button onclick="showConfigModal()"
-            style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
-        ⚙️ Configurar
-    </button>
     
 </div>
     <div class="tabs">
