@@ -36,6 +36,17 @@
 <div class="header" style="position: sticky; top: 0; z-index: 100; background: rgba(10, 15, 28, 0.98); backdrop-filter: blur(16px);">
     <h1 id="casino-name" style="margin:0; font-size:1.45rem; color:white; font-weight:700;">Nucky Casino</h1>
     
+    <!-- Solo se muestra después de login -->
+    <div id="header-logged" style="display:none; gap:12px; align-items:center;">
+        <button onclick="showConfigModal()" style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
+            ⚙️ Configurar
+        </button>
+        <button onclick="toggleHamburgerMenu()" style="background:#1e2937; color:white; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px;">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</div>
+    
     <!-- Botón Configurar -->
     <button onclick="showConfigModal()" 
             style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
@@ -81,8 +92,9 @@
     <div class="tab" onclick="switchTab(3)">Difu</div>
 </div>
   <!-- ==================== PANTALLA DE LOGIN BONITA ==================== -->
+<!-- PANTALLA DE LOGIN CENTRADA -->
 <div id="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; background:linear-gradient(135deg, #0a0f1c, #1e2a4a);">
-    <div style="background:rgba(18,26,46,0.85); backdrop-filter:blur(16px); border-radius:28px; padding:40px 30px; width:100%; max-width:420px; box-shadow:0 20px 40px rgba(0,0,0,0.5); border:1px solid rgba(34,211,238,0.2);">
+    <div style="background:rgba(18,26,46,0.9); backdrop-filter:blur(16px); border-radius:28px; padding:40px 30px; width:100%; max-width:420px; box-shadow:0 20px 40px rgba(0,0,0,0.5); border:1px solid rgba(34,211,238,0.2);">
         
         <h1 style="text-align:center; margin-bottom:8px; font-size:2rem; background:linear-gradient(90deg, #22d3ee, #67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
             Iniciar Sesión
@@ -99,10 +111,6 @@
                 style="width:100%; padding:18px; font-size:1.2rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer; box-shadow:0 8px 25px rgba(34,211,238,0.4);">
             Ingresar
         </button>
-
-        <p style="text-align:center; margin-top:24px; color:#64748b; font-size:0.95rem;">
-            ¿Olvidaste tus datos? Contacta al administrador
-        </p>
     </div>
 </div>
 
@@ -259,7 +267,7 @@
     }
     
 // ==================== LOGIN ====================
-    async function loginSuscriptor() {
+   async function loginSuscriptor() {
         const username = document.getElementById('login-user').value.trim();
         const password = document.getElementById('login-pass').value.trim();
         if (!username || !password) return alert("Usuario y contraseña son obligatorios");
@@ -271,16 +279,17 @@
             .eq('password', password)
             .single();
 
-        if (error || !data) return alert("Credenciales incorrectas");
-
+        if (data) {
         currentSubscriberId = data.suscriptores.id;
         localStorage.setItem('subscriber_id', currentSubscriberId);
 
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('header-logged').style.display = 'flex';   // Muestra los botones
         await cargarNombreCasino();
-        switchTab(1); // Abre directamente en CBU
+        switchTab(1);
     }
+}
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
@@ -861,18 +870,20 @@ document.addEventListener('click', (e) => {
 });
 
     window.onload = () => {
-        currentSubscriberId = localStorage.getItem('subscriber_id');
-        
-        if (currentSubscriberId) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            cargarNombreCasino();
-            switchTab(1); // Abre en CBU
-        } else {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-        }
-    };
+    currentSubscriberId = localStorage.getItem('subscriber_id');
+    
+    if (currentSubscriberId) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('header-logged').style.display = 'flex';   // Muestra botones del header
+        cargarNombreCasino();
+        switchTab(1); // Abre en CBU
+    } else {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('header-logged').style.display = 'none';   // Oculta botones del header
+    }
+};
 
     function showInstallIOSModal() {
     document.getElementById('modal-install-ios').style.display = 'flex';
