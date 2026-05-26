@@ -125,21 +125,19 @@
     </div>
 </div>
     
-    <!-- Modal Configurar -->
+        <!-- Modal Configurar -->
 <div id="modal-config" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
     <div style="background:#1e2937; max-width:460px; width:92%; border-radius:24px; padding:30px; color:white; max-height:90vh; overflow-y:auto;">
         <h2 style="margin-bottom:24px; text-align:center;">⚙️ Configuración</h2>
 
-        <!-- General -->
-        <h3 style="margin:20px 0 10px; color:#67e8f9;">General</h3>
+        <h3 style="margin:24px 0 12px; color:#67e8f9;">General</h3>
         <label>Nombre del Casino</label>
         <input type="text" id="config-nombre" style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
         <label>WhatsApp de atención</label>
         <input type="text" id="config-whatsapp" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
-        <!-- Salas de Juego -->
-        <h3 style="margin:24px 0 10px; color:#67e8f9;">Salas de Juego</h3>
+        <h3 style="margin:24px 0 12px; color:#67e8f9;">Salas de Juego</h3>
         <label>Sala 1</label>
         <input type="url" id="config-sala1" placeholder="https://..." style="width:100%; padding:14px; margin-bottom:12px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
@@ -152,26 +150,14 @@
         <label>Sala 4</label>
         <input type="url" id="config-sala4" placeholder="https://..." style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
-        <!-- Redes Sociales -->
-        <h3 style="margin:24px 0 10px; color:#67e8f9;">Redes Sociales</h3>
+        <h3 style="margin:24px 0 12px; color:#67e8f9;">Redes Sociales</h3>
         <label>Instagram</label>
         <input type="url" id="config-instagram" placeholder="https://instagram.com/..." style="width:100%; padding:14px; margin-bottom:12px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
         <label>Telegram</label>
         <input type="url" id="config-telegram" placeholder="https://t.me/..." style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
-        <!-- Ruleta -->
-        <h3 style="margin:24px 0 10px; color:#67e8f9;">Ruleta</h3>
-        <label>Premios Ruleta Normal (separados por coma)</label>
-        <input type="text" id="config-premios-normal" placeholder="3000,5000,8000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
-
-        <label>Premios Ruleta Dorada (separados por coma)</label>
-        <input type="text" id="config-premios-dorada" placeholder="15000,25000,40000..." style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
-
-        <label>Días para activar Ruleta Dorada</label>
-        <input type="number" id="config-dias-dorada" value="7" min="1" style="width:100%; padding:14px; margin-bottom:24px; border-radius:12px; background:#0f172a; color:white; border:none;">
-
-        <div style="display:flex; gap:12px; margin-top:20px;">
+        <div style="display:flex; gap:12px;">
             <button onclick="hideConfigModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
             <button onclick="guardarConfigCompleta()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Todo</button>
         </div>
@@ -353,6 +339,34 @@
         cargarCbus();
     }
     
+// ==================== CONFIGURACIÓN ====================
+async function showConfigModal() {
+    if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
+
+    const { data } = await _supabase
+        .from('suscriptores')
+        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram')
+        .eq('id', currentSubscriberId)
+        .single();
+
+    if (data) {
+        document.getElementById('config-nombre').value = data.nombre_casino || '';
+        document.getElementById('config-whatsapp').value = data.whatsapp || '';
+        document.getElementById('config-sala1').value = data.sala1_link || '';
+        document.getElementById('config-sala2').value = data.sala2_link || '';
+        document.getElementById('config-sala3').value = data.sala3_link || '';
+        document.getElementById('config-sala4').value = data.sala4_link || '';
+        document.getElementById('config-instagram').value = data.instagram || '';
+        document.getElementById('config-telegram').value = data.telegram || '';
+    }
+
+    document.getElementById('modal-config').style.display = 'flex';
+}
+
+function hideConfigModal() {
+    document.getElementById('modal-config').style.display = 'none';
+}
+
 async function guardarConfigCompleta() {
     if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
 
@@ -364,9 +378,14 @@ async function guardarConfigCompleta() {
     const sala4 = document.getElementById('config-sala4').value.trim();
     const instagram = document.getElementById('config-instagram').value.trim();
     const telegram = document.getElementById('config-telegram').value.trim();
-    const premiosNormal = document.getElementById('config-premios-normal').value.trim();
-    const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
-    const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
+
+    // Validación básica de links
+    const urlRegex = /^https?:\/\//i;
+    if ((sala1 && !urlRegex.test(sala1)) || (sala2 && !urlRegex.test(sala2)) || 
+        (sala3 && !urlRegex.test(sala3)) || (sala4 && !urlRegex.test(sala4)) ||
+        (instagram && !urlRegex.test(instagram)) || (telegram && !urlRegex.test(telegram))) {
+        return alert("Los enlaces deben comenzar con http:// o https://");
+    }
 
     const { error } = await _supabase
         .from('suscriptores')
@@ -378,10 +397,7 @@ async function guardarConfigCompleta() {
             sala3_link: sala3 || null,
             sala4_link: sala4 || null,
             instagram: instagram || null,
-            telegram: telegram || null,
-            premios_normal: premiosNormal || null,
-            premios_dorada: premiosDorada || null,
-            dias_dorada: diasDorada
+            telegram: telegram || null
         })
         .eq('id', currentSubscriberId);
 
