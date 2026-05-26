@@ -386,7 +386,7 @@ function hideConfigModal() {
 
 async function guardarConfigCompleta() {
     if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-
+    
     // === LEER LOS VALORES ===
     const nombre = document.getElementById('config-nombre').value.trim();
     const whatsapp = document.getElementById('config-whatsapp').value.trim();
@@ -425,9 +425,9 @@ async function guardarConfigCompleta() {
             sala4_link: sala4 || null,
             instagram: instagram || null,
             telegram: telegram || null,
-            premios_normal: premiosNormal || null,      // ← Agregado
-            premios_dorada: premiosDorada || null,      // ← Agregado
-            dias_dorada: diasDorada                     // ← Agregado
+            premios_normal: premiosNormal || null,
+            premios_dorada: premiosDorada || null,
+            dias_dorada: diasDorada
         })
         .eq('id', currentSubscriberId);
 
@@ -435,6 +435,7 @@ async function guardarConfigCompleta() {
         alert("Error al guardar: " + error.message);
     } else {
         alert("✅ Configuración guardada correctamente");
+        await cargarNombreCasino();     // ← Esta línea actualiza el nombre en el header
         hideConfigModal();
     }
 }
