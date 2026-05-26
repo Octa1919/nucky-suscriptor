@@ -106,6 +106,28 @@
             <button onclick="hideEditarModal()" style="background:#334155;color:white;margin-top:8px;">Cancelar</button>
         </div>
     </div>
+
+        <!-- Modal Editar CBU -->
+    <div id="modal-editar-cbu" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+        <div style="background:#1e2937; max-width:420px; width:92%; border-radius:24px; padding:32px 28px; color:white;">
+            <h2 style="margin-bottom:24px; text-align:center;">🏦 Editar CBU</h2>
+            
+            <label style="display:block; margin-bottom:6px; color:#67e8f9;">CBU</label>
+            <input type="text" id="edit-cbu" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
+
+            <label style="display:block; margin-bottom:6px; color:#67e8f9;">Nombre / Alias</label>
+            <input type="text" id="edit-alias" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:16px;">
+
+            <label style="display:block; margin-bottom:6px; color:#67e8f9;">Banco</label>
+            <input type="text" id="edit-banco" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:24px;">
+
+            <div style="display:flex; gap:12px;">
+                <button onclick="eliminarCbuActual()" style="flex:1; padding:14px; background:#ef4444; color:white; border:none; border-radius:12px;">Eliminar CBU</button>
+                <button onclick="guardarEdicionCbu()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Cambios</button>
+            </div>
+            <button onclick="hideEditarCbuModal()" style="width:100%; margin-top:12px; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
+        </div>
+    </div>
     
         <!-- Modal Agregar CBU -->
 <div id="modal-nuevo-cbu" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
@@ -284,35 +306,36 @@
     }
 
     // ==================== CBU ====================
-    async function cargarCbus() {
-        const div = document.getElementById('lista-cbus');
-        if (!div) return;
-        div.innerHTML = "<p>Cargando CBUs...</p>";
+   async function cargarCbus() {
+    const div = document.getElementById('lista-cbus');
+    if (!div) return;
+    div.innerHTML = "<p>Cargando CBUs...</p>";
 
-        const { data, error } = await _supabase
-            .from('cbus')
-            .select('*')
-            .eq('subscriber_id', currentSubscriberId)
-            .order('created_at', { ascending: false });
+    const { data, error } = await _supabase
+        .from('cbus')
+        .select('*')
+        .eq('subscriber_id', currentSubscriberId)
+        .order('created_at', { ascending: false });
 
-        if (error || !data || data.length === 0) {
-            div.innerHTML = "<p>Aún no tienes CBUs registrados.</p>";
-            return;
-        }
-
-        div.innerHTML = data.map(c => `
-            <div class="user-item" style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <strong>${c.alias_nombre}</strong><br>
-                    <small>${c.banco} • ${c.cbu}</small>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" ${c.activo ? 'checked' : ''} onchange="toggleCbuActivo('${c.id}', this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        `).join('');
+    if (error || !data || data.length === 0) {
+        div.innerHTML = "<p>Aún no tienes CBUs registrados.</p>";
+        return;
     }
+
+    div.innerHTML = data.map(c => `
+        <div class="user-item" onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre}', '${c.banco}')" 
+             style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+            <div>
+                <strong>${c.alias_nombre}</strong><br>
+                <small>${c.banco} • ${c.cbu}</small>
+            </div>
+            <label class="switch" onclick="event.stopImmediatePropagation();">
+                <input type="checkbox" ${c.activo ? 'checked' : ''} onchange="toggleCbuActivo('${c.id}', this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+    `).join('');
+}
 
     function showNuevoCbuModal() {
         document.getElementById('nuevo-cbu').value = '';
@@ -659,6 +682,57 @@ async function guardarConfigCompleta() {
         currentSubscriberId = null;
         location.reload();   // ← Esta es la forma más confiable por ahora
     }
+
+    // ==================== EDITAR / ELIMINAR CBU ====================
+let cbuAEditarId = null;
+
+function abrirModalEditarCbu(id, cbu, alias, banco) {
+    cbuAEditarId = id;
+    document.getElementById('edit-cbu').value = cbu;
+    document.getElementById('edit-alias').value = alias;
+    document.getElementById('edit-banco').value = banco;
+    document.getElementById('modal-editar-cbu').style.display = 'flex';
+}
+
+function hideEditarCbuModal() {
+    document.getElementById('modal-editar-cbu').style.display = 'none';
+    cbuAEditarId = null;
+}
+
+async function guardarEdicionCbu() {
+    if (!cbuAEditarId) return;
+
+    const cbu = document.getElementById('edit-cbu').value.trim();
+    const alias = document.getElementById('edit-alias').value.trim();
+    const banco = document.getElementById('edit-banco').value.trim();
+
+    if (!cbu || !alias || !banco) return alert("Todos los campos son obligatorios");
+
+    const { error } = await _supabase
+        .from('cbus')
+        .update({ cbu, alias_nombre: alias, banco })
+        .eq('id', cbuAEditarId);
+
+    if (error) alert("Error: " + error.message);
+    else {
+        alert("✅ CBU actualizado");
+        hideEditarCbuModal();
+        cargarCbus();
+    }
+}
+
+async function eliminarCbuActual() {
+    if (!cbuAEditarId) return;
+    if (!confirm("¿Eliminar este CBU permanentemente?")) return;
+
+    const { error } = await _supabase.from('cbus').delete().eq('id', cbuAEditarId);
+    if (error) alert("Error: " + error.message);
+    else {
+        alert("✅ CBU eliminado");
+        hideEditarCbuModal();
+        cargarCbus();
+    }
+}
 
     window.onload = () => {
         currentSubscriberId = localStorage.getItem('subscriber_id');
