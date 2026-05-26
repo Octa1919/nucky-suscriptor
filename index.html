@@ -32,8 +32,45 @@
     </style>
 </head>
 <body>
-   <div class="header">
+  <div class="header">
     <h1 id="casino-name" style="margin:0; font-size:1.4rem; color:white;">Nucky Casino</h1>
+    
+    <!-- Botón Configurar -->
+    <button onclick="showConfigModal()" 
+            style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
+        ⚙️ Configurar
+    </button>
+
+    <!-- Menú Hamburguesa -->
+    <button onclick="toggleHamburgerMenu()" 
+            style="background:#1e2937; color:white; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px;">
+        <i class="fas fa-bars"></i>
+    </button>
+</div>
+
+    <!-- Menú Hamburguesa Lateral -->
+<div id="hamburger-menu" style="position:fixed; top:0; right:-100%; width:280px; height:100%; background:#0f172a; box-shadow:-8px 0 30px rgba(0,0,0,0.6); transition:right 0.4s ease; z-index:9999; padding-top:80px; overflow-y:auto;">
+    <div style="padding:0 20px;">
+        <button onclick="toggleHamburgerMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:28px;">✕</button>
+        
+        <div onclick="uploadCronograma()" class="menu-item">📅 Cronograma</div>
+        <div onclick="instalarApp()" class="menu-item">📲 Instalar App</div>
+        <div onclick="showTyCModal()" class="menu-item">📜 TyC</div>
+        <div onclick="logout()" class="menu-item" style="color:#ef4444;">🚪 Cerrar Sesión</div>
+    </div>
+</div>
+
+<!-- Estilos adicionales para el menú (agregar al <style>) -->
+<style>
+    .menu-item {
+        padding: 18px 20px;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #334155;
+        color: white;
+        cursor: pointer;
+    }
+    .menu-item:hover { background: #1e2937; }
+</style>
    
     <!-- Botón Configurar (ahora funcional) -->
     <button onclick="showConfigModal()"
@@ -733,6 +770,65 @@ async function eliminarCbuActual() {
         cargarCbus();
     }
 }
+
+    // ==================== MENÚ HAMBURGUESA ====================
+function toggleHamburgerMenu() {
+    const menu = document.getElementById('hamburger-menu');
+    menu.style.right = menu.style.right === '0px' ? '-100%' : '0px';
+}
+
+// ==================== CRONOGRAMA ====================
+async function uploadCronograma() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.includes('png')) {
+            return alert("Solo se permiten archivos PNG");
+        }
+
+        const fileName = `cronograma-${currentSubscriberId}.png`;
+        
+        const { error } = await _supabase.storage
+            .from('cronogramas')
+            .upload(fileName, file, { upsert: true });
+
+        if (error) {
+            alert("Error al subir: " + error.message);
+        } else {
+            const { data: urlData } = _supabase.storage.from('cronogramas').getPublicUrl(fileName);
+            await _supabase.from('suscriptores').update({ cronograma_url: urlData.publicUrl }).eq('id', currentSubscriberId);
+            alert("✅ Cronograma subido correctamente");
+            toggleHamburgerMenu();
+        }
+    };
+    input.click();
+}
+
+// ==================== INSTALAR APP ====================
+function instalarApp() {
+    toggleHamburgerMenu();
+    // Aquí puedes reutilizar tu lógica PWA existente o mostrar un modal con instrucciones
+    alert("Funcionalidad de Instalar App (PWA) - En desarrollo");
+}
+
+// ==================== TyC ====================
+function showTyCModal() {
+    toggleHamburgerMenu();
+    // Aquí puedes crear un modal simple o usar uno existente
+    alert("📜 TyC\n\nEscribí aquí tus Términos y Condiciones completos.");
+}
+
+// Cierra el menú al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('hamburger-menu');
+    if (menu.style.right === '0px' && !e.target.closest('#hamburger-menu') && !e.target.closest('button[onclick="toggleHamburgerMenu()"]')) {
+        menu.style.right = '-100%';
+    }
+});
 
     window.onload = () => {
         currentSubscriberId = localStorage.getItem('subscriber_id');
