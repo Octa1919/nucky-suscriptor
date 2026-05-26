@@ -354,26 +354,28 @@
     }
     
 // ==================== CONFIGURACIÓN ====================
-async function guardarConfigCompleta() {
+async function showConfigModal() {
     if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
 
     const { data } = await _supabase
         .from('suscriptores')
-        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram')
+        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada')
         .eq('id', currentSubscriberId)
         .single();
 
-   const nombre = document.getElementById('config-nombre').value.trim();
-    const whatsapp = document.getElementById('config-whatsapp').value.trim();
-    const sala1 = document.getElementById('config-sala1').value.trim();
-    const sala2 = document.getElementById('config-sala2').value.trim();
-    const sala3 = document.getElementById('config-sala3').value.trim();
-    const sala4 = document.getElementById('config-sala4').value.trim();
-    const instagram = document.getElementById('config-instagram').value.trim();
-    const telegram = document.getElementById('config-telegram').value.trim();
-    const premiosNormal = document.getElementById('config-premios-normal').value.trim();
-    const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
-    const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
+    if (data) {
+        document.getElementById('config-nombre').value = data.nombre_casino || '';
+        document.getElementById('config-whatsapp').value = data.whatsapp || '';
+        document.getElementById('config-sala1').value = data.sala1_link || '';
+        document.getElementById('config-sala2').value = data.sala2_link || '';
+        document.getElementById('config-sala3').value = data.sala3_link || '';
+        document.getElementById('config-sala4').value = data.sala4_link || '';
+        document.getElementById('config-instagram').value = data.instagram || '';
+        document.getElementById('config-telegram').value = data.telegram || '';
+        document.getElementById('config-premios-normal').value = data.premios_normal || '';
+        document.getElementById('config-premios-dorada').value = data.premios_dorada || '';
+        document.getElementById('config-dias-dorada').value = data.dias_dorada || 7;
+    }
 
     document.getElementById('modal-config').style.display = 'flex';
 }
@@ -393,7 +395,10 @@ async function guardarConfigCompleta() {
     const sala4 = document.getElementById('config-sala4').value.trim();
     const instagram = document.getElementById('config-instagram').value.trim();
     const telegram = document.getElementById('config-telegram').value.trim();
-
+    const premiosNormal = document.getElementById('config-premios-normal').value.trim();
+    const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
+    const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
+    
     // Validación básica de links
     const urlRegex = /^https?:\/\//i;
     if ((sala1 && !urlRegex.test(sala1)) || (sala2 && !urlRegex.test(sala2)) || 
