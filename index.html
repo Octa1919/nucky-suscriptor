@@ -327,20 +327,60 @@
         await _supabase.from('cbus').update({ activo }).eq('id', id);
         cargarCbus();
     }
+    
+// ==================== CONFIGURACIÓN ====================
+async function showConfigModal() {
+    if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
 
-    // ==================== CONFIGURAR ====================
-    function showConfigModal() {
-        document.getElementById('modal-config').style.display = 'flex';
+    // Cargar datos actuales
+    const { data } = await _supabase
+        .from('suscriptores')
+        .select('nombre_casino, whatsapp, premios_normal, premios_dorada, dias_dorada')
+        .eq('id', currentSubscriberId)
+        .single();
+
+    if (data) {
+        document.getElementById('config-nombre').value = data.nombre_casino || '';
+        document.getElementById('config-whatsapp').value = data.whatsapp || '';
+        document.getElementById('config-premios-normal').value = data.premios_normal || '';
+        document.getElementById('config-premios-dorada').value = data.premios_dorada || '';
+        document.getElementById('config-dias-dorada').value = data.dias_dorada || 7;
     }
-    
-    function hideConfigModal() {
-        document.getElementById('modal-config').style.display = 'none';
-    }
-    
-    async function guardarConfigCompleta() {
-        alert("✅ Configuración guardada (pendiente de conectar completamente a la BD)");
+
+    document.getElementById('modal-config').style.display = 'flex';
+}
+
+function hideConfigModal() {
+    document.getElementById('modal-config').style.display = 'none';
+}
+
+async function guardarConfigCompleta() {
+    if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
+
+    const nombre = document.getElementById('config-nombre').value.trim();
+    const whatsapp = document.getElementById('config-whatsapp').value.trim();
+    const premiosNormal = document.getElementById('config-premios-normal').value.trim();
+    const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
+    const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
+
+    const { error } = await _supabase
+        .from('suscriptores')
+        .update({
+            nombre_casino: nombre || null,
+            whatsapp: whatsapp || null,
+            premios_normal: premiosNormal || null,
+            premios_dorada: premiosDorada || null,
+            dias_dorada: diasDorada
+        })
+        .eq('id', currentSubscriberId);
+
+    if (error) {
+        alert("Error al guardar: " + error.message);
+    } else {
+        alert("✅ Configuración guardada correctamente");
         hideConfigModal();
     }
+}
     
  // ==================== ENVÍO REAL A ONESIGNAL ====================
   async function enviarNotificacion() {
