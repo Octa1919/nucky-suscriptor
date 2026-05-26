@@ -386,7 +386,7 @@ function hideConfigModal() {
 
 async function guardarConfigCompleta() {
     if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-    
+
     // === LEER LOS VALORES ===
     const nombre = document.getElementById('config-nombre').value.trim();
     const whatsapp = document.getElementById('config-whatsapp').value.trim();
@@ -405,10 +405,10 @@ async function guardarConfigCompleta() {
         premios_dorada: premiosDorada,
         dias_dorada: diasDorada
     });
-    
+
     // Validación básica de links
     const urlRegex = /^https?:\/\//i;
-    if ((sala1 && !urlRegex.test(sala1)) || (sala2 && !urlRegex.test(sala2)) || 
+    if ((sala1 && !urlRegex.test(sala1)) || (sala2 && !urlRegex.test(sala2)) ||
         (sala3 && !urlRegex.test(sala3)) || (sala4 && !urlRegex.test(sala4)) ||
         (instagram && !urlRegex.test(instagram)) || (telegram && !urlRegex.test(telegram))) {
         return alert("Los enlaces deben comenzar con http:// o https://");
@@ -424,8 +424,11 @@ async function guardarConfigCompleta() {
             sala3_link: sala3 || null,
             sala4_link: sala4 || null,
             instagram: instagram || null,
-            telegram: telegram || null
-       })
+            telegram: telegram || null,
+            premios_normal: premiosNormal || null,      // ← Agregado
+            premios_dorada: premiosDorada || null,      // ← Agregado
+            dias_dorada: diasDorada                     // ← Agregado
+        })
         .eq('id', currentSubscriberId);
 
     if (error) {
