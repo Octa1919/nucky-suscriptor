@@ -386,7 +386,8 @@ function hideConfigModal() {
 
 async function guardarConfigCompleta() {
     if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-
+    
+    // === LEER LOS VALORES ===
     const nombre = document.getElementById('config-nombre').value.trim();
     const whatsapp = document.getElementById('config-whatsapp').value.trim();
     const sala1 = document.getElementById('config-sala1').value.trim();
@@ -398,6 +399,12 @@ async function guardarConfigCompleta() {
     const premiosNormal = document.getElementById('config-premios-normal').value.trim();
     const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
     const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
+
+    console.log("🔍 Datos que se van a guardar:", {
+        premios_normal: premiosNormal,
+        premios_dorada: premiosDorada,
+        dias_dorada: diasDorada
+    });
     
     // Validación básica de links
     const urlRegex = /^https?:\/\//i;
