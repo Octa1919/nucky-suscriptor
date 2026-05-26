@@ -803,7 +803,42 @@ async function uploadCronograma() {
 function instalarApp() {
     toggleHamburgerMenu();
     // Aquí puedes reutilizar tu lógica PWA existente o mostrar un modal con instrucciones
-    alert("Funcionalidad de Instalar App (PWA) - En desarrollo");
+    let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const floatBtn = document.getElementById('float-install-btn');
+    if (floatBtn) floatBtn.style.display = 'flex';
+});
+function showPWA() {
+    if (isIOS()) {
+        showModal('modal-install-ios');
+        return;
+    }
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                const floatBtn = document.getElementById('float-install-btn');
+                if (floatBtn) floatBtn.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        alert("La aplicación ya está instalada o tu navegador no soporta instalación directa.\n\nEn iOS: comparte → 'Añadir a la pantalla de inicio'.");
+    }
+}
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function initPWAInstallButton() {
+    const floatBtn = document.getElementById('float-install-btn');
+    if (floatBtn) {
+        floatBtn.addEventListener('click', showPWA, { passive: true });
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+            floatBtn.style.display = 'flex';
+        }
+    }
 }
 
 // ==================== TyC ====================
