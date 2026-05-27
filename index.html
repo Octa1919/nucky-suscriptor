@@ -32,11 +32,11 @@
     </style>
 </head>
 <body>
-    <!-- HEADER CORREGIDO -->
+    <!-- HEADER -->
     <div class="header" style="position: sticky; top: 0; z-index: 100; background: rgba(10, 15, 28, 0.98); backdrop-filter: blur(16px); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
         <h1 id="casino-name" style="margin:0; font-size:1.45rem; color:white; font-weight:700;">Nucky Casino</h1>
         
-        <!-- Solo aparece DESPUÉS de iniciar sesión -->
+        <!-- Solo aparece después de iniciar sesión -->
         <div id="header-logged" style="display: none; gap: 12px; align-items: center;">
             <button onclick="showConfigModal()" 
                     style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
@@ -49,7 +49,19 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE LOGIN (solo se ve antes de iniciar sesión) -->
+    <!-- Menú Hamburguesa Lateral -->
+    <div id="hamburger-menu" style="position:fixed; top:0; right:-100%; width:280px; height:100%; background:#0f172a; box-shadow:-8px 0 30px rgba(0,0,0,0.6); transition:right 0.4s ease; z-index:9999; padding-top:80px; overflow-y:auto;">
+        <div style="padding:0 20px;">
+            <button onclick="toggleHamburgerMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:28px;">✕</button>
+            
+            <div onclick="uploadCronograma()" class="menu-item">📅 Cronograma</div>
+            <div onclick="instalarApp()" class="menu-item">📲 Instalar App</div>
+            <div onclick="showTyCModal()" class="menu-item">📜 TyC</div>
+            <div onclick="logout()" class="menu-item" style="color:#ef4444;">🚪 Cerrar Sesión</div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE LOGIN (solo antes de iniciar sesión) -->
     <div id="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 70px); padding:20px; background:linear-gradient(135deg, #0a0f1c, #1e2a4a);">
         <div style="background:rgba(18,26,46,0.9); backdrop-filter:blur(16px); border-radius:28px; padding:40px 30px; width:100%; max-width:420px; box-shadow:0 20px 40px rgba(0,0,0,0.5); border:1px solid rgba(34,211,238,0.2);">
             <h1 style="text-align:center; margin-bottom:8px; font-size:2rem; background:linear-gradient(90deg, #22d3ee, #67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
@@ -70,7 +82,7 @@
         </div>
     </div>
 
-    <!-- DASHBOARD (solo se muestra después de iniciar sesión) -->
+    <!-- DASHBOARD (solo después de iniciar sesión) -->
     <div id="dashboard" style="display:none;">
         <div class="tabs">
             <div class="tab" onclick="switchTab(0)">Vivo</div>
