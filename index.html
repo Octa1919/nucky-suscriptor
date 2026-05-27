@@ -905,16 +905,16 @@ async function showPerfilModal() {
     const { data, error } = await _supabase
         .from('suscriptores_users')
         .select('nombre')
-        .eq('id', currentSubscriberId)  // o usa el join si es necesario
+        .eq('id', currentSubscriberId)   // Si no funciona, prueba con .eq('nombre', currentSubscriberId) si el nombre es único
         .single();
 
     if (error || !data) {
-        alert("Error al cargar perfil");
+        console.error(error);
+        alert("Error al cargar perfil. Intenta cerrar sesión y volver a entrar.");
         return;
     }
 
-    perfilUsuarioActual = data.nombre;
-    document.getElementById('perfil-username').value = data.nombre;
+   document.getElementById('perfil-username').value = data.nombre || 'Usuario';
     document.getElementById('perfil-nueva-password').value = '';
     document.getElementById('modal-perfil').style.display = 'flex';
 }
