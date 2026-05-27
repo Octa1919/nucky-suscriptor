@@ -54,6 +54,9 @@
     <div style="padding:0 20px;">
         <button onclick="toggleHamburgerMenu()" style="position:absolute; top:25px; right:25px; background:none; border:none; color:white; font-size:32px;">✕</button>
         
+        <div onclick="showPerfilModal()" class="menu-item">
+         <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
+        </div>
         <div onclick="uploadCronograma()" class="menu-item">
             <i class="fas fa-calendar-alt" style="margin-right:15px; width:24px;"></i> Cronograma
         </div>
@@ -252,6 +255,24 @@
             <li>3. Toca <strong>"Agregar"</strong> en la esquina superior derecha</li>
         </ol>
         <button onclick="hideInstallIOSModal()" style="margin-top:30px; width:100%; padding:16px; background:#334155; color:white; border:none; border-radius:14px;">Entendido</button>
+    </div>
+</div>
+
+    <!-- Modal Perfil (editar contraseña) -->
+<div id="modal-perfil" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div style="background:#1e2937; max-width:420px; width:92%; border-radius:24px; padding:32px 28px; color:white;">
+        <h2 style="margin-bottom:24px; text-align:center;">👤 Mi Perfil</h2>
+        
+        <label style="display:block; margin-bottom:8px; color:#67e8f9;">Nombre de usuario</label>
+        <input type="text" id="perfil-username" readonly style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:#94a3b8; border:none; margin-bottom:24px;">
+
+        <label style="display:block; margin-bottom:8px; color:#67e8f9;">Nueva contraseña</label>
+        <input type="password" id="perfil-nueva-password" placeholder="Ingresa tu nueva contraseña" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:none; margin-bottom:24px;">
+
+        <div style="display:flex; gap:12px;">
+            <button onclick="hidePerfilModal()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
+            <button onclick="guardarNuevaPassword()" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Contraseña</button>
+        </div>
     </div>
 </div>
    
@@ -874,6 +895,51 @@ document.addEventListener('click', (e) => {
         menu.style.right = '-100%';
     }
 });
+
+    // ==================== PERFIL ====================
+let perfilUsuarioActual = null;
+
+async function showPerfilModal() {
+    toggleHamburgerMenu();
+
+    const { data, error } = await _supabase
+        .from('suscriptores_users')
+        .select('nombre')
+        .eq('id', currentSubscriberId)  // o usa el join si es necesario
+        .single();
+
+    if (error || !data) {
+        alert("Error al cargar perfil");
+        return;
+    }
+
+    perfilUsuarioActual = data.nombre;
+    document.getElementById('perfil-username').value = data.nombre;
+    document.getElementById('perfil-nueva-password').value = '';
+    document.getElementById('modal-perfil').style.display = 'flex';
+}
+
+function hidePerfilModal() {
+    document.getElementById('modal-perfil').style.display = 'none';
+}
+
+async function guardarNuevaPassword() {
+    const nuevaPassword = document.getElementById('perfil-nueva-password').value.trim();
+
+    if (!nuevaPassword) return alert("La contraseña no puede estar vacía");
+
+    const { error } = await _supabase
+        .from('suscriptores_users')
+        .update({ password: nuevaPassword })
+        .eq('id', currentSubscriberId);   // Ajusta si usás otro campo para identificar
+
+    if (error) {
+        alert("Error al guardar: " + error.message);
+    } else {
+        alert("✅ Contraseña actualizada correctamente");
+        hidePerfilModal();
+    }
+}
 
     window.onload = () => {
     currentSubscriberId = localStorage.getItem('subscriber_id');
