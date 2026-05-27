@@ -293,29 +293,30 @@
     }
     
 // ==================== LOGIN ====================
-   async function loginSuscriptor() {
-        const username = document.getElementById('login-user').value.trim();
-        const password = document.getElementById('login-pass').value.trim();
-        if (!username || !password) return alert("Usuario y contraseña son obligatorios");
+ async function loginSuscriptor() {
+    const username = document.getElementById('login-user').value.trim();
+    const password = document.getElementById('login-pass').value.trim();
+    if (!username || !password) return alert("Usuario y contraseña son obligatorios");
 
-        const { data, error } = await _supabase
-            .from('suscriptores_users')
-            .select('*, suscriptores(id)')
-            .eq('nombre', username)
-            .eq('password', password)
-            .single();
+    const { data, error } = await _supabase
+        .from('suscriptores_users')
+        .select('*, suscriptores(id)')
+        .eq('nombre', username)
+        .eq('password', password)
+        .single();
 
-        if (data) {
-        currentSubscriberId = data.suscriptores.id;
-        localStorage.setItem('subscriber_id', currentSubscriberId);
+    if (error || !data) return alert("Credenciales incorrectas");
 
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        document.getElementById('header-logged').style.display = 'flex';
-        
-        await cargarNombreCasino();
-        switchTab(1);
-    }
+    currentSubscriberId = data.suscriptores.id;
+    localStorage.setItem('subscriber_id', currentSubscriberId);
+    localStorage.setItem('subscriber_username', username);   // ← Guardamos el nombre para el perfil
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('header-logged').style.display = 'flex';
+
+    await cargarNombreCasino();
+    switchTab(1);
 }
 
     async function cargarNombreCasino() {
@@ -902,19 +903,24 @@ let perfilUsuarioActual = null;
 async function showPerfilModal() {
     toggleHamburgerMenu();
 
-    const { data, error } = await _supabase
-        .from('suscriptores_users')
-        .select('nombre')
-        .eq('id', currentSubscriberId)   // Si no funciona, prueba con .eq('nombre', currentSubscriberId) si el nombre es único
-        .single();
-
-    if (error || !data) {
-        console.error(error);
+    const username = localStorage.getItem('subscriber_username');
+    if (!username) {
         alert("Error al cargar perfil. Intenta cerrar sesión y volver a entrar.");
         return;
     }
 
-   document.getElementById('perfil-username').value = data.nombre || 'Usuario';
+    const { data, error } = await _supabase
+        .from('suscriptores_users')
+        .select('nombre')
+        .eq('nombre', username)
+        .single();
+
+    if (error || !data) {
+        alert("Error al cargar perfil");
+        return;
+    }
+
+    document.getElementById('perfil-username').value = data.nombre;
     document.getElementById('perfil-nueva-password').value = '';
     document.getElementById('modal-perfil').style.display = 'flex';
 }
@@ -925,13 +931,14 @@ function hidePerfilModal() {
 
 async function guardarNuevaPassword() {
     const nuevaPassword = document.getElementById('perfil-nueva-password').value.trim();
-
     if (!nuevaPassword) return alert("La contraseña no puede estar vacía");
+
+    const username = localStorage.getItem('subscriber_username');
 
     const { error } = await _supabase
         .from('suscriptores_users')
         .update({ password: nuevaPassword })
-        .eq('id', currentSubscriberId);   // Ajusta si usás otro campo para identificar
+        .eq('nombre', username);
 
     if (error) {
         alert("Error al guardar: " + error.message);
