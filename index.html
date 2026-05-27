@@ -32,90 +32,55 @@
     </style>
 </head>
 <body>
-
-<!-- HEADER CORREGIDO -->
-<div class="header" style="position: sticky; top: 0; z-index: 100; background: rgba(10, 15, 28, 0.98); backdrop-filter: blur(16px); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
-    <h1 id="casino-name" style="margin:0; font-size:1.45rem; color:white; font-weight:700;">Nucky Casino</h1>
-    
-    <!-- Solo aparece después de iniciar sesión -->
-    <div id="header-logged" style="display: none; gap: 12px; align-items: center;">
-        <button onclick="showConfigModal()" 
-                style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
-            ⚙️ Configurar
-        </button>
-        <button onclick="toggleHamburgerMenu()" 
-                style="background:#1e2937; color:white; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px;">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-</div>
-
-    <!-- Menú Hamburguesa Lateral -->
-<div id="hamburger-menu" style="position:fixed; top:0; right:-100%; width:280px; height:100%; background:#0f172a; box-shadow:-8px 0 30px rgba(0,0,0,0.6); transition:right 0.4s ease; z-index:9999; padding-top:80px; overflow-y:auto;">
-    <div style="padding:0 20px;">
-        <button onclick="toggleHamburgerMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:28px;">✕</button>
+    <!-- HEADER CORREGIDO -->
+    <div class="header" style="position: sticky; top: 0; z-index: 100; background: rgba(10, 15, 28, 0.98); backdrop-filter: blur(16px); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;">
+        <h1 id="casino-name" style="margin:0; font-size:1.45rem; color:white; font-weight:700;">Nucky Casino</h1>
         
-        <div onclick="uploadCronograma()" class="menu-item">📅 Cronograma</div>
-        <div onclick="instalarApp()" class="menu-item">📲 Instalar App</div>
-        <div onclick="showTyCModal()" class="menu-item">📜 TyC</div>
-        <div onclick="logout()" class="menu-item" style="color:#ef4444;">🚪 Cerrar Sesión</div>
+        <!-- Solo aparece DESPUÉS de iniciar sesión -->
+        <div id="header-logged" style="display: none; gap: 12px; align-items: center;">
+            <button onclick="showConfigModal()" 
+                    style="background:#1e2937; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:600; cursor:pointer;">
+                ⚙️ Configurar
+            </button>
+            <button onclick="toggleHamburgerMenu()" 
+                    style="background:#1e2937; color:white; border:none; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:24px;">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </div>
-</div>
 
-<!-- Estilos adicionales para el menú (agregar al <style>) -->
-<style>
-    .menu-item {
-        padding: 18px 20px;
-        font-size: 1.1rem;
-        border-bottom: 1px solid #334155;
-        color: white;
-        cursor: pointer;
-    }
-    .menu-item:hover { background: #1e2937; }
-</style>
-    
-</div>
-    <div class="tabs">
-    <div class="tab" onclick="switchTab(0)">Vivo</div>
-    <div class="tab" onclick="switchTab(1)">CBU</div>
-    <div class="tab" onclick="switchTab(2)">Usuarios</div>
-    <div class="tab" onclick="switchTab(3)">Difu</div>
-</div>
-    
- <!-- PANTALLA DE LOGIN (solo antes de iniciar sesión) -->
-<div id="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 70px); padding:20px; background:linear-gradient(135deg, #0a0f1c, #1e2a4a);">
-    <div style="background:rgba(18,26,46,0.9); backdrop-filter:blur(16px); border-radius:28px; padding:40px 30px; width:100%; max-width:420px; box-shadow:0 20px 40px rgba(0,0,0,0.5); border:1px solid rgba(34,211,238,0.2);">
-        <h1 style="text-align:center; margin-bottom:8px; font-size:2rem; background:linear-gradient(90deg, #22d3ee, #67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-            Iniciar Sesión
-        </h1>
-        <p style="text-align:center; color:#94a3b8; margin-bottom:32px;">Panel Suscriptor</p>
+    <!-- PANTALLA DE LOGIN (solo se ve antes de iniciar sesión) -->
+    <div id="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 70px); padding:20px; background:linear-gradient(135deg, #0a0f1c, #1e2a4a);">
+        <div style="background:rgba(18,26,46,0.9); backdrop-filter:blur(16px); border-radius:28px; padding:40px 30px; width:100%; max-width:420px; box-shadow:0 20px 40px rgba(0,0,0,0.5); border:1px solid rgba(34,211,238,0.2);">
+            <h1 style="text-align:center; margin-bottom:8px; font-size:2rem; background:linear-gradient(90deg, #22d3ee, #67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+                Iniciar Sesión
+            </h1>
+            <p style="text-align:center; color:#94a3b8; margin-bottom:32px;">Panel Suscriptor</p>
 
-        <input type="text" id="login-user" placeholder="Nombre de usuario" 
-               style="width:100%; padding:18px 20px; margin-bottom:16px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
-        
-        <input type="password" id="login-pass" placeholder="Contraseña" 
-               style="width:100%; padding:18px 20px; margin-bottom:28px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
+            <input type="text" id="login-user" placeholder="Nombre de usuario" 
+                   style="width:100%; padding:18px 20px; margin-bottom:16px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
+            
+            <input type="password" id="login-pass" placeholder="Contraseña" 
+                   style="width:100%; padding:18px 20px; margin-bottom:28px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
 
-        <button onclick="loginSuscriptor()" 
-                style="width:100%; padding:18px; font-size:1.2rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer; box-shadow:0 8px 25px rgba(34,211,238,0.4);">
-            Ingresar
-        </button>
+            <button onclick="loginSuscriptor()" 
+                    style="width:100%; padding:18px; font-size:1.2rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer; box-shadow:0 8px 25px rgba(34,211,238,0.4);">
+                Ingresar
+            </button>
+        </div>
     </div>
-</div>
 
-<!-- DASHBOARD (solo después de iniciar sesión) -->
-<div id="dashboard" style="display:none;">
-    <div class="tabs">
-        <div class="tab" onclick="switchTab(0)">Vivo</div>
-        <div class="tab" onclick="switchTab(1)">CBU</div>
-        <div class="tab" onclick="switchTab(2)">Usuarios</div>
-        <div class="tab" onclick="switchTab(3)">Difu</div>
+    <!-- DASHBOARD (solo se muestra después de iniciar sesión) -->
+    <div id="dashboard" style="display:none;">
+        <div class="tabs">
+            <div class="tab" onclick="switchTab(0)">Vivo</div>
+            <div class="tab" onclick="switchTab(1)">CBU</div>
+            <div class="tab" onclick="switchTab(2)">Usuarios</div>
+            <div class="tab" onclick="switchTab(3)">Difu</div>
+        </div>
+        <div id="tab-content" class="container"></div>
     </div>
-    <div id="tab-content" class="container"></div>
-</div>
-    
-</div>
-    <div id="tab-content" class="container"></div>
+
     <!-- Modal Crear Usuario -->
     <div id="modal-nuevo-usuario" class="modal">
         <div class="modal-content">
