@@ -50,16 +50,46 @@
     </div>
 
     <!-- Menú Hamburguesa Lateral -->
-    <div id="hamburger-menu" style="position:fixed; top:0; right:-100%; width:280px; height:100%; background:#0f172a; box-shadow:-8px 0 30px rgba(0,0,0,0.6); transition:right 0.4s ease; z-index:9999; padding-top:80px; overflow-y:auto;">
-        <div style="padding:0 20px;">
-            <button onclick="toggleHamburgerMenu()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:28px;">✕</button>
-            
-            <div onclick="uploadCronograma()" class="menu-item">📅 Cronograma</div>
-            <div onclick="instalarApp()" class="menu-item">📲 Instalar App</div>
-            <div onclick="showTyCModal()" class="menu-item">📜 TyC</div>
-            <div onclick="logout()" class="menu-item" style="color:#ef4444;">🚪 Cerrar Sesión</div>
+<div id="hamburger-menu" style="position:fixed; top:0; right:-100%; width:300px; height:100%; background:#0f172a; box-shadow:-10px 0 40px rgba(0,0,0,0.7); transition:right 0.4s ease; z-index:9999; padding-top:80px; overflow-y:auto;">
+    <div style="padding:0 20px;">
+        <button onclick="toggleHamburgerMenu()" style="position:absolute; top:25px; right:25px; background:none; border:none; color:white; font-size:32px;">✕</button>
+        
+        <div onclick="uploadCronograma()" class="menu-item">
+            <i class="fas fa-calendar-alt" style="margin-right:15px; width:24px;"></i> Cronograma
+        </div>
+        <div onclick="instalarApp()" class="menu-item">
+            <i class="fas fa-download" style="margin-right:15px; width:24px;"></i> Instalar App
+        </div>
+        <div onclick="showTyCModal()" class="menu-item">
+            <i class="fas fa-file-alt" style="margin-right:15px; width:24px;"></i> TyC
+        </div>
+        <div onclick="logout()" class="menu-item" style="color:#ef4444;">
+            <i class="fas fa-sign-out-alt" style="margin-right:15px; width:24px;"></i> Cerrar Sesión
         </div>
     </div>
+</div>
+
+<!-- Estilos del menú hamburguesa (mejorados) -->
+<style>
+    .menu-item {
+        padding: 22px 20px;
+        font-size: 1.15rem;
+        font-weight: 500;
+        border-bottom: 1px solid #334155;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    .menu-item:hover {
+        background: #1e2937;
+        padding-left: 28px;
+    }
+    .menu-item i {
+        font-size: 1.3rem;
+    }
+</style>
 
     <!-- PANTALLA DE LOGIN (solo antes de iniciar sesión) -->
     <div id="login-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 70px); padding:20px; background:linear-gradient(135deg, #0a0f1c, #1e2a4a);">
