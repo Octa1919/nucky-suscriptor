@@ -4,26 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Suscriptor - Nucky SaaS</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <!-- Driver.js - Tour -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.4/dist/driver.css">
-<script>
-  // Cargamos Driver.js de forma más confiable
-  (function() {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/driver.js@1.3.4/dist/driver.js.iife.js';
-    script.onload = () => {
-      console.log('%c[Driver.js] Librería cargada correctamente', 'color:#22c55e');
-      window.DRIVER_JS_LOADED = true;
-    };
-    script.onerror = () => {
-      console.error('%c[Driver.js] Error al cargar la librería', 'color:#ef4444');
-      window.DRIVER_JS_LOADED = false;
-    };
-    document.head.appendChild(script);
-  })();
-</script>
+    <<!-- Driver.js cargado localmente (más estable en Vercel) -->
+    <link rel="stylesheet" href="driver.css">
+    <script src="driver.js" defer></script>
     <style>
         :root { --primary: #22d3ee; --accent: #67e8f9; --dark: #0a0f1c; --card: #121a2e; --glass: rgba(18, 26, 46, 0.75); }
         * { box-sizing: border-box; margin:0; padding:0; }
@@ -1131,14 +1114,14 @@ async function mostrarHistorialEntregados() {
 
 // ==================== PRODUCT TOUR (Driver.js) ====================
 function iniciarTour(forzar = false) {
-    // Si ya vio el tour y no es forzado, no mostramos nada
     if (!forzar && localStorage.getItem('nucky_tour_completado') === 'true') {
         return;
     }
 
     const iniciar = () => {
-        if (window.DRIVER_JS_LOADED === true && typeof Driver !== 'undefined') {
-            console.log('%c[Driver.js] Iniciando tour...', 'color:#3b82f6');
+        // Verificamos si Driver.js ya está disponible
+        if (typeof Driver !== 'undefined') {
+            console.log('%c[Driver.js] Iniciando tour...', 'color:#22c55e');
 
             const driver = new Driver({
                 animate: true,
@@ -1160,16 +1143,16 @@ function iniciarTour(forzar = false) {
                 {
                     element: '#casino-name',
                     popover: {
-                        title: '¡Bienvenido!',
-                        description: 'Este es tu panel de Suscriptor. Desde acá vas a gestionar todo tu casino.',
+                        title: '¡Bienvenido al Panel!',
+                        description: 'Este es tu panel de Suscriptor de Nucky. Desde acá gestionás todo tu casino.',
                         position: 'bottom'
                     }
                 },
                 {
                     element: '.tabs',
                     popover: {
-                        title: 'Navegación',
-                        description: 'Usá estas pestañas para moverte entre las secciones principales.',
+                        title: 'Pestañas de navegación',
+                        description: 'Usá estas pestañas para moverte entre las secciones: Vivo, CBU, Usuarios y Difusión.',
                         position: 'bottom'
                     }
                 },
@@ -1177,7 +1160,7 @@ function iniciarTour(forzar = false) {
                     element: '.tab:nth-child(1)',
                     popover: {
                         title: 'Sección "Vivo"',
-                        description: 'Acá ves los premios pendientes. Cuando el jugador reclame, tocás "Entregar".',
+                        description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen, usá el botón "Entregar".',
                         position: 'bottom'
                     }
                 },
@@ -1185,7 +1168,7 @@ function iniciarTour(forzar = false) {
                     element: '.tab:nth-child(2)',
                     popover: {
                         title: 'Sección "CBU"',
-                        description: 'Gestionás las cuentas donde tus jugadores cargan saldo.',
+                        description: 'Gestionás las cuentas donde los jugadores cargan saldo.',
                         position: 'bottom'
                     }
                 },
@@ -1201,15 +1184,15 @@ function iniciarTour(forzar = false) {
                     element: 'button[onclick="showConfigModal()"]',
                     popover: {
                         title: 'Botón Configurar',
-                        description: 'Acá configurás nombre del casino, WhatsApp, premios de ruleta, etc.',
+                        description: 'Acá configurás nombre del casino, WhatsApp, salas, premios de la ruleta, etc.',
                         position: 'left'
                     }
                 },
                 {
                     element: 'button[onclick="toggleHamburgerMenu()"]',
                     popover: {
-                        title: 'Menú',
-                        description: 'Desde acá podés ver tu perfil, historial de premios y volver a ver este tutorial.',
+                        title: 'Menú de opciones',
+                        description: 'Desde acá accedés a tu Perfil, Historial de premios y podés volver a ver este tutorial.',
                         position: 'left'
                     }
                 }
@@ -1218,9 +1201,8 @@ function iniciarTour(forzar = false) {
             driver.start();
 
         } else {
-            // Si todavía no cargó, reintentamos
-            console.warn('%c[Driver.js] Aún no está disponible, reintentando...', 'color:#f59e0b');
-            setTimeout(iniciar, 600);
+            console.warn('%c[Driver.js] Aún no está disponible, reintentando en 500ms...', 'color:#f59e0b');
+            setTimeout(iniciar, 500);
         }
     };
 
