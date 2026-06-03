@@ -601,47 +601,68 @@ async function guardarConfigCompleta() {
     }
     
     // ==================== VIVO ====================
-    async function cargarResultadosVivo() {
-        const div = document.getElementById('lista-en-vivo');
-        if (!div) return;
-        div.innerHTML = "<p>Cargando resultados en vivo...</p>";
-        const { data, error } = await _supabase
-            .from('premios_ruleta')
-            .select('*')
-            .eq('subscriber_id', currentSubscriberId)
-            .order('created_at', { ascending: false })
-            .limit(20);
-        if (error || !data || data.length === 0) {
-            div.innerHTML = "<p>Aún no hay resultados de ruleta para este suscriptor.</p>";
-            return;
-        }
-        div.innerHTML = data.map(p => `
-            <div class="user-item" style="margin-bottom:24px; border: 2px solid #22d3ee; background: linear-gradient(180deg, #1e2937, #16213e);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <strong onclick="copiarAlPortapapeles('${p.usuario}')" style="font-size:1.25rem; cursor:pointer;">${p.usuario}</strong>
-                    <small style="color:#67e8f9;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
-                </div>
-                <div onclick="copiarAlPortapapeles('${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}')"
-                     style="background:#1e2937; border: 2px dashed #22d3ee; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#67e8f9; cursor:pointer;">
-                    #${p.codigo || 'WIN-' + Math.floor(Math.random()*90000 + 10000)}
-                </div>
-                <div style="font-size:1.1rem; margin-bottom:18px;">
-                    <strong>Premio:</strong> ${p.premio}
-                </div>
-                <div style="display:flex; gap:12px;">
-                    <button onclick="denegarPremio('${p.id}')" style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">Denegar</button>
-                    <button onclick="marcarEntregado('${p.id}')" style="flex:1; background:#22d3ee; color:#000; padding:14px; border-radius:12px; font-weight:700;">Entregar</button>
-                </div>
+   async function cargarResultadosVivo() {
+    const div = document.getElementById('lista-en-vivo');
+    if (!div) return;
+    div.innerHTML = "<p>Cargando resultados en vivo...</p>";
+
+    const { data, error } = await _supabase
+        .from('premios_ruleta')
+        .select('*')
+        .eq('subscriber_id', currentSubscriberId)
+        .eq('estado', 'pendiente')           // ← Solo pendientes
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+    if (error || !data || data.length === 0) {
+        div.innerHTML = "<p>No hay premios pendientes por entregar.</p>";
+        return;
+    }
+
+    div.innerHTML = data.map(p => `
+        <div class="user-item" style="margin-bottom:24px; border: 2px solid #22d3ee; background: linear-gradient(180deg, #1e2937, #16213e);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <strong onclick="copiarAlPortapapeles('${p.usuario}')" style="font-size:1.25rem; cursor:pointer;">${p.usuario}</strong>
+                <small style="color:#67e8f9;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
             </div>
-        `).join('');
-    }
+            <div onclick="copiarAlPortapapeles('${p.codigo}')"
+                 style="background:#1e2937; border: 2px dashed #22d3ee; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#67e8f9; cursor:pointer;">
+                ${p.codigo}
+            </div>
+            <div style="font-size:1.1rem; margin-bottom:18px;">
+                <strong>Premio:</strong> ${p.premio}
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button onclick="denegarPremio('${p.id}')" style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">Denegar</button>
+                <button onclick="marcarEntregado('${p.id}', '${p.usuario}')" style="flex:1; background:#22d3ee; color:#000; padding:14px; border-radius:12px; font-weight:700;">Entregar</button>
+            </div>
+        </div>
+    `).join('');
+}
     
-    async function marcarEntregado(id) {
-        if (confirm("¿Marcar como entregado y quitar de la lista?")) {
-            await _supabase.from('premios_ruleta').delete().eq('id', id);
-            cargarResultadosVivo();
-        }
+    async function marcarEntregado(id, username) {
+    if (!confirm("¿Marcar como entregado?")) return;
+
+    // 1. Actualizar el premio
+    const { error: updateError } = await _supabase
+        .from('premios_ruleta')
+        .update({
+            estado: 'entregado',
+            entregado_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+    if (updateError) {
+        alert("Error al actualizar el premio: " + updateError.message);
+        return;
     }
+
+    // 2. Actualizar ultima_ruleta del usuario + calcular racha
+    await actualizarRachaYUltimaRuleta(username);
+
+    alert("✅ Premio marcado como entregado");
+    cargarResultadosVivo();
+}
     
     async function denegarPremio(id) {
         if (confirm("¿Denegar este premio y quitar de la lista?")) {
@@ -970,5 +991,41 @@ async function guardarNuevaPassword() {
 
 function hideInstallIOSModal() {
     document.getElementById('modal-install-ios').style.display = 'none';
+}
+
+async function actualizarRachaYUltimaRuleta(username) {
+    // Buscar el usuario
+    const { data: user } = await _supabase
+        .from('usuarios')
+        .select('id, racha_ruleta, ultima_ruleta')
+        .eq('username', username)
+        .eq('subscriber_id', currentSubscriberId)
+        .single();
+
+    if (!user) return;
+
+    const ahora = new Date();
+    let nuevaRacha = 1;
+
+    if (user.ultima_ruleta) {
+        const ultimaEntrega = new Date(user.ultima_ruleta);
+        const horasPasadas = (ahora - ultimaEntrega) / (1000 * 60 * 60);
+
+        // Si entregó dentro de las últimas 48hs → suma racha
+        if (horasPasadas < 48) {
+            nuevaRacha = (user.racha_ruleta || 0) + 1;
+        } else {
+            nuevaRacha = 1; // Reinicia racha
+        }
+    }
+
+    // Actualizar usuario
+    await _supabase
+        .from('usuarios')
+        .update({
+            ultima_ruleta: ahora.toISOString(),
+            racha_ruleta: nuevaRacha
+        })
+        .eq('id', user.id);
 }
 </script>
