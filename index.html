@@ -7,8 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <!-- Driver.js - Product Tour -->
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js" defer></script>
     <style>
         :root { --primary: #22d3ee; --accent: #67e8f9; --dark: #0a0f1c; --card: #121a2e; --glass: rgba(18, 26, 46, 0.75); }
         * { box-sizing: border-box; margin:0; padding:0; }
@@ -1121,89 +1121,93 @@ function iniciarTour(forzar = false) {
         return;
     }
 
-    if (typeof Driver === 'undefined') {
-        alert("El tutorial aún no está disponible. Por favor recargá la página.");
-        return;
-    }
+    // Verificación mejorada de si Driver.js está disponible
+    const intentarIniciar = () => {
+        if (typeof Driver !== 'undefined') {
+            const driver = new Driver({
+                animate: true,
+                opacity: 0.75,
+                padding: 8,
+                allowClose: true,
+                doneBtnText: 'Finalizar',
+                closeBtnText: 'Cerrar',
+                nextBtnText: 'Siguiente',
+                prevBtnText: 'Anterior',
+                onReset: () => {
+                    if (!forzar) {
+                        localStorage.setItem('nucky_tour_completado', 'true');
+                    }
+                }
+            });
 
-    const driver = new Driver({
-        animate: true,
-        opacity: 0.75,
-        padding: 8,
-        allowClose: true,
-        doneBtnText: 'Finalizar',
-        closeBtnText: 'Cerrar',
-        nextBtnText: 'Siguiente',
-        prevBtnText: 'Anterior',
-        onReset: () => {
-            if (!forzar) {
-                localStorage.setItem('nucky_tour_completado', 'true');
-            }
+            driver.defineSteps([
+                {
+                    element: '#casino-name',
+                    popover: {
+                        title: '¡Bienvenido al Panel!',
+                        description: 'Este es tu panel de control como Suscriptor de Nucky. Acá vas a gestionar todo tu casino.',
+                        position: 'bottom'
+                    }
+                },
+                {
+                    element: '.tabs',
+                    popover: {
+                        title: 'Pestañas de navegación',
+                        description: 'Usá estas pestañas para moverte entre las secciones: Vivo, CBU, Usuarios y Difusión.',
+                        position: 'bottom'
+                    }
+                },
+                {
+                    element: '.tab:nth-child(1)',
+                    popover: {
+                        title: 'Pestaña "Vivo"',
+                        description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen su premio, usá el botón <strong>Entregar</strong>.',
+                        position: 'bottom'
+                    }
+                },
+                {
+                    element: '.tab:nth-child(2)',
+                    popover: {
+                        title: 'Pestaña "CBU"',
+                        description: 'Gestioná las cuentas donde los jugadores cargan saldo.',
+                        position: 'bottom'
+                    }
+                },
+                {
+                    element: '.tab:nth-child(3)',
+                    popover: {
+                        title: 'Pestaña "Usuarios"',
+                        description: 'Creá y administrá las cuentas de tus jugadores.',
+                        position: 'bottom'
+                    }
+                },
+                {
+                    element: '#header-logged button[onclick="showConfigModal()"]',
+                    popover: {
+                        title: 'Botón Configurar',
+                        description: 'Acá configurás nombre del casino, WhatsApp, salas, premios de la ruleta, etc.',
+                        position: 'left'
+                    }
+                },
+                {
+                    element: 'button[onclick="toggleHamburgerMenu()"]',
+                    popover: {
+                        title: 'Menú de opciones',
+                        description: 'Desde acá accedés a tu Perfil, Historial de premios y podés volver a ver este tutorial.',
+                        position: 'left'
+                    }
+                }
+            ]);
+
+            driver.start();
+        } else {
+            // Si todavía no cargó, reintenta en 800ms
+            setTimeout(intentarIniciar, 800);
         }
-    });
+    };
 
-    driver.defineSteps([
-        {
-            element: '#casino-name',
-            popover: {
-                title: '¡Bienvenido al Panel!',
-                description: 'Este es tu panel de control como Suscriptor de Nucky. Acá vas a gestionar todo tu casino.',
-                position: 'bottom'
-            }
-        },
-        {
-            element: '.tabs',
-            popover: {
-                title: 'Pestañas de navegación',
-                description: 'Usá estas pestañas para moverte entre las secciones: Vivo, CBU, Usuarios y Difusión.',
-                position: 'bottom'
-            }
-        },
-        {
-            element: '.tab:nth-child(1)',
-            popover: {
-                title: 'Pestaña "Vivo"',
-                description: 'Acá ves los premios pendientes. Cuando un jugador reclame, usá el botón <strong>Entregar</strong>.',
-                position: 'bottom'
-            }
-        },
-        {
-            element: '.tab:nth-child(2)',
-            popover: {
-                title: 'Pestaña "CBU"',
-                description: 'Gestioná las cuentas donde los jugadores cargan saldo.',
-                position: 'bottom'
-            }
-        },
-        {
-            element: '.tab:nth-child(3)',
-            popover: {
-                title: 'Pestaña "Usuarios"',
-                description: 'Creá y administrá las cuentas de tus jugadores.',
-                position: 'bottom'
-            }
-        },
-        {
-            element: '#header-logged button[onclick="showConfigModal()"]',
-            popover: {
-                title: 'Botón Configurar',
-                description: 'Acá configurás nombre del casino, WhatsApp, salas, premios de la ruleta, etc.',
-                position: 'left'
-            }
-        },
-        {
-            element: 'button[onclick="toggleHamburgerMenu()"]',
-            popover: {
-                title: 'Menú de opciones',
-                description: 'Desde acá accedés a tu Perfil, Historial de premios y podés volver a ver este tutorial.',
-                position: 'left'
-            }
-        }
-    ]);
-
-    driver.start();
+    intentarIniciar();
 }
-
 // Mostrar tour automáticamente la primera vez que inicia sesión
 function mostrarTourSiEsPrimeraVez() {
     const yaVioTour = localStorage.getItem('nucky_tour_completado');
