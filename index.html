@@ -311,7 +311,7 @@
     }
     
 // ==================== LOGIN ====================
- async function loginSuscriptor() {
+async function loginSuscriptor() {
     const username = document.getElementById('login-user').value.trim();
     const password = document.getElementById('login-pass').value.trim();
     if (!username || !password) return alert("Usuario y contraseña son obligatorios");
@@ -327,19 +327,20 @@
 
     currentSubscriberId = data.suscriptores.id;
     localStorage.setItem('subscriber_id', currentSubscriberId);
-    localStorage.setItem('subscriber_username', username);   // ← Guardamos el nombre para el perfil
+    localStorage.setItem('subscriber_username', username);
 
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('header-logged').style.display = 'flex';
 
-   await cargarNombreCasino();
-switchTab(1);
+    await cargarNombreCasino();
+    switchTab(1);
 
-// Mostrar tour la primera vez
-setTimeout(() => {
-    iniciarTour(false);
-}, 1500);
+    // === MOSTRAR TOUR LA PRIMERA VEZ ===
+    setTimeout(() => {
+        iniciarTour(false); // false = solo si nunca lo vio
+    }, 1500);
+}
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
@@ -865,7 +866,7 @@ function toggleHamburgerMenu() {
 function repetirTour() {
     toggleHamburgerMenu();
     setTimeout(() => {
-        iniciarTour();
+        iniciarTour(true); // true = forzar mostrar aunque ya lo haya visto
     }, 400);
 }
 
@@ -1116,11 +1117,10 @@ async function mostrarHistorialEntregados() {
 // ==================== PRODUCT TOUR (Driver.js) ====================
 function iniciarTour(forzar = false) {
     // Si ya vio el tour y no es forzado, no mostrar
-    if (!forzar && localStorage.getItem('tour_completado') === 'true') {
+    if (!forzar && localStorage.getItem('nucky_tour_completado') === 'true') {
         return;
     }
 
-    // Verificamos que Driver.js esté cargado
     if (typeof Driver === 'undefined') {
         alert("El tutorial aún no está disponible. Por favor recargá la página.");
         return;
@@ -1137,7 +1137,7 @@ function iniciarTour(forzar = false) {
         prevBtnText: 'Anterior',
         onReset: () => {
             if (!forzar) {
-                localStorage.setItem('tour_completado', 'true');
+                localStorage.setItem('nucky_tour_completado', 'true');
             }
         }
     });
@@ -1155,7 +1155,7 @@ function iniciarTour(forzar = false) {
             element: '.tabs',
             popover: {
                 title: 'Pestañas de navegación',
-                description: 'Usá estas pestañas para moverte entre las secciones principales: Vivo, CBU, Usuarios y Difusión.',
+                description: 'Usá estas pestañas para moverte entre las secciones: Vivo, CBU, Usuarios y Difusión.',
                 position: 'bottom'
             }
         },
@@ -1163,7 +1163,7 @@ function iniciarTour(forzar = false) {
             element: '.tab:nth-child(1)',
             popover: {
                 title: 'Pestaña "Vivo"',
-                description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen su premio, usá el botón <strong>Entregar</strong>.',
+                description: 'Acá ves los premios pendientes. Cuando un jugador reclame, usá el botón <strong>Entregar</strong>.',
                 position: 'bottom'
             }
         },
@@ -1171,7 +1171,7 @@ function iniciarTour(forzar = false) {
             element: '.tab:nth-child(2)',
             popover: {
                 title: 'Pestaña "CBU"',
-                description: 'Gestioná las cuentas donde los jugadores cargan saldo. Podés agregar, editar y activar/desactivar CBUs.',
+                description: 'Gestioná las cuentas donde los jugadores cargan saldo.',
                 position: 'bottom'
             }
         },
@@ -1187,7 +1187,7 @@ function iniciarTour(forzar = false) {
             element: '#header-logged button[onclick="showConfigModal()"]',
             popover: {
                 title: 'Botón Configurar',
-                description: 'Acá configurás todo: nombre del casino, WhatsApp, salas de juego, premios de la ruleta, etc.',
+                description: 'Acá configurás nombre del casino, WhatsApp, salas, premios de la ruleta, etc.',
                 position: 'left'
             }
         },
@@ -1195,7 +1195,7 @@ function iniciarTour(forzar = false) {
             element: 'button[onclick="toggleHamburgerMenu()"]',
             popover: {
                 title: 'Menú de opciones',
-                description: 'Desde acá accedés a tu Perfil, el Historial de premios y podés volver a ver este tutorial.',
+                description: 'Desde acá accedés a tu Perfil, Historial de premios y podés volver a ver este tutorial.',
                 position: 'left'
             }
         }
