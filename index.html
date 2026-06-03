@@ -67,12 +67,9 @@
         <div onclick="showPerfilModal()" class="menu-item">
             <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
         </div>
-        <!-- NUEVO -->
+        <!-- TOUR -->
         <div onclick="repetirTour()" class="menu-item">
             <i class="fas fa-question-circle" style="margin-right:15px; width:24px;"></i> Ver tutorial
-        </div>
-        <div onclick="mostrarHistorialEntregados()" class="menu-item">
-            <i class="fas fa-history" style="margin-right:15px; width:24px;"></i> Historial de premios
         </div>
         <!-- NUEVO: Historial de premios entregados -->
         <div onclick="mostrarHistorialEntregados()" class="menu-item">
@@ -864,6 +861,12 @@ function toggleHamburgerMenu() {
     const menu = document.getElementById('hamburger-menu');
     menu.style.right = menu.style.right === '0px' ? '-100%' : '0px';
 }
+function repetirTour() {
+    toggleHamburgerMenu();
+    setTimeout(() => {
+        iniciarTour();
+    }, 400);
+}
 
 // ==================== CRONOGRAMA ====================
 async function uploadCronograma() {
@@ -1206,12 +1209,5 @@ function mostrarTourSiEsPrimeraVez() {
             localStorage.setItem('nucky_tour_completado', 'true');
         }, 1200);
     }
-}
-    
-    function repetirTour() {
-    toggleHamburgerMenu();
-    setTimeout(() => {
-        iniciarTour();
-    }, 400);
 }
 </script>
