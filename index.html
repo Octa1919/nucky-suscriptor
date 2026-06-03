@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Suscriptor - Nucky SaaS</title>
-    <!-- Driver.js cargado LOCALMENTE (estable en Vercel) -->
-    <link rel="stylesheet" href="driver.css">
-    <script src="driver.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -39,6 +36,78 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(34, 211, 238, 0.15);
 }
+        /* ==================== TOUR NATIVO ==================== */
+#tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 99998;
+    display: none;
+}
+
+#tour-highlight {
+    position: fixed;
+    border: 3px solid #22d3ee;
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+    z-index: 99999;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    display: none;
+}
+
+#tour-popover {
+    position: fixed;
+    background: #0f172a;
+    border: 2px solid #22d3ee;
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 320px;
+    z-index: 100000;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    display: none;
+}
+
+#tour-popover h3 {
+    color: #67e8f9;
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+}
+
+#tour-popover p {
+    color: #e2e8f0;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+#tour-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#tour-buttons button {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9rem;
+}
+
+#tour-btn-prev {
+    background: #334155;
+    color: white;
+}
+
+#tour-btn-next, #tour-btn-finish {
+    background: linear-gradient(90deg, #22d3ee, #67e8f9);
+    color: #0f172a;
+}
     </style>
 </head>
 <body>
@@ -68,8 +137,8 @@
             <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
         </div>
         <!-- TOUR -->
-        <div onclick="repetirTour()" class="menu-item">
-            <i class="fas fa-question-circle" style="margin-right:15px; width:24px;"></i> Ver tutorial
+        <div onclick="toggleHamburgerMenu(); iniciarTour(true);" class="menu-item">
+            <i class="fas fa-question-circle"></i> Ver tutorial
         </div>
         <!-- NUEVO: Historial de premios entregados -->
         <div onclick="mostrarHistorialEntregados()" class="menu-item">
@@ -336,11 +405,10 @@ async function loginSuscriptor() {
     await cargarNombreCasino();
     switchTab(1);
 
-    // === MOSTRAR TOUR LA PRIMERA VEZ ===
-    setTimeout(() => {
-        iniciarTour(false); // false = solo si nunca lo vio
-    }, 1500);
-}
+    // Después de cargar todo...
+setTimeout(() => {
+    iniciarTour(false); // false = solo si es la primera vez
+}, 1600);
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
@@ -1114,100 +1182,155 @@ async function mostrarHistorialEntregados() {
     }).join('');
 }
 
-// ==================== PRODUCT TOUR (Driver.js) ====================
+// ==================== TOUR NATIVO (sin Driver.js) ====================
+let tourStep = 0;
+let tourSteps = [];
+
 function iniciarTour(forzar = false) {
     if (!forzar && localStorage.getItem('nucky_tour_completado') === 'true') {
         return;
     }
 
-    const iniciar = () => {
-        if (typeof Driver !== 'undefined') {
-            console.log('%c[Driver.js] ✅ Librería lista. Iniciando tour...', 'color:#22c55e');
-
-            const driver = new Driver({
-                animate: true,
-                opacity: 0.75,
-                padding: 10,
-                allowClose: true,
-                doneBtnText: 'Finalizar',
-                closeBtnText: 'Cerrar',
-                nextBtnText: 'Siguiente',
-                prevBtnText: 'Anterior',
-                onReset: () => {
-                    if (!forzar) {
-                        localStorage.setItem('nucky_tour_completado', 'true');
-                    }
-                }
-            });
-
-            driver.defineSteps([
-                {
-                    element: '#casino-name',
-                    popover: {
-                        title: '¡Bienvenido al Panel!',
-                        description: 'Este es tu panel de Suscriptor de Nucky. Desde acá gestionás todo tu casino.',
-                        position: 'bottom'
-                    }
-                },
-                {
-                    element: '.tabs',
-                    popover: {
-                        title: 'Pestañas de navegación',
-                        description: 'Usá estas pestañas para moverte entre las secciones principales.',
-                        position: 'bottom'
-                    }
-                },
-                {
-                    element: '.tab:nth-child(1)',
-                    popover: {
-                        title: 'Sección "Vivo"',
-                        description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen, tocá "Entregar".',
-                        position: 'bottom'
-                    }
-                },
-                {
-                    element: '.tab:nth-child(2)',
-                    popover: {
-                        title: 'Sección "CBU"',
-                        description: 'Gestionás las cuentas donde los jugadores cargan saldo.',
-                        position: 'bottom'
-                    }
-                },
-                {
-                    element: '.tab:nth-child(3)',
-                    popover: {
-                        title: 'Sección "Usuarios"',
-                        description: 'Creás y administrás las cuentas de tus jugadores.',
-                        position: 'bottom'
-                    }
-                },
-                {
-                    element: 'button[onclick="showConfigModal()"]',
-                    popover: {
-                        title: 'Botón Configurar',
-                        description: 'Acá configurás nombre del casino, WhatsApp, salas y premios de la ruleta.',
-                        position: 'left'
-                    }
-                },
-                {
-                    element: 'button[onclick="toggleHamburgerMenu()"]',
-                    popover: {
-                        title: 'Menú de opciones',
-                        description: 'Desde acá accedés a tu Perfil, Historial de premios y podés repetir este tutorial.',
-                        position: 'left'
-                    }
-                }
-            ]);
-
-            driver.start();
-
-        } else {
-            console.warn('%c[Driver.js] Aún no disponible, reintentando...', 'color:#f59e0b');
-            setTimeout(iniciar, 400);
+    tourSteps = [
+        {
+            element: '#casino-name',
+            title: '¡Bienvenido al Panel!',
+            description: 'Este es tu panel de Suscriptor de Nucky. Desde acá vas a gestionar todo tu casino.'
+        },
+        {
+            element: '.tabs',
+            title: 'Pestañas de navegación',
+            description: 'Usá estas pestañas para moverte entre las secciones: Vivo, CBU, Usuarios y Difusión.'
+        },
+        {
+            element: '.tab:nth-child(1)',
+            title: 'Sección "Vivo"',
+            description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen su premio, tocá el botón "Entregar".'
+        },
+        {
+            element: '.tab:nth-child(2)',
+            title: 'Sección "CBU"',
+            description: 'Gestionás las cuentas donde los jugadores cargan saldo. Podés activar y desactivar CBUs.'
+        },
+        {
+            element: '.tab:nth-child(3)',
+            title: 'Sección "Usuarios"',
+            description: 'Creás, editás y eliminás las cuentas de tus jugadores.'
+        },
+        {
+            element: 'button[onclick="showConfigModal()"]',
+            title: 'Botón Configurar',
+            description: 'Acá configurás el nombre del casino, WhatsApp, links de salas, premios de la ruleta y más.'
+        },
+        {
+            element: 'button[onclick="toggleHamburgerMenu()"]',
+            title: 'Menú de opciones',
+            description: 'Desde acá accedés a tu Perfil, Historial de premios entregados y podés volver a ver este tutorial.'
         }
-    };
+    ];
 
-    iniciar();
+    tourStep = 0;
+    mostrarPasoTour();
+}
+
+function mostrarPasoTour() {
+    const overlay = document.getElementById('tour-overlay') || crearTourElements();
+    const highlight = document.getElementById('tour-highlight');
+    const popover = document.getElementById('tour-popover');
+
+    if (tourStep >= tourSteps.length) {
+        finalizarTour();
+        return;
+    }
+
+    const step = tourSteps[tourStep];
+    const target = document.querySelector(step.element);
+
+    if (!target) {
+        console.warn('Elemento no encontrado para el tour:', step.element);
+        tourStep++;
+        mostrarPasoTour();
+        return;
+    }
+
+    // Mostrar overlay
+    overlay.style.display = 'block';
+
+    // Posicionar highlight
+    const rect = target.getBoundingClientRect();
+    highlight.style.display = 'block';
+    highlight.style.top = (rect.top - 6) + 'px';
+    highlight.style.left = (rect.left - 6) + 'px';
+    highlight.style.width = (rect.width + 12) + 'px';
+    highlight.style.height = (rect.height + 12) + 'px';
+
+    // Posicionar popover
+    popover.style.display = 'block';
+    popover.innerHTML = `
+        <h3>${step.title}</h3>
+        <p>${step.description}</p>
+        <div id="tour-buttons">
+            ${tourStep > 0 ? '<button id="tour-btn-prev">Anterior</button>' : ''}
+            <button id="${tourStep === tourSteps.length - 1 ? 'tour-btn-finish' : 'tour-btn-next'}">
+                ${tourStep === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente'}
+            </button>
+        </div>
+    `;
+
+    // Posicionar el popover inteligentemente
+    const popoverRect = popover.getBoundingClientRect();
+    let top = rect.bottom + 15;
+    let left = rect.left;
+
+    if (top + popoverRect.height > window.innerHeight) {
+        top = rect.top - popoverRect.height - 15;
+    }
+    if (left + popoverRect.width > window.innerWidth) {
+        left = window.innerWidth - popoverRect.width - 20;
+    }
+
+    popover.style.top = top + 'px';
+    popover.style.left = left + 'px';
+
+    // Eventos de botones
+    const nextBtn = document.getElementById('tour-btn-next');
+    const prevBtn = document.getElementById('tour-btn-prev');
+    const finishBtn = document.getElementById('tour-btn-finish');
+
+    if (nextBtn) nextBtn.onclick = () => { tourStep++; mostrarPasoTour(); };
+    if (prevBtn) prevBtn.onclick = () => { tourStep--; mostrarPasoTour(); };
+    if (finishBtn) finishBtn.onclick = finalizarTour;
+}
+
+function crearTourElements() {
+    const overlay = document.createElement('div');
+    overlay.id = 'tour-overlay';
+    document.body.appendChild(overlay);
+
+    const highlight = document.createElement('div');
+    highlight.id = 'tour-highlight';
+    document.body.appendChild(highlight);
+
+    const popover = document.createElement('div');
+    popover.id = 'tour-popover';
+    document.body.appendChild(popover);
+
+    // Cerrar al hacer clic en el overlay
+    overlay.onclick = finalizarTour;
+
+    return overlay;
+}
+
+function finalizarTour() {
+    const overlay = document.getElementById('tour-overlay');
+    const highlight = document.getElementById('tour-highlight');
+    const popover = document.getElementById('tour-popover');
+
+    if (overlay) overlay.style.display = 'none';
+    if (highlight) highlight.style.display = 'none';
+    if (popover) popover.style.display = 'none';
+
+    localStorage.setItem('nucky_tour_completado', 'true');
 }
     
 // Mostrar tour automáticamente la primera vez que inicia sesión
