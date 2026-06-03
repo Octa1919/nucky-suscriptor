@@ -402,13 +402,24 @@ async function loginSuscriptor() {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('header-logged').style.display = 'flex';
 
-    await cargarNombreCasino();
+    // Cargar nombre del casino
+    const { data: casinoData } = await _supabase
+        .from('suscriptores')
+        .select('nombre_casino')
+        .eq('id', currentSubscriberId)
+        .single();
+
+    if (casinoData && casinoData.nombre_casino) {
+        document.getElementById('casino-name').textContent = casinoData.nombre_casino;
+    }
+
     switchTab(1);
 
-    // Después de cargar todo...
-setTimeout(() => {
-    iniciarTour(false); // false = solo si es la primera vez
-}, 1600);
+    // Iniciar tour (solo la primera vez)
+    setTimeout(() => {
+        iniciarTour(false);
+    }, 1600);
+}
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
@@ -1326,23 +1337,10 @@ function finalizarTour() {
     const highlight = document.getElementById('tour-highlight');
     const popover = document.getElementById('tour-popover');
 
-    if (overlay) overlay.style.display = 'none';
-    if (highlight) highlight.style.display = 'none';
-    if (popover) popover.style.display = 'none';
+    if (overlay) overlay.remove();
+    if (highlight) highlight.remove();
+    if (popover) popover.remove();
 
     localStorage.setItem('nucky_tour_completado', 'true');
-}
-    
-// Mostrar tour automáticamente la primera vez que inicia sesión
-function mostrarTourSiEsPrimeraVez() {
-    const yaVioTour = localStorage.getItem('nucky_tour_completado');
-    
-    if (!yaVioTour) {
-        // Esperamos un poco para que cargue bien la interfaz
-        setTimeout(() => {
-            iniciarTour();
-            localStorage.setItem('nucky_tour_completado', 'true');
-        }, 1200);
-    }
 }
 </script>
