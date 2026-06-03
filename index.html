@@ -29,6 +29,13 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: var(--card); width: 92%; max-width: 480px; border-radius: 24px; padding: 32px 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .modal button { width: 100%; padding: 16px; border-radius: 14px; font-weight: 700; font-size: 1.05rem; margin-top: 10px; }
+        .user-item {
+    transition: all 0.2s ease;
+}
+.user-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(34, 211, 238, 0.15);
+}
     </style>
 </head>
 <body>
@@ -55,7 +62,11 @@
         <button onclick="toggleHamburgerMenu()" style="position:absolute; top:25px; right:25px; background:none; border:none; color:white; font-size:32px;">✕</button>
         
         <div onclick="showPerfilModal()" class="menu-item">
-         <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
+             <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
+        </div>
+        <!-- NUEVO: Historial de premios entregados -->
+        <div onclick="mostrarHistorialEntregados()" class="menu-item">
+            <i class="fas fa-history" style="margin-right:15px; width:24px;"></i> Historial de premios
         </div>
         <div onclick="uploadCronograma()" class="menu-item">
             <i class="fas fa-calendar-alt" style="margin-right:15px; width:24px;"></i> Cronograma
@@ -1027,5 +1038,61 @@ async function actualizarRachaYUltimaRuleta(username) {
             racha_ruleta: nuevaRacha
         })
         .eq('id', user.id);
+}
+
+    // ==================== HISTORIAL DE PREMIOS ENTREGADOS ====================
+async function mostrarHistorialEntregados() {
+    toggleHamburgerMenu(); // Cierra el menú
+
+    const content = document.getElementById('tab-content');
+    content.innerHTML = `
+        <div class="card">
+            <h2 style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+                <i class="fas fa-history"></i> Historial de Premios Entregados
+            </h2>
+            <div id="historial-lista">Cargando historial...</div>
+        </div>
+    `;
+
+    const { data, error } = await _supabase
+        .from('premios_ruleta')
+        .select('usuario, premio, codigo, created_at, entregado_at')
+        .eq('subscriber_id', currentSubscriberId)
+        .eq('estado', 'entregado')
+        .order('entregado_at', { ascending: false })
+        .limit(100);
+
+    const contenedor = document.getElementById('historial-lista');
+
+    if (error || !data || data.length === 0) {
+        contenedor.innerHTML = `<p style="color:#94a3b8;">No hay premios entregados aún.</p>`;
+        return;
+    }
+
+    contenedor.innerHTML = data.map(p => {
+        const fechaEntrega = p.entregado_at 
+            ? new Date(p.entregado_at).toLocaleString('es-AR')
+            : '—';
+
+        return `
+            <div class="user-item" style="margin-bottom:16px; border-left: 5px solid #22d3ee;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                    <div>
+                        <strong style="font-size:1.15rem;">${p.usuario}</strong><br>
+                        <span style="color:#67e8f9; font-weight:600;">${p.premio}</span>
+                    </div>
+                    <div style="text-align:right; font-size:0.85rem; color:#94a3b8;">
+                        ${fechaEntrega}
+                    </div>
+                </div>
+                
+                <div onclick="copiarAlPortapapeles('${p.codigo}')" 
+                     style="background:#0f172a; border: 2px dashed #64748b; border-radius:10px; padding:10px 14px; 
+                            text-align:center; margin-top:10px; cursor:pointer; font-family:monospace; font-size:1.05rem; color:#67e8f9;">
+                    ${p.codigo}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 </script>
