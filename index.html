@@ -50,9 +50,12 @@
 
 #tour-highlight {
     position: fixed;
-    border: 3px solid #22d3ee;
-    border-radius: 12px;
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
+    border: 5px solid #67e8f9;           /* Borde más grueso y brillante */
+    border-radius: 14px;
+    box-shadow: 
+        0 0 0 9999px rgba(0, 0, 0, 0.65),   /* Overlay oscuro alrededor */
+        0 0 0 12px rgba(103, 232, 249, 0.25), /* Glow cian suave */
+        0 0 35px 10px rgba(103, 232, 249, 0.45); /* Glow cian más fuerte */
     z-index: 99999;
     pointer-events: none;
     transition: all 0.3s ease;
