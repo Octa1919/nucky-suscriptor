@@ -36,22 +36,15 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(34, 211, 238, 0.15);
 }
-        /* ==================== TOUR NATIVO ==================== */
- #tour-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.75);
-    z-index: 99998;
-    display: none;
-}
-        
+        /* ==================== TOUR NATIVO ==================== */    
 #tour-highlight {
     position: fixed;
     border: 5px solid #67e8f9;
     border-radius: 14px;
+    box-shadow: 
+        0 0 0 9999px rgba(0, 0, 0, 0.6),           /* Overlay un poco menos oscuro */
+        0 0 0 14px rgba(103, 232, 249, 0.2),       /* Glow cian suave */
+        0 0 45px 12px rgba(103, 232, 249, 0.5);    /* Glow más fuerte */
     z-index: 99999;
     pointer-events: none;
     transition: all 0.25s ease;
