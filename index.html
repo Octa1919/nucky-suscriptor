@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Suscriptor - Nucky SaaS</title>
-    <<!-- Driver.js cargado localmente (más estable en Vercel) -->
+    <!-- Driver.js cargado LOCALMENTE (estable en Vercel) -->
     <link rel="stylesheet" href="driver.css">
     <script src="driver.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1121,9 +1121,8 @@ function iniciarTour(forzar = false) {
     }
 
     const iniciar = () => {
-        // Verificamos si Driver.js ya está disponible
         if (typeof Driver !== 'undefined') {
-            console.log('%c[Driver.js] Iniciando tour...', 'color:#22c55e');
+            console.log('%c[Driver.js] ✅ Librería lista. Iniciando tour...', 'color:#22c55e');
 
             const driver = new Driver({
                 animate: true,
@@ -1154,7 +1153,7 @@ function iniciarTour(forzar = false) {
                     element: '.tabs',
                     popover: {
                         title: 'Pestañas de navegación',
-                        description: 'Usá estas pestañas para moverte entre las secciones: Vivo, CBU, Usuarios y Difusión.',
+                        description: 'Usá estas pestañas para moverte entre las secciones principales.',
                         position: 'bottom'
                     }
                 },
@@ -1162,7 +1161,7 @@ function iniciarTour(forzar = false) {
                     element: '.tab:nth-child(1)',
                     popover: {
                         title: 'Sección "Vivo"',
-                        description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen, usá el botón "Entregar".',
+                        description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen, tocá "Entregar".',
                         position: 'bottom'
                     }
                 },
@@ -1186,7 +1185,7 @@ function iniciarTour(forzar = false) {
                     element: 'button[onclick="showConfigModal()"]',
                     popover: {
                         title: 'Botón Configurar',
-                        description: 'Acá configurás nombre del casino, WhatsApp, salas, premios de la ruleta, etc.',
+                        description: 'Acá configurás nombre del casino, WhatsApp, salas y premios de la ruleta.',
                         position: 'left'
                     }
                 },
@@ -1194,7 +1193,7 @@ function iniciarTour(forzar = false) {
                     element: 'button[onclick="toggleHamburgerMenu()"]',
                     popover: {
                         title: 'Menú de opciones',
-                        description: 'Desde acá accedés a tu Perfil, Historial de premios y podés volver a ver este tutorial.',
+                        description: 'Desde acá accedés a tu Perfil, Historial de premios y podés repetir este tutorial.',
                         position: 'left'
                     }
                 }
@@ -1203,8 +1202,8 @@ function iniciarTour(forzar = false) {
             driver.start();
 
         } else {
-            console.warn('%c[Driver.js] Aún no está disponible, reintentando en 500ms...', 'color:#f59e0b');
-            setTimeout(iniciar, 500);
+            console.warn('%c[Driver.js] Aún no disponible, reintentando...', 'color:#f59e0b');
+            setTimeout(iniciar, 400);
         }
     };
 
