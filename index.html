@@ -6,6 +6,9 @@
     <title>Panel Suscriptor - Nucky SaaS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Driver.js - Product Tour -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
     <style>
         :root { --primary: #22d3ee; --accent: #67e8f9; --dark: #0a0f1c; --card: #121a2e; --glass: rgba(18, 26, 46, 0.75); }
         * { box-sizing: border-box; margin:0; padding:0; }
@@ -62,7 +65,14 @@
         <button onclick="toggleHamburgerMenu()" style="position:absolute; top:25px; right:25px; background:none; border:none; color:white; font-size:32px;">✕</button>
         
         <div onclick="showPerfilModal()" class="menu-item">
-             <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
+            <i class="fas fa-user" style="margin-right:15px; width:24px;"></i> Perfil
+        </div>
+        <!-- NUEVO -->
+        <div onclick="repetirTour()" class="menu-item">
+            <i class="fas fa-question-circle" style="margin-right:15px; width:24px;"></i> Ver tutorial
+        </div>
+        <div onclick="mostrarHistorialEntregados()" class="menu-item">
+            <i class="fas fa-history" style="margin-right:15px; width:24px;"></i> Historial de premios
         </div>
         <!-- NUEVO: Historial de premios entregados -->
         <div onclick="mostrarHistorialEntregados()" class="menu-item">
@@ -326,8 +336,11 @@
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('header-logged').style.display = 'flex';
 
-    await cargarNombreCasino();
+   await cargarNombreCasino();
     switchTab(1);
+
+    // === NUEVO: Mostrar tour la primera vez ===
+    mostrarTourSiEsPrimeraVez();
 }
 
     async function cargarNombreCasino() {
@@ -1094,5 +1107,111 @@ async function mostrarHistorialEntregados() {
             </div>
         `;
     }).join('');
+}
+
+    // ==================== PRODUCT TOUR (Driver.js) ====================
+let driverObj = null;
+
+function iniciarTour() {
+    if (driverObj) driverObj.destroy();
+
+    driverObj = window.driver({
+        showProgress: true,
+        progressText: "Paso {{current}} de {{total}}",
+        nextBtnText: "Siguiente",
+        prevBtnText: "Anterior",
+        doneBtnText: "Finalizar",
+        closeBtnText: "×",
+        overlayOpacity: 0.75,
+        smoothScroll: true,
+    });
+
+    driverObj.setSteps([
+        {
+            element: "#casino-name",
+            popover: {
+                title: "¡Bienvenido al Panel!",
+                description: "Este es tu panel de control como Suscriptor de Nucky. Acá vas a gestionar todo tu casino.",
+                side: "bottom",
+                align: "start"
+            }
+        },
+        {
+            element: ".tabs",
+            popover: {
+                title: "Navegación principal",
+                description: "Usá estas pestañas para moverte entre las secciones: <strong>Vivo</strong>, <strong>CBU</strong>, <strong>Usuarios</strong> y <strong>Difu</strong>.",
+                side: "bottom",
+                align: "center"
+            }
+        },
+        {
+            element: ".tab:nth-child(1)",
+            popover: {
+                title: "Pestaña 'Vivo'",
+                description: "Acá ves todos los premios pendientes de entregar. Cuando el jugador reclame, usá el botón <strong>Entregar</strong>.",
+                side: "bottom",
+                align: "center"
+            }
+        },
+        {
+            element: ".tab:nth-child(2)",
+            popover: {
+                title: "Pestaña 'CBU'",
+                description: "Gestioná las cuentas bancarias donde los jugadores pueden cargar saldo.",
+                side: "bottom",
+                align: "center"
+            }
+        },
+        {
+            element: ".tab:nth-child(3)",
+            popover: {
+                title: "Pestaña 'Usuarios'",
+                description: "Creá y administrá los usuarios de tus jugadores. También podés buscarlos fácilmente.",
+                side: "bottom",
+                align: "center"
+            }
+        },
+        {
+            element: "button[onclick='showConfigModal()']",
+            popover: {
+                title: "Botón Configurar",
+                description: "Acá configurás todo: nombre del casino, premios de la ruleta, salas de juego, WhatsApp, redes sociales, etc.",
+                side: "left",
+                align: "start"
+            }
+        },
+        {
+            element: "button[onclick='toggleHamburgerMenu()']",
+            popover: {
+                title: "Menú de opciones",
+                description: "Accedé a tu perfil, historial de premios entregados, cronograma y más opciones.",
+                side: "left",
+                align: "start"
+            }
+        }
+    ]);
+
+    driverObj.drive();
+}
+
+// Mostrar tour automáticamente la primera vez que inicia sesión
+function mostrarTourSiEsPrimeraVez() {
+    const yaVioTour = localStorage.getItem('nucky_tour_completado');
+    
+    if (!yaVioTour) {
+        // Esperamos un poco para que cargue bien la interfaz
+        setTimeout(() => {
+            iniciarTour();
+            localStorage.setItem('nucky_tour_completado', 'true');
+        }, 1200);
+    }
+}
+    
+    function repetirTour() {
+    toggleHamburgerMenu();
+    setTimeout(() => {
+        iniciarTour();
+    }, 400);
 }
 </script>
