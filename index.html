@@ -334,11 +334,12 @@
     document.getElementById('header-logged').style.display = 'flex';
 
    await cargarNombreCasino();
-    switchTab(1);
+switchTab(1);
 
-    // === NUEVO: Mostrar tour la primera vez ===
-    mostrarTourSiEsPrimeraVez();
-}
+// Mostrar tour la primera vez
+setTimeout(() => {
+    iniciarTour(false);
+}, 1500);
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
@@ -1112,90 +1113,95 @@ async function mostrarHistorialEntregados() {
     }).join('');
 }
 
-    // ==================== PRODUCT TOUR (Driver.js) ====================
-let driverObj = null;
+// ==================== PRODUCT TOUR (Driver.js) ====================
+function iniciarTour(forzar = false) {
+    // Si ya vio el tour y no es forzado, no mostrar
+    if (!forzar && localStorage.getItem('tour_completado') === 'true') {
+        return;
+    }
 
-function iniciarTour() {
-    if (driverObj) driverObj.destroy();
+    // Verificamos que Driver.js esté cargado
+    if (typeof Driver === 'undefined') {
+        alert("El tutorial aún no está disponible. Por favor recargá la página.");
+        return;
+    }
 
-    driverObj = window.driver({
-        showProgress: true,
-        progressText: "Paso {{current}} de {{total}}",
-        nextBtnText: "Siguiente",
-        prevBtnText: "Anterior",
-        doneBtnText: "Finalizar",
-        closeBtnText: "×",
-        overlayOpacity: 0.75,
-        smoothScroll: true,
+    const driver = new Driver({
+        animate: true,
+        opacity: 0.75,
+        padding: 8,
+        allowClose: true,
+        doneBtnText: 'Finalizar',
+        closeBtnText: 'Cerrar',
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Anterior',
+        onReset: () => {
+            if (!forzar) {
+                localStorage.setItem('tour_completado', 'true');
+            }
+        }
     });
 
-    driverObj.setSteps([
+    driver.defineSteps([
         {
-            element: "#casino-name",
+            element: '#casino-name',
             popover: {
-                title: "¡Bienvenido al Panel!",
-                description: "Este es tu panel de control como Suscriptor de Nucky. Acá vas a gestionar todo tu casino.",
-                side: "bottom",
-                align: "start"
+                title: '¡Bienvenido al Panel!',
+                description: 'Este es tu panel de control como Suscriptor de Nucky. Acá vas a gestionar todo tu casino.',
+                position: 'bottom'
             }
         },
         {
-            element: ".tabs",
+            element: '.tabs',
             popover: {
-                title: "Navegación principal",
-                description: "Usá estas pestañas para moverte entre las secciones: <strong>Vivo</strong>, <strong>CBU</strong>, <strong>Usuarios</strong> y <strong>Difu</strong>.",
-                side: "bottom",
-                align: "center"
+                title: 'Pestañas de navegación',
+                description: 'Usá estas pestañas para moverte entre las secciones principales: Vivo, CBU, Usuarios y Difusión.',
+                position: 'bottom'
             }
         },
         {
-            element: ".tab:nth-child(1)",
+            element: '.tab:nth-child(1)',
             popover: {
-                title: "Pestaña 'Vivo'",
-                description: "Acá ves todos los premios pendientes de entregar. Cuando el jugador reclame, usá el botón <strong>Entregar</strong>.",
-                side: "bottom",
-                align: "center"
+                title: 'Pestaña "Vivo"',
+                description: 'Acá ves los premios pendientes de tus jugadores. Cuando reclamen su premio, usá el botón <strong>Entregar</strong>.',
+                position: 'bottom'
             }
         },
         {
-            element: ".tab:nth-child(2)",
+            element: '.tab:nth-child(2)',
             popover: {
-                title: "Pestaña 'CBU'",
-                description: "Gestioná las cuentas bancarias donde los jugadores pueden cargar saldo.",
-                side: "bottom",
-                align: "center"
+                title: 'Pestaña "CBU"',
+                description: 'Gestioná las cuentas donde los jugadores cargan saldo. Podés agregar, editar y activar/desactivar CBUs.',
+                position: 'bottom'
             }
         },
         {
-            element: ".tab:nth-child(3)",
+            element: '.tab:nth-child(3)',
             popover: {
-                title: "Pestaña 'Usuarios'",
-                description: "Creá y administrá los usuarios de tus jugadores. También podés buscarlos fácilmente.",
-                side: "bottom",
-                align: "center"
+                title: 'Pestaña "Usuarios"',
+                description: 'Creá y administrá las cuentas de tus jugadores.',
+                position: 'bottom'
             }
         },
         {
-            element: "button[onclick='showConfigModal()']",
+            element: '#header-logged button[onclick="showConfigModal()"]',
             popover: {
-                title: "Botón Configurar",
-                description: "Acá configurás todo: nombre del casino, premios de la ruleta, salas de juego, WhatsApp, redes sociales, etc.",
-                side: "left",
-                align: "start"
+                title: 'Botón Configurar',
+                description: 'Acá configurás todo: nombre del casino, WhatsApp, salas de juego, premios de la ruleta, etc.',
+                position: 'left'
             }
         },
         {
-            element: "button[onclick='toggleHamburgerMenu()']",
+            element: 'button[onclick="toggleHamburgerMenu()"]',
             popover: {
-                title: "Menú de opciones",
-                description: "Accedé a tu perfil, historial de premios entregados, cronograma y más opciones.",
-                side: "left",
-                align: "start"
+                title: 'Menú de opciones',
+                description: 'Desde acá accedés a tu Perfil, el Historial de premios y podés volver a ver este tutorial.',
+                position: 'left'
             }
         }
     ]);
 
-    driverObj.drive();
+    driver.start();
 }
 
 // Mostrar tour automáticamente la primera vez que inicia sesión
