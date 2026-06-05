@@ -386,6 +386,10 @@
     let usuarioAEditarId = null;
     let deferredPrompt = null;
     let premiosVivoCache = [];
+
+    // === REALTIME ===
+    let suscripcionVivo = null;
+    let suscripcionUsuarios = null;
     
  // ==================== COPIAR AL PORTAPAPELES ====================
     function copiarAlPortapapeles(texto) {
@@ -472,6 +476,7 @@ async function loginSuscriptor() {
         </div>
     `;
     cargarResultadosVivo();
+    suscribirseAVivo();           // ← Activar Realtime
 }
         else if (tab === 1) { // CBU
             content.innerHTML = `<div class="card"><h2 style="margin-bottom:28px;">🏦 Mis CBU</h2><button onclick="showNuevoCbuModal()" class="btn-primary" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button><div id="lista-cbus"></div></div>`;
@@ -480,7 +485,8 @@ async function loginSuscriptor() {
         else if (tab === 2) { // Usuarios
             content.innerHTML = `<div class="card"><h2>👥 Usuarios Jugadores</h2><input type="text" id="buscador-usuarios" placeholder="🔎 Buscar por usuario o teléfono..." style="margin:28px 0 24px 0;padding:14px 16px;border-radius:12px;width:100%;"><button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">+ Crear Nuevo Usuario</button><div id="lista-usuarios"></div></div>`;
             cargarUsuarios();
-            setTimeout(() => {
+            suscribirseAUsuarios();       // ← Activar Realtime
+        }
                 const buscador = document.getElementById('buscador-usuarios');
                 if (buscador) buscador.addEventListener('input', cargarUsuarios);
             }, 100);
@@ -739,7 +745,6 @@ async function guardarConfigCompleta() {
         }
     }
     
-    // ==================== VIVO ====================
  // ==================== VIVO CON BUSCADOR ====================
 async function cargarResultadosVivo() {
     const div = document.getElementById('lista-en-vivo');
@@ -967,12 +972,12 @@ function limpiarBusquedaVivo() {
     }
     
        function logout() {
-    detenerAutoRefresh();                    // ← Agregar esta línea
+    desuscribirseDeTodo();           // ← Importante
     localStorage.removeItem('subscriber_id');
     currentSubscriberId = null;
     location.reload();
 }
-
+    
     // ==================== EDITAR / ELIMINAR CBU ====================
 let cbuAEditarId = null;
 
@@ -1431,50 +1436,70 @@ function finalizarTour() {
     localStorage.setItem('nucky_tour_completado', 'true');
 }
 
-    // ==================== AUTO REFRESH ====================
-let intervaloVivo = null;
-let intervaloUsuarios = null;
+// ==================== SUPABASE REALTIME ====================
 
-function iniciarAutoRefresh() {
-    // Detenemos cualquier intervalo anterior
-    detenerAutoRefresh();
+function suscribirseAVivo() {
+    // Desuscribimos si ya existe una suscripción anterior
+    if (suscripcionVivo) {
+        _supabase.removeChannel(suscripcionVivo);
+    }
 
-    // Refrescar sección Vivo cada 12 segundos
-    intervaloVivo = setInterval(() => {
-        const tabActivo = document.querySelector('.tab.active');
-        if (tabActivo && tabActivo.textContent.includes('Vivo')) {
-            // Solo refrescamos si no hay búsqueda activa
-            const buscador = document.getElementById('buscador-codigo');
-            if (!buscador || buscador.value.trim() === '') {
-                cargarResultadosVivo();
+    suscripcionVivo = _supabase
+        .channel('premios-ruleta-changes')
+        .on(
+            'postgres_changes',
+            {
+                event: '*', // INSERT, UPDATE, DELETE
+                schema: 'public',
+                table: 'premios_ruleta',
+                filter: `subscriber_id=eq.${currentSubscriberId}`
+            },
+            (payload) => {
+                console.log('🔄 Cambio en premios_ruleta:', payload);
+                // Solo refrescamos si estamos en la pestaña Vivo
+                const tabActivo = document.querySelector('.tab.active');
+                if (tabActivo && tabActivo.textContent.includes('Vivo')) {
+                    cargarResultadosVivo();
+                }
             }
-        }
-    }, 12000);
-
-    // Refrescar sección Usuarios cada 15 segundos
-    intervaloUsuarios = setInterval(() => {
-        const tabActivo = document.querySelector('.tab.active');
-        if (tabActivo && tabActivo.textContent.includes('Usuarios')) {
-            cargarUsuarios();
-        }
-    }, 15000);
+        )
+        .subscribe();
 }
 
-function detenerAutoRefresh() {
-    if (intervaloVivo) {
-        clearInterval(intervaloVivo);
-        intervaloVivo = null;
+function suscribirseAUsuarios() {
+    if (suscripcionUsuarios) {
+        _supabase.removeChannel(suscripcionUsuarios);
     }
-    if (intervaloUsuarios) {
-        clearInterval(intervaloUsuarios);
-        intervaloUsuarios = null;
-    }
+
+    suscripcionUsuarios = _supabase
+        .channel('usuarios-changes')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'usuarios',
+                filter: `subscriber_id=eq.${currentSubscriberId}`
+            },
+            (payload) => {
+                console.log('🔄 Cambio en usuarios:', payload);
+                const tabActivo = document.querySelector('.tab.active');
+                if (tabActivo && tabActivo.textContent.includes('Usuarios')) {
+                    cargarUsuarios();
+                }
+            }
+        )
+        .subscribe();
 }
 
-// Iniciamos el auto-refresh cuando carga la página (si ya está logueado)
-window.addEventListener('load', () => {
-    if (currentSubscriberId) {
-        iniciarAutoRefresh();
+function desuscribirseDeTodo() {
+    if (suscripcionVivo) {
+        _supabase.removeChannel(suscripcionVivo);
+        suscripcionVivo = null;
     }
-});
+    if (suscripcionUsuarios) {
+        _supabase.removeChannel(suscripcionUsuarios);
+        suscripcionUsuarios = null;
+    }
+}
 </script>
