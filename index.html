@@ -483,14 +483,33 @@ async function loginSuscriptor() {
             cargarCbus();
         } 
         else if (tab === 2) { // Usuarios
-            content.innerHTML = `<div class="card"><h2>👥 Usuarios Jugadores</h2><input type="text" id="buscador-usuarios" placeholder="🔎 Buscar por usuario o teléfono..." style="margin:28px 0 24px 0;padding:14px 16px;border-radius:12px;width:100%;"><button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">+ Crear Nuevo Usuario</button><div id="lista-usuarios"></div></div>`;
-            cargarUsuarios();
-            suscribirseAUsuarios();       // ← Activar Realtime
+    content.innerHTML = `
+        <div class="card">
+            <h2>👥 Usuarios Jugadores</h2>
+            
+            <input type="text" id="buscador-usuarios" 
+                   placeholder="🔎 Buscar por usuario o teléfono..." 
+                   style="margin: 20px 0; padding:14px 16px; border-radius:12px; width:100%; background:#0f172a; color:white; border:1px solid #334155;">
+            
+            <button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">
+                + Crear Nuevo Usuario
+            </button>
+            
+            <div id="lista-usuarios"></div>
+        </div>
+    `;
+    
+    cargarUsuarios();
+    suscribirseAUsuarios(); // ← Realtime activado
+
+    // Buscador en tiempo real
+    setTimeout(() => {
+        const buscador = document.getElementById('buscador-usuarios');
+        if (buscador) {
+            buscador.addEventListener('input', cargarUsuarios);
         }
-                const buscador = document.getElementById('buscador-usuarios');
-                if (buscador) buscador.addEventListener('input', cargarUsuarios);
-            }, 100);
-        } 
+    }, 100);
+}
         else if (tab === 3) { // Difu
             content.innerHTML = `
                 <div class="card">
