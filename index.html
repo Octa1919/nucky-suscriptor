@@ -362,7 +362,8 @@
 
     let currentSubscriberId = localStorage.getItem('subscriber_id') || null;
     let usuarioAEditarId = null;
-    let deferredPrompt = null;   // Para guardar el evento de instalación PWA
+    let deferredPrompt = null;
+    let premiosVivoCache = [];
     
  // ==================== COPIAR AL PORTAPAPELES ====================
     function copiarAlPortapapeles(texto) {
@@ -713,43 +714,92 @@ async function guardarConfigCompleta() {
     }
     
     // ==================== VIVO ====================
-   async function cargarResultadosVivo() {
+ // ==================== VIVO CON BUSCADOR ====================
+async function cargarResultadosVivo() {
     const div = document.getElementById('lista-en-vivo');
     if (!div) return;
+
     div.innerHTML = "<p>Cargando resultados en vivo...</p>";
 
     const { data, error } = await _supabase
         .from('premios_ruleta')
         .select('*')
         .eq('subscriber_id', currentSubscriberId)
-        .eq('estado', 'pendiente')           // ← Solo pendientes
+        .eq('estado', 'pendiente')
         .order('created_at', { ascending: false })
-        .limit(30);
+        .limit(50);
 
     if (error || !data || data.length === 0) {
         div.innerHTML = "<p>No hay premios pendientes por entregar.</p>";
+        premiosVivoCache = [];
         return;
     }
 
-    div.innerHTML = data.map(p => `
+    premiosVivoCache = data;
+    renderizarPremiosVivo(data);
+}
+
+function renderizarPremiosVivo(lista) {
+    const div = document.getElementById('lista-en-vivo');
+    if (!div) return;
+
+    if (!lista || lista.length === 0) {
+        div.innerHTML = "<p>No se encontraron premios con ese código.</p>";
+        return;
+    }
+
+    div.innerHTML = lista.map(p => `
         <div class="user-item" style="margin-bottom:24px; border: 2px solid #22d3ee; background: linear-gradient(180deg, #1e2937, #16213e);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <strong onclick="copiarAlPortapapeles('${p.usuario}')" style="font-size:1.25rem; cursor:pointer;">${p.usuario}</strong>
                 <small style="color:#67e8f9;">${new Date(p.created_at).toLocaleString('es-AR')}</small>
             </div>
+            
             <div onclick="copiarAlPortapapeles('${p.codigo}')"
                  style="background:#1e2937; border: 2px dashed #22d3ee; border-radius:12px; padding:14px; text-align:center; margin-bottom:14px; font-size:1.35rem; font-weight:700; color:#67e8f9; cursor:pointer;">
                 ${p.codigo}
             </div>
+            
             <div style="font-size:1.1rem; margin-bottom:18px;">
                 <strong>Premio:</strong> ${p.premio}
             </div>
+            
             <div style="display:flex; gap:12px;">
-                <button onclick="denegarPremio('${p.id}')" style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">Denegar</button>
-                <button onclick="marcarEntregado('${p.id}', '${p.usuario}')" style="flex:1; background:#22d3ee; color:#000; padding:14px; border-radius:12px; font-weight:700;">Entregar</button>
+                <button onclick="denegarPremio('${p.id}')" 
+                        style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">
+                    Denegar
+                </button>
+                <button onclick="marcarEntregado('${p.id}', '${p.usuario}')" 
+                        style="flex:1; background:#22d3ee; color:#000; padding:14px; border-radius:12px; font-weight:700;">
+                    Entregar
+                </button>
             </div>
         </div>
     `).join('');
+}
+
+function filtrarResultadosVivo() {
+    const input = document.getElementById('buscador-codigo');
+    if (!input || !premiosVivoCache.length) return;
+
+    const termino = input.value.trim().toLowerCase();
+
+    if (!termino) {
+        renderizarPremiosVivo(premiosVivoCache);
+        return;
+    }
+
+    const filtrados = premiosVivoCache.filter(p => 
+        p.codigo && p.codigo.toLowerCase().includes(termino)
+    );
+
+    renderizarPremiosVivo(filtrados);
+}
+
+function limpiarBusquedaVivo() {
+    const input = document.getElementById('buscador-codigo');
+    if (input) input.value = '';
+    renderizarPremiosVivo(premiosVivoCache);
 }
     
     async function marcarEntregado(id, username) {
