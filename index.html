@@ -36,6 +36,28 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(34, 211, 238, 0.15);
 }
+        /* === Luz verde parpadeante (Live indicator) === */
+.live-dot {
+    width: 16px;
+    height: 16px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulse-green 2s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 14px rgba(34, 197, 94, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}
         /* ==================== TOUR NATIVO ==================== */    
 #tour-highlight {
     position: fixed;
@@ -425,10 +447,14 @@ async function loginSuscriptor() {
         document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
         const content = document.getElementById('tab-content');
 
-        if (tab === 0) { // Vivo
+      if (tab === 0) { // Vivo
     content.innerHTML = `
         <div class="card">
-            <h2 style="margin-bottom:20px;"><i class="fas fa-broadcast-tower"></i> Vivo - Resultados Ruleta</h2>
+            <h2 style="margin-bottom:20px; display:flex; align-items:center; gap:12px;">
+                <!-- Luz verde parpadeante -->
+                <span class="live-dot"></span>
+                <span>Vivo - Ruleta</span>
+            </h2>
             
             <!-- BUSCADOR POR CÓDIGO -->
             <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
@@ -940,11 +966,12 @@ function limpiarBusquedaVivo() {
         }
     }
     
-            function logout() {
-        localStorage.removeItem('subscriber_id');
-        currentSubscriberId = null;
-        location.reload();   // ← Esta es la forma más confiable por ahora
-    }
+       function logout() {
+    detenerAutoRefresh();                    // ← Agregar esta línea
+    localStorage.removeItem('subscriber_id');
+    currentSubscriberId = null;
+    location.reload();
+}
 
     // ==================== EDITAR / ELIMINAR CBU ====================
 let cbuAEditarId = null;
@@ -1403,4 +1430,51 @@ function finalizarTour() {
 
     localStorage.setItem('nucky_tour_completado', 'true');
 }
+
+    // ==================== AUTO REFRESH ====================
+let intervaloVivo = null;
+let intervaloUsuarios = null;
+
+function iniciarAutoRefresh() {
+    // Detenemos cualquier intervalo anterior
+    detenerAutoRefresh();
+
+    // Refrescar sección Vivo cada 12 segundos
+    intervaloVivo = setInterval(() => {
+        const tabActivo = document.querySelector('.tab.active');
+        if (tabActivo && tabActivo.textContent.includes('Vivo')) {
+            // Solo refrescamos si no hay búsqueda activa
+            const buscador = document.getElementById('buscador-codigo');
+            if (!buscador || buscador.value.trim() === '') {
+                cargarResultadosVivo();
+            }
+        }
+    }, 12000);
+
+    // Refrescar sección Usuarios cada 15 segundos
+    intervaloUsuarios = setInterval(() => {
+        const tabActivo = document.querySelector('.tab.active');
+        if (tabActivo && tabActivo.textContent.includes('Usuarios')) {
+            cargarUsuarios();
+        }
+    }, 15000);
+}
+
+function detenerAutoRefresh() {
+    if (intervaloVivo) {
+        clearInterval(intervaloVivo);
+        intervaloVivo = null;
+    }
+    if (intervaloUsuarios) {
+        clearInterval(intervaloUsuarios);
+        intervaloUsuarios = null;
+    }
+}
+
+// Iniciamos el auto-refresh cuando carga la página (si ya está logueado)
+window.addEventListener('load', () => {
+    if (currentSubscriberId) {
+        iniciarAutoRefresh();
+    }
+});
 </script>
