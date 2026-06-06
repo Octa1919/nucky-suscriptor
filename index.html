@@ -960,6 +960,23 @@ async function crearNuevoUsuario() {
         return alert("La contraseña debe tener:\n\n• Mínimo 8 caracteres\n• Al menos una letra mayúscula\n• Al menos una letra minúscula");
     }
 
+    // === VERIFICAR SI EL USUARIO YA EXISTE (case-insensitive) ===
+    const { data: existente, error: errorCheck } = await _supabase
+        .from('usuarios')
+        .select('id')
+        .eq('subscriber_id', currentSubscriberId)
+        .ilike('username', username)   // ← Búsqueda sin importar mayúsculas/minúsculas
+        .limit(1);
+
+    if (errorCheck) {
+        return alert("Error al verificar usuario: " + errorCheck.message);
+    }
+
+    if (existente && existente.length > 0) {
+        return alert(`El usuario "${username}" ya existe. Por favor elegí otro nombre.`);
+    }
+
+    // === CREAR USUARIO ===
     const { error } = await _supabase.from('usuarios').insert({
         subscriber_id: currentSubscriberId,
         username: username,
@@ -968,7 +985,7 @@ async function crearNuevoUsuario() {
     });
 
     if (error) {
-        alert("Error: " + error.message);
+        alert("Error al crear usuario: " + error.message);
     } else {
         alert(`✅ Usuario "${username}" creado correctamente`);
         hideNewUserModal();
