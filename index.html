@@ -1332,11 +1332,10 @@ async function uploadCronograma() {
             return alert("Solo se permiten archivos PNG o JPG");
         }
 
-        // Ruta correcta usando el subscriber_id
         const fileExt = file.name.split('.').pop();
         const fileName = `cronogramas/${currentSubscriberId}/cronograma.${fileExt}`;
 
-        // Eliminar archivos anteriores del suscriptor (limpieza)
+        // 1. Eliminar archivos anteriores del suscriptor
         const { data: existingFiles } = await _supabase.storage
             .from('cronogramas')
             .list(`cronogramas/${currentSubscriberId}`);
@@ -1346,7 +1345,7 @@ async function uploadCronograma() {
             await _supabase.storage.from('cronogramas').remove(filesToDelete);
         }
 
-        // Subir el nuevo archivo
+        // 2. Subir nuevo archivo
         const { error: uploadError } = await _supabase.storage
             .from('cronogramas')
             .upload(fileName, file, { upsert: true });
@@ -1356,24 +1355,29 @@ async function uploadCronograma() {
             return;
         }
 
-        // Obtener URL pública
+        // 3. Obtener URL pública
         const { data: urlData } = _supabase.storage
             .from('cronogramas')
             .getPublicUrl(fileName);
 
-        // Guardar la URL en la tabla suscriptores
+        // 4. Guardar URL + timestamp de actualización
+        const ahora = new Date().toISOString();
+
         const { error: updateError } = await _supabase
             .from('suscriptores')
-            .update({ cronograma_url: urlData.publicUrl })
+            .update({ 
+                cronograma_url: urlData.publicUrl,
+                cronograma_updated_at: ahora
+            })
             .eq('id', currentSubscriberId);
 
         if (updateError) {
-            alert("Error al guardar la URL del cronograma");
+            alert("Error al guardar el cronograma");
             return;
         }
 
         alert("✅ Cronograma actualizado correctamente");
-        cargarPreviewCronograma(); // Actualiza el preview en el modal
+        cargarPreviewCronograma();
     };
 
     input.click();
