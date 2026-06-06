@@ -222,7 +222,7 @@ input:checked + .slider:before {
         <div onclick="mostrarHistorialEntregados()" class="menu-item">
             <i class="fas fa-history" style="margin-right:15px; width:24px;"></i> Historial de premios
         </div>
-        <div onclick="uploadCronograma()" class="menu-item">
+        <div onclick="showCronogramaModal()" class="menu-item">
             <i class="fas fa-calendar-alt" style="margin-right:15px; width:24px;"></i> Cronograma
         </div>
         <div onclick="instalarApp()" class="menu-item">
@@ -433,6 +433,30 @@ input:checked + .slider:before {
             <li>3. Toca <strong>"Agregar"</strong> en la esquina superior derecha</li>
         </ol>
         <button onclick="hideInstallIOSModal()" style="margin-top:30px; width:100%; padding:16px; background:#334155; color:white; border:none; border-radius:14px;">Entendido</button>
+    </div>
+</div>
+
+    <!-- Modal Cronograma -->
+<div id="modal-cronograma" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div style="background:#1e2937; max-width:480px; width:92%; border-radius:24px; padding:32px 28px; color:white; text-align:center;">
+        
+        <h2 style="margin-bottom:24px;">📅 Cronograma de Pagos</h2>
+
+        <!-- Preview de la imagen actual -->
+        <div id="cronograma-preview" style="margin-bottom:24px; min-height:180px; display:flex; align-items:center; justify-content:center; background:#0f172a; border-radius:16px; border:2px dashed #334155; overflow:hidden;">
+            <!-- Aquí se carga la imagen o un mensaje -->
+        </div>
+
+        <button onclick="uploadCronograma()" 
+                style="width:100%; padding:16px; font-size:1.1rem; font-weight:700; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer; margin-bottom:12px;">
+            📤 Subir / Reemplazar Cronograma
+        </button>
+
+        <button onclick="hideCronogramaModal()" 
+                style="width:100%; padding:16px; background:#334155; color:white; border:none; border-radius:16px; font-weight:600;">
+            Cerrar
+        </button>
+
     </div>
 </div>
 
@@ -1254,36 +1278,108 @@ function repetirTour() {
 }
 
 // ==================== CRONOGRAMA ====================
+
+function showCronogramaModal() {
+    toggleHamburgerMenu(); // Cierra el menú hamburguesa
+    document.getElementById('modal-cronograma').style.display = 'flex';
+    cargarPreviewCronograma();
+}
+
+function hideCronogramaModal() {
+    document.getElementById('modal-cronograma').style.display = 'none';
+}
+
+async function cargarPreviewCronograma() {
+    const previewContainer = document.getElementById('cronograma-preview');
+    previewContainer.innerHTML = `<p style="color:#64748b;">Cargando...</p>`;
+
+    const { data, error } = await _supabase
+        .from('suscriptores')
+        .select('cronograma_url')
+        .eq('id', currentSubscriberId)
+        .single();
+
+    if (error || !data || !data.cronograma_url) {
+        previewContainer.innerHTML = `
+            <div style="text-align:center; padding:40px 20px;">
+                <i class="fas fa-image" style="font-size:3rem; color:#475569; margin-bottom:16px;"></i>
+                <p style="color:#94a3b8;">Aún no has subido un cronograma</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Mostrar la imagen actual
+    previewContainer.innerHTML = `
+        <img src="${data.cronograma_url}" 
+             style="max-width:100%; max-height:280px; object-fit:contain; border-radius:12px;"
+             onerror="this.parentElement.innerHTML='<p style=color:#ef4444>Error al cargar la imagen</p>'">
+    `;
+}
+
+// Función mejorada de subida con limpieza automática
 async function uploadCronograma() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/png';
+    input.accept = 'image/png, image/jpeg, image/jpg';
+
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (!file.type.includes('png')) {
-            return alert("Solo se permiten archivos PNG");
+        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+            return alert("Solo se permiten archivos PNG o JPG");
         }
 
-        const fileName = `cronograma-${currentSubscriberId}.png`;
+        // 1. Eliminar archivos anteriores del mismo suscriptor (limpieza)
+        const folderPath = `cronogramas/${currentSubscriberId}`;
         
-        const { error } = await _supabase.storage
+        const { data: existingFiles } = await _supabase.storage
+            .from('cronogramas')
+            .list(folderPath);
+
+        if (existingFiles && existingFiles.length > 0) {
+            const filesToDelete = existingFiles.map(f => `${folderPath}/${f.name}`);
+            await _supabase.storage.from('cronogramas').remove(filesToDelete);
+        }
+
+        // 2. Subir el nuevo archivo
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${folderPath}/cronograma.${fileExt}`;
+
+        const { error: uploadError } = await _supabase.storage
             .from('cronogramas')
             .upload(fileName, file, { upsert: true });
 
-        if (error) {
-            alert("Error al subir: " + error.message);
-        } else {
-            const { data: urlData } = _supabase.storage.from('cronogramas').getPublicUrl(fileName);
-            await _supabase.from('suscriptores').update({ cronograma_url: urlData.publicUrl }).eq('id', currentSubscriberId);
-            alert("✅ Cronograma subido correctamente");
-            toggleHamburgerMenu();
+        if (uploadError) {
+            alert("Error al subir el cronograma: " + uploadError.message);
+            return;
         }
+
+        // 3. Obtener URL pública y guardar en la tabla
+        const { data: urlData } = _supabase.storage
+            .from('cronogramas')
+            .getPublicUrl(fileName);
+
+        const { error: updateError } = await _supabase
+            .from('suscriptores')
+            .update({ cronograma_url: urlData.publicUrl })
+            .eq('id', currentSubscriberId);
+
+        if (updateError) {
+            alert("Error al guardar la URL del cronograma");
+            return;
+        }
+
+        alert("✅ Cronograma actualizado correctamente");
+        
+        // Recargar el preview dentro del modal
+        cargarPreviewCronograma();
     };
+
     input.click();
 }
-
 // ==================== INSTALAR APP ====================
    // Detectar si se puede instalar la PWA
 window.addEventListener('beforeinstallprompt', (e) => {
