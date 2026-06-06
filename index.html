@@ -270,8 +270,14 @@ input:checked + .slider:before {
             <input type="text" id="login-user" placeholder="Nombre de usuario" 
                    style="width:100%; padding:18px 20px; margin-bottom:16px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
             
-            <input type="password" id="login-pass" placeholder="Contraseña" 
-                   style="width:100%; padding:18px 20px; margin-bottom:28px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
+           <div style="position: relative; margin-bottom: 28px;">
+                <input type="password" id="login-pass" placeholder="Contraseña" 
+                       style="width:100%; padding:18px 20px; padding-right: 50px; border-radius:16px; background:#0f172a; border:1px solid #334155; color:white; font-size:1.1rem; outline:none;">
+    
+                <i id="eye-login" class="fas fa-eye" 
+                   onclick="togglePasswordVisibility('login-pass', 'eye-login')"
+                   style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; font-size: 1.25rem;"></i>
+           </div>
 
             <button onclick="loginSuscriptor()" 
                     style="width:100%; padding:18px; font-size:1.2rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer; box-shadow:0 8px 25px rgba(34,211,238,0.4);">
@@ -584,7 +590,7 @@ async function loginSuscriptor() {
         document.getElementById('casino-name').textContent = casinoData.nombre_casino;
     }
 
-    switchTab(1);
+    switchTab(0);   // ← Ahora abre en "Vivo"
 
     // Iniciar tour (solo la primera vez)
     setTimeout(() => {
