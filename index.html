@@ -965,18 +965,18 @@ async function crearNuevoUsuario() {
         .from('usuarios')
         .select('id')
         .eq('subscriber_id', currentSubscriberId)
-        .ilike('username', username)   // ← Búsqueda sin importar mayúsculas/minúsculas
+        .ilike('username', username)
         .limit(1);
 
     if (errorCheck) {
-        return alert("Error al verificar usuario: " + errorCheck.message);
+        return alert("Error al verificar el usuario: " + errorCheck.message);
     }
 
     if (existente && existente.length > 0) {
         return alert(`El usuario "${username}" ya existe. Por favor elegí otro nombre.`);
     }
 
-    // === CREAR USUARIO ===
+    // === INTENTAR CREAR EL USUARIO ===
     const { error } = await _supabase.from('usuarios').insert({
         subscriber_id: currentSubscriberId,
         username: username,
@@ -985,12 +985,18 @@ async function crearNuevoUsuario() {
     });
 
     if (error) {
-        alert("Error al crear usuario: " + error.message);
-    } else {
-        alert(`✅ Usuario "${username}" creado correctamente`);
-        hideNewUserModal();
-        await cargarUsuarios();
+        // Manejo específico cuando la base de datos rechaza el duplicado (índice único)
+        if (error.code === '23505') {
+            return alert(`El usuario "${username}" ya existe. Por favor elegí otro nombre.`);
+        } else {
+            return alert("Error al crear el usuario: " + error.message);
+        }
     }
+
+    // Éxito
+    alert(`✅ Usuario "${username}" creado correctamente`);
+    hideNewUserModal();
+    await cargarUsuarios();
 }
     
     function abrirModalEditar(id, username, password, telefono) {
