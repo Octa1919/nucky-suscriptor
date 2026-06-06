@@ -1295,7 +1295,7 @@ async function cargarPreviewCronograma() {
 
     const { data, error } = await _supabase
         .from('suscriptores')
-        .select('cronograma_url')
+        .select('cronograma_url, cronograma_updated_at')
         .eq('id', currentSubscriberId)
         .single();
 
@@ -1309,14 +1309,20 @@ async function cargarPreviewCronograma() {
         return;
     }
 
-    // Mostrar la imagen actual
+    // === CACHE BUSTER ===
+    const cacheBuster = data.cronograma_updated_at 
+        ? `?v=${new Date(data.cronograma_updated_at).getTime()}` 
+        : `?v=${Date.now()}`;
+
+    const imageUrl = data.cronograma_url + cacheBuster;
+
     previewContainer.innerHTML = `
-        <img src="${data.cronograma_url}" 
+        <img src="${imageUrl}" 
              style="max-width:100%; max-height:280px; object-fit:contain; border-radius:12px;"
              onerror="this.parentElement.innerHTML='<p style=color:#ef4444>Error al cargar la imagen</p>'">
     `;
 }
-
+    
 // Función mejorada de subida con limpieza automática
 async function uploadCronograma() {
     const input = document.createElement('input');
@@ -1332,10 +1338,21 @@ async function uploadCronograma() {
             return alert("Solo se permiten archivos PNG o JPG");
         }
 
+        const previewContainer = document.getElementById('cronograma-preview');
+
+        // === MOSTRAR ESTADO DE CARGA ===
+        previewContainer.innerHTML = `
+            <div style="text-align:center; padding:50px 20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:2.8rem; color:#67e8f9; margin-bottom:18px;"></i>
+                <p style="color:#e0e7ff; font-size:1.15rem; font-weight:600;">Subiendo imagen...</p>
+                <p style="color:#94a3b8; font-size:0.95rem; margin-top:8px;">Por favor esperá un momento</p>
+            </div>
+        `;
+
         const fileExt = file.name.split('.').pop();
         const fileName = `cronogramas/${currentSubscriberId}/cronograma.${fileExt}`;
 
-        // 1. Eliminar archivos anteriores del suscriptor
+        // 1. Eliminar archivos anteriores
         const { data: existingFiles } = await _supabase.storage
             .from('cronogramas')
             .list(`cronogramas/${currentSubscriberId}`);
@@ -1352,6 +1369,7 @@ async function uploadCronograma() {
 
         if (uploadError) {
             alert("Error al subir el cronograma: " + uploadError.message);
+            cargarPreviewCronograma(); // Restauramos el preview anterior
             return;
         }
 
@@ -1360,7 +1378,7 @@ async function uploadCronograma() {
             .from('cronogramas')
             .getPublicUrl(fileName);
 
-        // 4. Guardar URL + timestamp de actualización
+        // 4. Guardar URL + timestamp
         const ahora = new Date().toISOString();
 
         const { error: updateError } = await _supabase
@@ -1373,10 +1391,13 @@ async function uploadCronograma() {
 
         if (updateError) {
             alert("Error al guardar el cronograma");
+            cargarPreviewCronograma();
             return;
         }
 
         alert("✅ Cronograma actualizado correctamente");
+
+        // 5. Recargar el preview (ya con cache buster)
         cargarPreviewCronograma();
     };
 
