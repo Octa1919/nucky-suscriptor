@@ -1332,22 +1332,21 @@ async function uploadCronograma() {
             return alert("Solo se permiten archivos PNG o JPG");
         }
 
-        // 1. Eliminar archivos anteriores del mismo suscriptor (limpieza)
-        const folderPath = `cronogramas/${currentSubscriberId}`;
-        
+        // Ruta organizada por suscriptor
+        const fileExt = file.name.split('.').pop();
+        const fileName = `cronogramas/${currentSubscriberId}/cronograma.${fileExt}`;
+
+        // 1. Eliminar archivos anteriores del suscriptor (limpieza)
         const { data: existingFiles } = await _supabase.storage
             .from('cronogramas')
-            .list(folderPath);
+            .list(`cronogramas/${currentSubscriberId}`);
 
         if (existingFiles && existingFiles.length > 0) {
-            const filesToDelete = existingFiles.map(f => `${folderPath}/${f.name}`);
+            const filesToDelete = existingFiles.map(f => `cronogramas/${currentSubscriberId}/${f.name}`);
             await _supabase.storage.from('cronogramas').remove(filesToDelete);
         }
 
-        // 2. Subir el nuevo archivo
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${folderPath}/cronograma.${fileExt}`;
-
+        // 2. Subir nuevo archivo
         const { error: uploadError } = await _supabase.storage
             .from('cronogramas')
             .upload(fileName, file, { upsert: true });
@@ -1357,11 +1356,12 @@ async function uploadCronograma() {
             return;
         }
 
-        // 3. Obtener URL pública y guardar en la tabla
+        // 3. Obtener URL pública
         const { data: urlData } = _supabase.storage
             .from('cronogramas')
             .getPublicUrl(fileName);
 
+        // 4. Guardar URL en la tabla suscriptores
         const { error: updateError } = await _supabase
             .from('suscriptores')
             .update({ cronograma_url: urlData.publicUrl })
@@ -1373,9 +1373,7 @@ async function uploadCronograma() {
         }
 
         alert("✅ Cronograma actualizado correctamente");
-        
-        // Recargar el preview dentro del modal
-        cargarPreviewCronograma();
+        cargarPreviewCronograma(); // Actualiza el preview en el modal
     };
 
     input.click();
