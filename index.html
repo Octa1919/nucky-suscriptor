@@ -671,37 +671,52 @@ async function loginSuscriptor() {
         else if (tab === 3) { // Difu
             content.innerHTML = `
                 <div class="card">
-                    <h2 style="margin-bottom:28px; color: white;">📢 Difusión OneSignal</h2>
+                    <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
+    
                     <div style="background:#1e2937; border-radius:20px; padding:28px;">
+        
+                        <!-- Tipo de envío -->
                         <div style="margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9">Enviar a:</label>
-                            <select id="target-type" onchange="toggleSpecificUser()" style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:none; border-radius:12px">
-                                <option value="all">Todos los usuarios de mi casino</option>
-                                <option value="specific">Usuario específico</option>
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
+                            <select id="target-type" onchange="toggleSpecificUser()" 
+                                    style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
+                                <option value="all">Todos mis jugadores</option>
+                                <option value="specific">Un jugador específico</option>
                             </select>
                         </div>
+
+                        <!-- Usuario específico -->
                         <div id="specific-user-field" style="display:none; margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9">Nombre de usuario:</label>
-                            <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:none; border-radius:12px">
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
+                            <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
+                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
                         </div>
+
+                        <!-- Título -->
                         <div style="margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9">Título de la notificación</label>
-                            <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción!" style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:none; border-radius:12px">
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
+                            <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
+                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
                         </div>
+
+                        <!-- Mensaje -->
                         <div style="margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9">Mensaje</label>
-                            <textarea id="notif-message" rows="4" placeholder="Escribe el mensaje que recibirán tus jugadores..." style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:none; border-radius:12px; resize:vertical"></textarea>
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
+                            <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
+                                      style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
                         </div>
-                        <button onclick="enviarNotificacion()" style="width:100%; padding:18px; font-size:18px; font-weight:bold; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer">
+
+                        <!-- Botón de envío -->
+                        <button onclick="enviarNotificacion()" 
+                                style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
                             🚀 Enviar Notificación
                         </button>
-                        <div id="notif-status" style="margin-top:20px; text-align:center; min-height:28px"></div>
+
+                        <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
                     </div>
                 </div>
             `;
-        }
-    }
-
+            
     function toggleSpecificUser() {
         const field = document.getElementById('specific-user-field');
         field.style.display = document.getElementById('target-type').value === 'specific' ? 'block' : 'none';
@@ -917,61 +932,69 @@ async function guardarConfigCompleta() {
 }
     
  // ==================== ENVÍO REAL A ONESIGNAL ====================
-  async function enviarNotificacion() {
-        const status = document.getElementById('notif-status');
-        status.innerHTML = `<span style="color:#67e8f9">Enviando notificación...</span>`;
+ async function enviarNotificacion() {
+    const status = document.getElementById('notif-status');
+    status.innerHTML = `<span style="color:#67e8f9">Enviando notificación...</span>`;
 
-        const target = document.getElementById('target-type').value;
-        const specificUser = document.getElementById('specific-username').value.trim();
-        const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
-        const message = document.getElementById('notif-message').value.trim();
+    const target = document.getElementById('target-type').value;
+    const specificUser = document.getElementById('specific-username').value.trim();
+    const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
+    const message = document.getElementById('notif-message').value.trim();
 
-        if (!message) {
-            status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío</span>`;
-            return;
-        }
-
-        const payload = {
-            app_id: "f1d17c3e-a156-4a64-a288-c1a4f04f686d",
-            headings: { "es": title },
-            contents: { "es": message },
-            url: "https://nucky-corp.vercel.app"
-        };
-
-        if (target === "all") {
-            payload.filters = [{ "field": "tag", "key": "subscriber_id", "relation": "=", "value": currentSubscriberId }];
-        } else if (target === "specific" && specificUser) {
-            payload.include_external_user_ids = [specificUser];
-        } else {
-            status.innerHTML = `<span style="color:#ef4444">Debe ingresar un usuario específico</span>`;
-            return;
-        }
-
-        try {
-            const response = await fetch("https://api.onesignal.com/api/v1/notifications", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Key os_v2_app_6hixypvbkzfgjiuiygspat3inw2ppprphvbugzfmxrtn7sf2odfjurr2imsuigaevmveg6rfrde2kam7ivm6qbkr35nqkinttlbsz4y"
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                status.innerHTML = `<span style="color:#67e8f9">✅ Notificación enviada correctamente</span>`;
-                document.getElementById('notif-title').value = '';
-                document.getElementById('notif-message').value = '';
-                if (target === "specific") document.getElementById('specific-username').value = '';
-            } else {
-                status.innerHTML = `<span style="color:#ef4444">Error: ${result.errors ? result.errors[0] : 'Desconocido'}</span>`;
-            }
-        } catch (err) {
-            status.innerHTML = `<span style="color:#ef4444">Error de conexión</span>`;
-            console.error(err);
-        }
+    if (!message) {
+        status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío.</span>`;
+        return;
     }
+
+    // Payload base
+    const payload = {
+        app_id: "f1d17c3e-a156-4a64-a288-c1a4f04f686d", // App ID de tu App de OneSignal del SaaS
+        headings: { "es": title },
+        contents: { "es": message },
+        url: "https://nucky-corp.vercel.app" // URL que se abre al tocar la notificación
+    };
+
+    // Filtros según el tipo de envío
+    if (target === "all") {
+        // Enviar a todos los jugadores de este suscriptor
+        payload.filters = [
+            { "field": "tag", "key": "subscriber_id", "relation": "=", "value": currentSubscriberId }
+        ];
+    } else if (target === "specific") {
+        if (!specificUser) {
+            status.innerHTML = `<span style="color:#ef4444">Debes ingresar el nombre de usuario.</span>`;
+            return;
+        }
+        payload.include_external_user_ids = [specificUser];
+    }
+
+    try {
+        const response = await fetch("https://api.onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Key os_v2_app_6hixypvbkzfgjiuiygspat3inu3gn4g7my3uufufbh2eklewx4d7ip4xgd54gbnaltr4bywe3lssmqoof6jkqaq36ngzevkbfzltf7a"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
+            // Limpiar campos
+            document.getElementById('notif-title').value = '';
+            document.getElementById('notif-message').value = '';
+            if (target === "specific") document.getElementById('specific-username').value = '';
+        } else {
+            console.error(result);
+            status.innerHTML = `<span style="color:#ef4444">Error: ${result.errors ? result.errors[0] : 'Desconocido'}</span>`;
+        }
+    } catch (err) {
+        console.error(err);
+        status.innerHTML = `<span style="color:#ef4444">Error de conexión con OneSignal</span>`;
+    }
+}
     
  // ==================== VIVO CON BUSCADOR ====================
 async function cargarResultadosVivo() {
