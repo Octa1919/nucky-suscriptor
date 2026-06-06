@@ -1332,11 +1332,11 @@ async function uploadCronograma() {
             return alert("Solo se permiten archivos PNG o JPG");
         }
 
-        // Ruta organizada por suscriptor
+        // Ruta correcta usando el subscriber_id
         const fileExt = file.name.split('.').pop();
         const fileName = `cronogramas/${currentSubscriberId}/cronograma.${fileExt}`;
 
-        // 1. Eliminar archivos anteriores del suscriptor (limpieza)
+        // Eliminar archivos anteriores del suscriptor (limpieza)
         const { data: existingFiles } = await _supabase.storage
             .from('cronogramas')
             .list(`cronogramas/${currentSubscriberId}`);
@@ -1346,7 +1346,7 @@ async function uploadCronograma() {
             await _supabase.storage.from('cronogramas').remove(filesToDelete);
         }
 
-        // 2. Subir nuevo archivo
+        // Subir el nuevo archivo
         const { error: uploadError } = await _supabase.storage
             .from('cronogramas')
             .upload(fileName, file, { upsert: true });
@@ -1356,12 +1356,12 @@ async function uploadCronograma() {
             return;
         }
 
-        // 3. Obtener URL pública
+        // Obtener URL pública
         const { data: urlData } = _supabase.storage
             .from('cronogramas')
             .getPublicUrl(fileName);
 
-        // 4. Guardar URL en la tabla suscriptores
+        // Guardar la URL en la tabla suscriptores
         const { error: updateError } = await _supabase
             .from('suscriptores')
             .update({ cronograma_url: urlData.publicUrl })
