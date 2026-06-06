@@ -122,6 +122,60 @@
     background: linear-gradient(90deg, #22d3ee, #67e8f9);
     color: #0f172a;
 }
+
+/* ==================== SWITCH / INTERRUPTOR ==================== */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #475569;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #22c55e;
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+/* ==================== TARJETA CBU ACTIVO ==================== */
+.cbu-activo {
+    border: 2.5px solid #22c55e !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.5),
+                0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    background: linear-gradient(145deg, #1e2937, #16213e) !important;
+}
     </style>
 </head>
 <body>
@@ -566,6 +620,7 @@ async function loginSuscriptor() {
    async function cargarCbus() {
     const div = document.getElementById('lista-cbus');
     if (!div) return;
+
     div.innerHTML = "<p>Cargando CBUs...</p>";
 
     const { data, error } = await _supabase
@@ -580,20 +635,26 @@ async function loginSuscriptor() {
     }
 
     div.innerHTML = data.map(c => `
-        <div class="user-item" onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre}', '${c.banco}')" 
-             style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
-            <div>
-                <strong>${c.alias_nombre}</strong><br>
-                <small>${c.banco} • ${c.cbu}</small>
+        <div class="user-item ${c.activo ? 'cbu-activo' : ''}" 
+             onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre}', '${c.banco}')">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="font-size:1.15rem;">${c.alias_nombre}</strong><br>
+                    <small style="color:#94a3b8;">${c.banco}</small><br>
+                    <span style="font-family:monospace; font-size:0.95rem;">${c.cbu}</span>
+                </div>
+
+                <!-- INTERRUPTOR -->
+                <label class="switch" onclick="event.stopImmediatePropagation();">
+                    <input type="checkbox" ${c.activo ? 'checked' : ''} 
+                           onchange="toggleCbuActivo('${c.id}', this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <label class="switch" onclick="event.stopImmediatePropagation();">
-                <input type="checkbox" ${c.activo ? 'checked' : ''} onchange="toggleCbuActivo('${c.id}', this.checked)">
-                <span class="slider"></span>
-            </label>
         </div>
     `).join('');
 }
-
     function showNuevoCbuModal() {
         document.getElementById('nuevo-cbu').value = '';
         document.getElementById('nuevo-alias').value = '';
@@ -628,10 +689,52 @@ async function loginSuscriptor() {
         }
     }
     
-    async function toggleCbuActivo(id, activo) {
-        await _supabase.from('cbus').update({ activo }).eq('id', id);
+   async function toggleCbuActivo(id, nuevoEstado) {
+    // Si está desactivando el CBU, solo actualizamos ese registro
+    if (!nuevoEstado) {
+        const { error } = await _supabase
+            .from('cbus')
+            .update({ activo: false })
+            .eq('id', id);
+
+        if (error) {
+            alert("Error al desactivar el CBU");
+            cargarCbus();
+            return;
+        }
         cargarCbus();
+        return;
     }
+
+    // === Si está activando un CBU ===
+
+    // 1. Desactivamos TODOS los CBUs de este suscriptor
+    const { error: errorDesactivar } = await _supabase
+        .from('cbus')
+        .update({ activo: false })
+        .eq('subscriber_id', currentSubscriberId);
+
+    if (errorDesactivar) {
+        alert("Error al actualizar los CBUs");
+        cargarCbus();
+        return;
+    }
+
+    // 2. Activamos solo el CBU seleccionado
+    const { error: errorActivar } = await _supabase
+        .from('cbus')
+        .update({ activo: true })
+        .eq('id', id);
+
+    if (errorActivar) {
+        alert("Error al activar el CBU seleccionado");
+        cargarCbus();
+        return;
+    }
+
+    // 3. Recargamos la lista para reflejar los cambios visuales
+    cargarCbus();
+}
     
 // ==================== CONFIGURACIÓN ====================
 async function showConfigModal() {
