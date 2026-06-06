@@ -700,69 +700,49 @@ async function loginSuscriptor() {
     }
     
 async function toggleCbuActivo(id, nuevoEstado) {
-    // Buscamos el switch que fue clickeado
     const switchElement = event.target.closest('.switch');
     const checkbox = event.target;
 
     if (!switchElement || !checkbox) return;
 
-    // === 1. ACTIVACIÓN VISUAL INMEDIATA (Optimista) ===
-    const card = switchElement.closest('.user-item');
-
-    if (nuevoEstado) {
-        // Desactivar visualmente todos los demás
-        document.querySelectorAll('.user-item').forEach(el => {
-            el.classList.remove('cbu-activo');
-            const otherCheckbox = el.querySelector('input[type="checkbox"]');
-            if (otherCheckbox) otherCheckbox.checked = false;
-        });
-
-        // Activar visualmente el seleccionado
-        if (card) card.classList.add('cbu-activo');
-    } else {
-        if (card) card.classList.remove('cbu-activo');
-    }
-
-    // === 2. ACTIVAR ESTADO DE CARGA ===
+    // Activamos estado de carga visual
     switchElement.classList.add('loading');
     checkbox.disabled = true;
 
     try {
         if (nuevoEstado) {
-            // Desactivar todos los CBUs del suscriptor
+            // Desactivamos todos los CBUs del suscriptor
             await _supabase
                 .from('cbus')
                 .update({ activo: false })
                 .eq('subscriber_id', currentSubscriberId);
 
-            // Activar solo el seleccionado
+            // Activamos solo el seleccionado
             await _supabase
                 .from('cbus')
                 .update({ activo: true })
                 .eq('id', id);
         } else {
-            // Solo desactivar el seleccionado
+            // Solo desactivamos el CBU actual
             await _supabase
                 .from('cbus')
                 .update({ activo: false })
                 .eq('id', id);
         }
 
-        // === Éxito: Quitar estado de carga ===
+        // === ÉXITO: Recargamos la lista de CBUs (rápido y limpio) ===
         switchElement.classList.remove('loading');
         checkbox.disabled = false;
+
+        cargarCbus(); // ← Esto asegura que todo quede visualmente correcto
 
     } catch (error) {
         console.error("Error al actualizar CBU:", error);
         
-        // === Error: Revertir cambios visuales ===
-        alert("Hubo un error al actualizar el CBU. Se recargará la lista.");
-        
-        // Quitamos el estado de carga
         switchElement.classList.remove('loading');
         checkbox.disabled = false;
 
-        // Recargamos toda la lista para dejar todo consistente
+        alert("Hubo un error al actualizar el CBU. Se recargará la lista.");
         cargarCbus();
     }
 }
