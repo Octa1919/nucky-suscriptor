@@ -232,7 +232,7 @@
         <div class="modal-content">
             <h2 style="margin-bottom:24px;">Crear Nuevo Usuario</h2>
             <input type="text" id="new-username" placeholder="Nombre de usuario">
-            <input type="text" id="new-password" placeholder="Contraseña">
+            <input type="password" id="new-password" placeholder="Contraseña">
             <input type="text" id="new-telefono" placeholder="Teléfono (opcional)">
             <button class="btn-primary" onclick="crearNuevoUsuario()">Crear Usuario</button>
             <button onclick="hideNewUserModal()" style="background:#334155;color:white;">Cancelar</button>
@@ -244,7 +244,10 @@
         <div class="modal-content">
             <h2 style="margin-bottom:24px;">Editar Usuario</h2>
             <input type="text" id="edit-username" placeholder="Nombre de usuario">
-            <input type="text" id="edit-password" placeholder="Contraseña">
+            <input type="password" id="edit-password" placeholder="Contraseña">
+            <small style="color:#94a3b8; font-size:0.85rem; margin-top:6px; display:block;">
+            Dejar en blanco para mantener la contraseña actual
+            </small>
             <input type="text" id="edit-telefono" placeholder="Teléfono">
             <button class="btn-primary" onclick="guardarEdicionUsuario()">Guardar Cambios</button>
             <button onclick="eliminarUsuarioActual()" style="background:#ef4444;color:white;margin-top:8px;">Eliminar Usuario</button>
@@ -928,25 +931,7 @@ function limpiarBusquedaVivo() {
         document.getElementById('modal-nuevo-usuario').style.display = 'none';
     }
     
-    async function crearNuevoUsuario() {
-        if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor. Vuelve a iniciar sesión.");
-        const username = document.getElementById('new-username').value.trim();
-        const password = document.getElementById('new-password').value.trim();
-        const telefono = document.getElementById('new-telefono').value.trim();
-        if (!username || !password) return alert("Usuario y contraseña son obligatorios");
-        const { error } = await _supabase.from('usuarios').insert({
-            subscriber_id: currentSubscriberId,
-            username: username,
-            password: password,
-            telefono: telefono || null
-        });
-        if (error) alert("Error: " + error.message);
-        else {
-            alert(`✅ Usuario "${username}" creado`);
-            hideNewUserModal();
-            await cargarUsuarios();
-        }
-    }
+   <input type="password" id="new-password" placeholder="Contraseña">
     
     function abrirModalEditar(id, username, password, telefono) {
         usuarioAEditarId = id;
@@ -961,22 +946,50 @@ function limpiarBusquedaVivo() {
         usuarioAEditarId = null;
     }
     
-    async function guardarEdicionUsuario() {
-        if (!usuarioAEditarId) return;
-        const username = document.getElementById('edit-username').value.trim();
-        const password = document.getElementById('edit-password').value.trim();
-        const telefono = document.getElementById('edit-telefono').value.trim();
-        const { error } = await _supabase
-            .from('usuarios')
-            .update({ username, password, telefono: telefono || null })
-            .eq('id', usuarioAEditarId);
-        if (error) alert("Error: " + error.message);
-        else {
-            alert("✅ Usuario actualizado");
-            hideEditarModal();
-            await cargarUsuarios();
+   async function guardarEdicionUsuario() {
+    if (!usuarioAEditarId) return;
+
+    const username = document.getElementById('edit-username').value.trim();
+    const password = document.getElementById('edit-password').value.trim();
+    const telefono = document.getElementById('edit-telefono').value.trim();
+
+    if (!username) {
+        return alert("El nombre de usuario es obligatorio");
+    }
+
+    // === VALIDACIÓN DE CONTRASEÑA (solo si se escribió una nueva) ===
+    if (password) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
+        if (!passwordRegex.test(password)) {
+            return alert("La contraseña debe tener:\n\n• Mínimo 8 caracteres\n• Al menos una letra mayúscula\n• Al menos una letra minúscula");
         }
     }
+
+    // Preparar los datos a actualizar
+    const datosActualizar = {
+        username: username,
+        telefono: telefono || null
+    };
+
+    // Solo actualizamos la contraseña si el campo no está vacío
+    if (password) {
+        datosActualizar.password = password;
+    }
+
+    const { error } = await _supabase
+        .from('usuarios')
+        .update(datosActualizar)
+        .eq('id', usuarioAEditarId);
+
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert("✅ Usuario actualizado correctamente");
+        hideEditarModal();
+        await cargarUsuarios();
+    }
+}
     
     async function eliminarUsuarioActual() {
         if (!usuarioAEditarId) return;
