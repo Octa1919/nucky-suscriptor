@@ -232,7 +232,12 @@
         <div class="modal-content">
             <h2 style="margin-bottom:24px;">Crear Nuevo Usuario</h2>
             <input type="text" id="new-username" placeholder="Nombre de usuario">
-            <input type="password" id="new-password" placeholder="Contraseña">
+            <div style="position: relative;">
+                <input type="password" id="new-password" placeholder="Contraseña" style="padding-right: 50px;">
+                <i id="eye-new" class="fas fa-eye" 
+                   onclick="togglePasswordVisibility('new-password', 'eye-new')"
+                   style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; font-size: 1.1rem;"></i>
+            </div>
             <input type="text" id="new-telefono" placeholder="Teléfono (opcional)">
             <button class="btn-primary" onclick="crearNuevoUsuario()">Crear Usuario</button>
             <button onclick="hideNewUserModal()" style="background:#334155;color:white;">Cancelar</button>
@@ -244,7 +249,15 @@
         <div class="modal-content">
             <h2 style="margin-bottom:24px;">Editar Usuario</h2>
             <input type="text" id="edit-username" placeholder="Nombre de usuario">
-            <input type="password" id="edit-password" placeholder="Contraseña">
+            <div style="position: relative; margin-bottom: 8px;">
+                <input type="password" id="edit-password" placeholder="Contraseña" style="padding-right: 50px;">
+                <i id="eye-edit" class="fas fa-eye" 
+                   onclick="togglePasswordVisibility('edit-password', 'eye-edit')"
+                   style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; font-size: 1.1rem;"></i>
+            </div>
+            <small style="color:#94a3b8; font-size:0.85rem; display:block; margin-bottom:12px;">
+                Dejar en blanco para mantener la contraseña actual
+            </small>
             <small style="color:#94a3b8; font-size:0.85rem; margin-top:6px; display:block;">
             Dejar en blanco para mantener la contraseña actual
             </small>
@@ -930,6 +943,41 @@ function limpiarBusquedaVivo() {
     function hideNewUserModal() {
     document.getElementById('modal-nuevo-usuario').style.display = 'none';
 }
+
+// ==================== CREAR USUARIO ====================
+async function crearNuevoUsuario() {
+    if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor.");
+
+    const username = document.getElementById('new-username').value.trim();
+    const password = document.getElementById('new-password').value.trim();
+    const telefono = document.getElementById('new-telefono').value.trim();
+
+    if (!username || !password) {
+        return alert("Usuario y contraseña son obligatorios");
+    }
+
+    // Validación de contraseña
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+        return alert("La contraseña debe tener:\n\n• Mínimo 8 caracteres\n• Al menos una letra mayúscula\n• Al menos una letra minúscula");
+    }
+
+    const { error } = await _supabase.from('usuarios').insert({
+        subscriber_id: currentSubscriberId,
+        username: username,
+        password: password,
+        telefono: telefono || null
+    });
+
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert(`✅ Usuario "${username}" creado correctamente`);
+        hideNewUserModal();
+        await cargarUsuarios();
+    }
+}
     
     function abrirModalEditar(id, username, password, telefono) {
         usuarioAEditarId = id;
@@ -1530,6 +1578,21 @@ function desuscribirseDeTodo() {
     if (suscripcionUsuarios) {
         _supabase.removeChannel(suscripcionUsuarios);
         suscripcionUsuarios = null;
+    }
+}
+    // ==================== MOSTRAR / OCULTAR CONTRASEÑA ====================
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
     }
 }
 </script>
