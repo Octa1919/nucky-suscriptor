@@ -669,55 +669,54 @@ async function loginSuscriptor() {
     }, 100);
 }
         else if (tab === 3) { // Difu
-    content.innerHTML = `
-        <div class="card">
-            <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
+            content.innerHTML = `
+                <div class="card">
+                    <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
     
-            <div style="background:#1e2937; border-radius:20px; padding:28px;">
+                    <div style="background:#1e2937; border-radius:20px; padding:28px;">
         
-                <!-- Tipo de envío -->
-                <div style="margin-bottom:20px">
-                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
-                    <select id="target-type" onchange="toggleSpecificUser()" 
-                            style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
-                        <option value="all">Todos mis jugadores</option>
-                        <option value="specific">Un jugador específico</option>
-                    </select>
+                        <!-- Tipo de envío -->
+                        <div style="margin-bottom:20px">
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
+                            <select id="target-type" onchange="toggleSpecificUser()" 
+                                    style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
+                                <option value="all">Todos mis jugadores</option>
+                                <option value="specific">Un jugador específico</option>
+                            </select>
+                        </div>
+
+                        <!-- Usuario específico -->
+                        <div id="specific-user-field" style="display:none; margin-bottom:20px">
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
+                            <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
+                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                        </div>
+
+                        <!-- Título -->
+                        <div style="margin-bottom:20px">
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
+                            <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
+                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                        </div>
+
+                        <!-- Mensaje -->
+                        <div style="margin-bottom:20px">
+                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
+                            <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
+                                      style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
+                        </div>
+
+                        <!-- Botón de envío -->
+                        <button onclick="enviarNotificacion()" 
+                                style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
+                            🚀 Enviar Notificación
+                        </button>
+
+                        <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
+                    </div>
                 </div>
-
-                <!-- Usuario específico -->
-                <div id="specific-user-field" style="display:none; margin-bottom:20px">
-                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
-                    <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
-                           style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
-                </div>
-
-                <!-- Título -->
-                <div style="margin-bottom:20px">
-                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
-                    <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
-                           style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
-                </div>
-
-                <!-- Mensaje -->
-                <div style="margin-bottom:20px">
-                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
-                    <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
-                              style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
-                </div>
-
-                <!-- Botón de envío -->
-                <button onclick="enviarNotificacion()" 
-                        style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
-                    🚀 Enviar Notificación
-                </button>
-
-                <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
-            </div>
-        </div>
-    `;
-}
-
+            `;
+        }
         function toggleSpecificUser() {
     const field = document.getElementById('specific-user-field');
     if (!field) return;
