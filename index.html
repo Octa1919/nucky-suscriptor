@@ -986,13 +986,11 @@ async function enviarNotificacion() {
 
         if (response.ok) {
             status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
-            
-            // Limpiar campos
             document.getElementById('notif-title').value = '';
             document.getElementById('notif-message').value = '';
             if (target === "specific") document.getElementById('specific-username').value = '';
         } else {
-            console.error("Error de Edge Function:", result);
+            console.error("Error Edge Function:", result);
             status.innerHTML = `<span style="color:#ef4444">Error: ${result.error || result.message || 'Desconocido'}</span>`;
         }
     } catch (err) {
