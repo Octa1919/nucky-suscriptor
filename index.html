@@ -668,7 +668,7 @@ async function loginSuscriptor() {
         }
     }, 100);
 }
-        else if (tab === 3) { // Difu
+               else if (tab === 3) { // Difu
             content.innerHTML = `
                 <div class="card">
                     <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
@@ -717,7 +717,8 @@ async function loginSuscriptor() {
                 </div>
             `;
         }
-        function toggleSpecificUser() {
+        
+       function toggleSpecificUser() {
     const field = document.getElementById('specific-user-field');
     if (!field) return;
     field.style.display = document.getElementById('target-type').value === 'specific' ? 'block' : 'none';
@@ -947,17 +948,14 @@ async function guardarConfigCompleta() {
         return;
     }
 
-    // Payload base
     const payload = {
-        app_id: "f1d17c3e-a156-4a64-a288-c1a4f04f686d", // App ID de tu App de OneSignal del SaaS
+        app_id: "f1d17c3e-a156-4a64-a288-c1a4f04f686d",
         headings: { "es": title },
         contents: { "es": message },
-        url: "https://nucky-corp.vercel.app" // URL que se abre al tocar la notificación
+        url: "https://nucky-corp.vercel.app"
     };
 
-    // Filtros según el tipo de envío
     if (target === "all") {
-        // Enviar a todos los jugadores de este suscriptor
         payload.filters = [
             { "field": "tag", "key": "subscriber_id", "relation": "=", "value": currentSubscriberId }
         ];
@@ -974,7 +972,7 @@ async function guardarConfigCompleta() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Key os_v2_app_6hixypvbkzfgjiuiygspat3inu3gn4g7my3uufufbh2eklewx4d7ip4xgd54gbnaltr4bywe3lssmqoof6jkqaq36ngzevkbfzltf7a"
+                "Authorization": "Key TU_NUEVA_CLAVE_ROTADA_AQUI"   // ← Acá va la clave nueva
             },
             body: JSON.stringify(payload)
         });
@@ -983,7 +981,6 @@ async function guardarConfigCompleta() {
 
         if (response.ok) {
             status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
-            // Limpiar campos
             document.getElementById('notif-title').value = '';
             document.getElementById('notif-message').value = '';
             if (target === "specific") document.getElementById('specific-username').value = '';
@@ -993,7 +990,7 @@ async function guardarConfigCompleta() {
         }
     } catch (err) {
         console.error(err);
-        status.innerHTML = `<span style="color:#ef4444">Error de conexión con OneSignal</span>`;
+        status.innerHTML = `<span style="color:#ef4444">Error de conexión</span>`;
     }
 }
     
