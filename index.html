@@ -970,7 +970,8 @@ async function enviarNotificacion() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "apikey": "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd" // tu public key
+                    "apikey": "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd",
+                    "Authorization": "Bearer sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd"   // ← Esta línea es clave
                 },
                 body: JSON.stringify({
                     subscriber_id: currentSubscriberId,
@@ -986,17 +987,16 @@ async function enviarNotificacion() {
 
         if (response.ok) {
             status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
-            // Limpiar campos
             document.getElementById('notif-title').value = '';
             document.getElementById('notif-message').value = '';
             if (target === "specific") document.getElementById('specific-username').value = '';
         } else {
-            console.error(result);
-            status.innerHTML = `<span style="color:#ef4444">Error: ${result.error || 'Desconocido'}</span>`;
+            console.error("Error de Edge Function:", result);
+            status.innerHTML = `<span style="color:#ef4444">Error: ${result.message || result.error || 'Desconocido'}</span>`;
         }
     } catch (err) {
         console.error(err);
-        status.innerHTML = `<span style="color:#ef4444">Error de conexión con el servidor</span>`;
+        status.innerHTML = `<span style="color:#ef4444">Error de conexión</span>`;
     }
 }
     
