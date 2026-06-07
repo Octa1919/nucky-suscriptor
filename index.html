@@ -971,7 +971,6 @@ async function enviarNotificacion() {
                 headers: {
                     "Content-Type": "application/json",
                     "apikey": "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd"
-                    // ← Quitamos completamente el header Authorization
                 },
                 body: JSON.stringify({
                     subscriber_id: currentSubscriberId,
@@ -987,6 +986,8 @@ async function enviarNotificacion() {
 
         if (response.ok) {
             status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
+            
+            // Limpiar campos
             document.getElementById('notif-title').value = '';
             document.getElementById('notif-message').value = '';
             if (target === "specific") document.getElementById('specific-username').value = '';
