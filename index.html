@@ -624,120 +624,116 @@ async function loginSuscriptor() {
     }
     
 // ==================== TABS ====================
-    async function switchTab(tab) {
-        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
-        const content = document.getElementById('tab-content');
+async function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === tab));
+    const content = document.getElementById('tab-content');
 
-      if (tab === 0) { // Vivo
-    content.innerHTML = `
-        <div class="card">
-            <h2 style="margin-bottom:20px; display:flex; align-items:center; gap:12px;">
-                <!-- Luz verde parpadeante -->
-                <span class="live-dot"></span>
-                <span>Vivo - Ruleta</span>
-            </h2>
-            
-            <!-- BUSCADOR POR CÓDIGO -->
-            <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
-                <input type="text" id="buscador-codigo" 
-                       placeholder="🔎 Buscar por código de premio..." 
-                       style="flex:1; padding:14px 18px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; font-size:1rem;"
-                       oninput="filtrarResultadosVivo()">
-                <button onclick="limpiarBusquedaVivo()" 
-                        style="padding:14px 22px; background:#334155; color:white; border:none; border-radius:12px; font-weight:600; white-space:nowrap;">
-                    Limpiar
-                </button>
-            </div>
-
-            <div id="lista-en-vivo">Cargando resultados en vivo...</div>
-        </div>
-    `;
-    cargarResultadosVivo();
-    suscribirseAVivo();           // ← Activar Realtime
-}
-        else if (tab === 1) { // CBU
-            content.innerHTML = `<div class="card"><h2 style="margin-bottom:28px;">🏦 Mis CBU</h2><button onclick="showNuevoCbuModal()" class="btn-primary" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button><div id="lista-cbus"></div></div>`;
-            cargarCbus();
-        } 
-        else if (tab === 2) { // Usuarios
-    content.innerHTML = `
-        <div class="card">
-            <h2>👥 Usuarios Jugadores</h2>
-            
-            <input type="text" id="buscador-usuarios" 
-                   placeholder="🔎 Buscar por usuario o teléfono..." 
-                   style="margin: 20px 0; padding:14px 16px; border-radius:12px; width:100%; background:#0f172a; color:white; border:1px solid #334155;">
-            
-            <button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">
-                + Crear Nuevo Usuario
-            </button>
-            
-            <div id="lista-usuarios"></div>
-        </div>
-    `;
-    
-    cargarUsuarios();
-    suscribirseAUsuarios(); // ← Realtime activado
-
-    // Buscador en tiempo real
-    setTimeout(() => {
-        const buscador = document.getElementById('buscador-usuarios');
-        if (buscador) {
-            buscador.addEventListener('input', cargarUsuarios);
-        }
-    }, 100);
-}
-        else if (tab === 3) { // Difu
-            content.innerHTML = `
-                <div class="card">
-                    <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
-    
-                    <div style="background:#1e2937; border-radius:20px; padding:28px;">
-        
-                        <!-- Tipo de envío -->
-                        <div style="margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
-                            <select id="target-type" onchange="toggleSpecificUser()" 
-                                    style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
-                                <option value="all">Todos mis jugadores</option>
-                                <option value="specific">Un jugador específico</option>
-                            </select>
-                        </div>
-
-                        <!-- Usuario específico -->
-                        <div id="specific-user-field" style="display:none; margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
-                            <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
-                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
-                        </div>
-
-                        <!-- Título -->
-                        <div style="margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
-                            <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
-                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
-                        </div>
-
-                        <!-- Mensaje -->
-                        <div style="margin-bottom:20px">
-                            <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
-                            <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
-                                      style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
-                        </div>
-
-                        <!-- Botón de envío -->
-                        <button onclick="enviarNotificacion()" 
-                                style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
-                            🚀 Enviar Notificación
-                        </button>
-
-                        <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
-                    </div>
+    if (tab === 0) { // Vivo
+        content.innerHTML = `
+            <div class="card">
+                <h2 style="margin-bottom:20px; display:flex; align-items:center; gap:12px;">
+                    <span class="live-dot"></span>
+                    <span>Vivo - Ruleta</span>
+                </h2>
+                
+                <div style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
+                    <input type="text" id="buscador-codigo" 
+                           placeholder="🔎 Buscar por código de premio..." 
+                           style="flex:1; padding:14px 18px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; font-size:1rem;"
+                           oninput="filtrarResultadosVivo()">
+                    <button onclick="limpiarBusquedaVivo()" 
+                            style="padding:14px 22px; background:#334155; color:white; border:none; border-radius:12px; font-weight:600; white-space:nowrap;">
+                        Limpiar
+                    </button>
                 </div>
-            `;
-        }
+
+                <div id="lista-en-vivo">Cargando resultados en vivo...</div>
+            </div>
+        `;
+        cargarResultadosVivo();
+        suscribirseAVivo();
+    } 
+    else if (tab === 1) { // CBU
+        content.innerHTML = `
+            <div class="card">
+                <h2 style="margin-bottom:28px;">🏦 Mis CBU</h2>
+                <button onclick="showNuevoCbuModal()" class="btn-primary" style="margin-bottom:20px;">+ Agregar Nuevo CBU</button>
+                <div id="lista-cbus"></div>
+            </div>
+        `;
+        cargarCbus();
+    } 
+    else if (tab === 2) { // Usuarios
+        content.innerHTML = `
+            <div class="card">
+                <h2>👥 Usuarios Jugadores</h2>
+                
+                <input type="text" id="buscador-usuarios" 
+                       placeholder="🔎 Buscar por usuario o teléfono..." 
+                       style="margin: 20px 0; padding:14px 16px; border-radius:12px; width:100%; background:#0f172a; color:white; border:1px solid #334155;">
+                
+                <button class="btn-primary" onclick="showNewUserModal()" style="margin-bottom:20px;">
+                    + Crear Nuevo Usuario
+                </button>
+                
+                <div id="lista-usuarios"></div>
+            </div>
+        `;
+        cargarUsuarios();
+        suscribirseAUsuarios();
+
+        setTimeout(() => {
+            const buscador = document.getElementById('buscador-usuarios');
+            if (buscador) buscador.addEventListener('input', cargarUsuarios);
+        }, 100);
+    } 
+    else if (tab === 3) { // Difu
+        content.innerHTML = `
+            <div class="card">
+                <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
+    
+                <div style="background:#1e2937; border-radius:20px; padding:28px;">
+    
+                    <div style="margin-bottom:20px">
+                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
+                        <select id="target-type" onchange="toggleSpecificUser()" 
+                                style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
+                            <option value="all">Todos mis jugadores</option>
+                            <option value="specific">Un jugador específico</option>
+                        </select>
+                    </div>
+
+                    <div id="specific-user-field" style="display:none; margin-bottom:20px">
+                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
+                        <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
+                               style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                    </div>
+
+                    <div style="margin-bottom:20px">
+                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
+                        <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
+                               style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                    </div>
+
+                    <div style="margin-bottom:20px">
+                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
+                        <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
+                                  style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
+                    </div>
+
+                    <button onclick="enviarNotificacion()" 
+                            style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
+                        🚀 Enviar Notificación
+                    </button>
+
+                    <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
+                </div>
+            </div>
+        `;
+    }
+}
         
- function toggleSpecificUser() {
+function toggleSpecificUser() {
     const field = document.getElementById('specific-user-field');
     if (!field) return;
     field.style.display = document.getElementById('target-type').value === 'specific' ? 'block' : 'none';
