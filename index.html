@@ -560,7 +560,12 @@ input:checked + .slider:before {
 async function loginSuscriptor() {
     const username = document.getElementById('login-user').value.trim();
     const password = document.getElementById('login-pass').value.trim();
-    if (!username || !password) return alert("Usuario y contraseña son obligatorios");
+    
+    if (!username || !password) {
+        return alert("Usuario y contraseña son obligatorios");
+    }
+
+    console.log("Intentando login con:", username);
 
     const { data, error } = await _supabase
         .from('suscriptores_users')
@@ -569,9 +574,24 @@ async function loginSuscriptor() {
         .eq('password', password)
         .single();
 
-    if (error || !data) return alert("Credenciales incorrectas");
+    console.log("Respuesta de Supabase:", { data, error });
 
-    currentSubscriberId = data.suscriptores.id;
+    if (error) {
+        console.error("Error de Supabase:", error);
+        return alert("Error de base de datos: " + error.message);
+    }
+
+    if (!data) {
+        return alert("Credenciales incorrectas");
+    }
+
+    currentSubscriberId = data.suscriptores?.id;
+    
+    if (!currentSubscriberId) {
+        console.error("No se pudo obtener el subscriber_id");
+        return alert("Error: No se detectó el suscriptor asociado");
+    }
+
     localStorage.setItem('subscriber_id', currentSubscriberId);
     localStorage.setItem('subscriber_username', username);
 
@@ -590,9 +610,8 @@ async function loginSuscriptor() {
         document.getElementById('casino-name').textContent = casinoData.nombre_casino;
     }
 
-    switchTab(0);   // ← Ahora abre en "Vivo"
+    switchTab(0);
 
-    // Iniciar tour (solo la primera vez)
     setTimeout(() => {
         iniciarTour(false);
     }, 1600);
