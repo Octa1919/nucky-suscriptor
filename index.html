@@ -687,7 +687,7 @@ async function loginSuscriptor() {
         }
     }, 100);
 }
-               else if (tab === 3) { // Difu
+        else if (tab === 3) { // Difu
             content.innerHTML = `
                 <div class="card">
                     <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
@@ -737,7 +737,7 @@ async function loginSuscriptor() {
             `;
         }
         
-       function toggleSpecificUser() {
+ function toggleSpecificUser() {
     const field = document.getElementById('specific-user-field');
     if (!field) return;
     field.style.display = document.getElementById('target-type').value === 'specific' ? 'block' : 'none';
