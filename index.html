@@ -970,8 +970,8 @@ async function enviarNotificacion() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "apikey": "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd",
-                    "Authorization": "Bearer sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd"   // ← Esta línea es clave
+                    "apikey": "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd"
+                    // ← Quitamos completamente el header Authorization
                 },
                 body: JSON.stringify({
                     subscriber_id: currentSubscriberId,
@@ -992,7 +992,7 @@ async function enviarNotificacion() {
             if (target === "specific") document.getElementById('specific-username').value = '';
         } else {
             console.error("Error de Edge Function:", result);
-            status.innerHTML = `<span style="color:#ef4444">Error: ${result.message || result.error || 'Desconocido'}</span>`;
+            status.innerHTML = `<span style="color:#ef4444">Error: ${result.error || result.message || 'Desconocido'}</span>`;
         }
     } catch (err) {
         console.error(err);
