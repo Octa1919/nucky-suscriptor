@@ -544,7 +544,6 @@ input:checked + .slider:before {
     let usuarioAEditarId = null;
     let deferredPrompt = null;
     let premiosVivoCache = [];
-    let esPremiumSuscriptor = false;   // ← NUEVA
 
     // === REALTIME ===
     let suscripcionVivo = null;
@@ -559,38 +558,63 @@ input:checked + .slider:before {
     
 // ==================== LOGIN ====================
 async function loginSuscriptor() {
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value.trim();
-
+    const username = document.getElementById('login-user').value.trim();
+    const password = document.getElementById('login-pass').value.trim();
+    
     if (!username || !password) {
-        return mostrarErrorLogin("Usuario y contraseña son obligatorios");
+        return alert("Usuario y contraseña son obligatorios");
     }
+
+    console.log("Intentando login con:", username);
 
     const { data, error } = await _supabase
         .from('suscriptores_users')
-        .select(`
-            *,
-            suscriptores (id, nombre_casino, slug),
-            planes (id, nombre, es_premium)
-        `)
+        .select('*, suscriptores(id)')
         .eq('nombre', username)
         .eq('password', password)
         .single();
 
-    if (error || !data) {
-        return mostrarErrorLogin("Usuario o contraseña incorrectos");
+    console.log("Respuesta de Supabase:", { data, error });
+
+    if (error) {
+        console.error("Error de Supabase:", error);
+        return alert("Error de base de datos: " + error.message);
     }
 
-    // Guardamos el suscriptor y el estado premium
-    suscriptorActual = data;
-    esPremiumSuscriptor = data.planes?.es_premium || false;
+    if (!data) {
+        return alert("Credenciales incorrectas");
+    }
 
-    // Ocultamos login y mostramos la app
+    currentSubscriberId = data.suscriptores?.id;
+    
+    if (!currentSubscriberId) {
+        console.error("No se pudo obtener el subscriber_id");
+        return alert("Error: No se detectó el suscriptor asociado");
+    }
+
+    localStorage.setItem('subscriber_id', currentSubscriberId);
+    localStorage.setItem('subscriber_username', username);
+
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('header-logged').style.display = 'flex';
 
-    // Cargar datos iniciales
-    await cargarDatosIniciales();
+    // Cargar nombre del casino
+    const { data: casinoData } = await _supabase
+        .from('suscriptores')
+        .select('nombre_casino')
+        .eq('id', currentSubscriberId)
+        .single();
+
+    if (casinoData && casinoData.nombre_casino) {
+        document.getElementById('casino-name').textContent = casinoData.nombre_casino;
+    }
+
+    switchTab(0);
+
+    setTimeout(() => {
+        iniciarTour(false);
+    }, 1600);
 }
 
     async function cargarNombreCasino() {
@@ -664,32 +688,6 @@ async function switchTab(tab) {
         }, 100);
     } 
     else if (tab === 3) { // Difu
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-        const contenido = document.getElementById(`tab-content-${tab}`);
-        const boton = document.getElementById(`tab-btn-${tab}`);
-
-        if (contenido) contenido.style.display = 'block';
-        if (boton) boton.classList.add('active');
-
-        // === BLOQUEO DE DIFU (Premium) ===
-        if (tab === 3 && !esPremiumSuscriptor) {
-            mostrarModalPremium(
-                "Función Exclusiva Premium",
-                "La sección de Difusión y Notificaciones está disponible solo para planes Premium."
-            );
-            // Volvemos a la pestaña anterior (Vivo)
-            setTimeout(() => switchTab(0), 50);
-            return;
-        }
-
-        // Cargar contenido según la pestaña
-        if (tab === 0) cargarVivo();
-        if (tab === 1) cargarCBU();
-        if (tab === 2) cargarUsuarios();
-        if (tab === 3 && esPremiumSuscriptor) cargarDifu(); // Solo si es premium
-    }
         content.innerHTML = `
             <div class="card">
                 <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
