@@ -544,6 +544,7 @@ input:checked + .slider:before {
     let usuarioAEditarId = null;
     let deferredPrompt = null;
     let premiosVivoCache = [];
+    let esPremiumSuscriptor = false;   // ← NUEVA
 
     // === REALTIME ===
     let suscripcionVivo = null;
@@ -558,63 +559,38 @@ input:checked + .slider:before {
     
 // ==================== LOGIN ====================
 async function loginSuscriptor() {
-    const username = document.getElementById('login-user').value.trim();
-    const password = document.getElementById('login-pass').value.trim();
-    
-    if (!username || !password) {
-        return alert("Usuario y contraseña son obligatorios");
-    }
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
 
-    console.log("Intentando login con:", username);
+    if (!username || !password) {
+        return mostrarErrorLogin("Usuario y contraseña son obligatorios");
+    }
 
     const { data, error } = await _supabase
         .from('suscriptores_users')
-        .select('*, suscriptores(id)')
+        .select(`
+            *,
+            suscriptores (id, nombre_casino, slug),
+            planes (id, nombre, es_premium)
+        `)
         .eq('nombre', username)
         .eq('password', password)
         .single();
 
-    console.log("Respuesta de Supabase:", { data, error });
-
-    if (error) {
-        console.error("Error de Supabase:", error);
-        return alert("Error de base de datos: " + error.message);
+    if (error || !data) {
+        return mostrarErrorLogin("Usuario o contraseña incorrectos");
     }
 
-    if (!data) {
-        return alert("Credenciales incorrectas");
-    }
+    // Guardamos el suscriptor y el estado premium
+    suscriptorActual = data;
+    esPremiumSuscriptor = data.planes?.es_premium || false;
 
-    currentSubscriberId = data.suscriptores?.id;
-    
-    if (!currentSubscriberId) {
-        console.error("No se pudo obtener el subscriber_id");
-        return alert("Error: No se detectó el suscriptor asociado");
-    }
-
-    localStorage.setItem('subscriber_id', currentSubscriberId);
-    localStorage.setItem('subscriber_username', username);
-
+    // Ocultamos login y mostramos la app
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    document.getElementById('header-logged').style.display = 'flex';
+    document.getElementById('main-app').style.display = 'block';
 
-    // Cargar nombre del casino
-    const { data: casinoData } = await _supabase
-        .from('suscriptores')
-        .select('nombre_casino')
-        .eq('id', currentSubscriberId)
-        .single();
-
-    if (casinoData && casinoData.nombre_casino) {
-        document.getElementById('casino-name').textContent = casinoData.nombre_casino;
-    }
-
-    switchTab(0);
-
-    setTimeout(() => {
-        iniciarTour(false);
-    }, 1600);
+    // Cargar datos iniciales
+    await cargarDatosIniciales();
 }
 
     async function cargarNombreCasino() {
