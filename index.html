@@ -1933,13 +1933,14 @@ function suscribirseAUsuarios() {
         .subscribe();
 }
 
-    // ==================== SUSCRIPCIÓN EN TIEMPO REAL AL PLAN ====================
+// ==================== SUSCRIPCIÓN EN TIEMPO REAL AL PLAN ====================
 function iniciarSuscripcionPlan() {
     // Si ya existe una suscripción anterior, la eliminamos
     if (suscripcionPlan) {
         _supabase.removeChannel(suscripcionPlan);
     }
 
+    // Usamos currentSubscriberId (que sí tenemos) para filtrar por subscriber_id
     suscripcionPlan = _supabase
         .channel('plan-changes-' + currentSubscriberId)
         .on(
@@ -1948,7 +1949,7 @@ function iniciarSuscripcionPlan() {
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'suscriptores_users',
-                filter: `id=eq.${suscriptorActual?.id || ''}`   // Mejor si tenés el id del suscriptores_users
+                filter: `subscriber_id=eq.${currentSubscriberId}`
             },
             async (payload) => {
                 console.log('🔄 Cambio detectado en el plan del suscriptor:', payload);
@@ -1968,18 +1969,18 @@ function iniciarSuscripcionPlan() {
                     if (nuevoEstadoPremium !== esPremiumSuscriptor) {
                         esPremiumSuscriptor = nuevoEstadoPremium;
 
-                        // Mostramos un aviso lindo al usuario
+                        // Mostramos aviso
                         mostrarAvisoPlanActualizado(planData?.nombre || 'tu plan');
 
-                        // Opcional: si está en una pestaña bloqueada y ahora es premium, podemos recargar
-                        // (por ahora lo dejamos simple)
+                        // Opcional: si ahora es premium y está en una pestaña bloqueada, podemos recargar
+                        // (por ahora lo dejamos simple, pero se puede mejorar)
                     }
                 }
             }
         )
         .subscribe();
 }
-
+    
 function desuscribirseDeTodo() {
     if (suscripcionVivo) {
         _supabase.removeChannel(suscripcionVivo);
