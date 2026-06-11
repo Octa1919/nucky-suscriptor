@@ -566,33 +566,44 @@ async function loginSuscriptor() {
         return alert("Usuario y contraseña son obligatorios");
     }
 
-    const { data, error } = await _supabase
+    // 1. Traemos el usuario + suscriptor
+    const { data: userData, error: userError } = await _supabase
         .from('suscriptores_users')
-        .select(`
-            *,
-            suscriptores (id, nombre_casino),
-            planes:plan_id (id, nombre, es_premium)
-        `)
+        .select('*, suscriptores(id, nombre_casino)')
         .eq('nombre', username)
         .eq('password', password)
         .single();
 
-    if (error || !data) {
-        console.error("Error de login:", error);
+    if (userError || !userData) {
+        console.error("Error de login:", userError);
         return alert("Credenciales incorrectas");
     }
 
-    currentSubscriberId = data.suscriptores?.id;
-    
+    currentSubscriberId = userData.suscriptores?.id;
+
     if (!currentSubscriberId) {
         return alert("Error: No se detectó el suscriptor asociado");
     }
 
-    // === DETECCIÓN DE PLAN PREMIUM ===
-    esPremiumSuscriptor = data.planes?.es_premium === true;
+    // 2. Traemos el plan de forma explícita usando el plan_id
+    let esPremium = false;
 
-    console.log("Usuario logueado:", username);
-    console.log("¿Es plan Premium?:", esPremiumSuscriptor);
+    if (userData.plan_id) {
+        const { data: planData } = await _supabase
+            .from('planes')
+            .select('es_premium')
+            .eq('id', userData.plan_id)
+            .single();
+
+        esPremium = planData?.es_premium === true;
+    }
+
+    esPremiumSuscriptor = esPremium;
+
+    console.log("=== LOGIN ===");
+    console.log("Usuario:", username);
+    console.log("plan_id del usuario:", userData.plan_id);
+    console.log("¿Es Premium?:", esPremiumSuscriptor);
 
     localStorage.setItem('subscriber_id', currentSubscriberId);
     localStorage.setItem('subscriber_username', username);
@@ -601,8 +612,8 @@ async function loginSuscriptor() {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('header-logged').style.display = 'flex';
 
-    if (data.suscriptores?.nombre_casino) {
-        document.getElementById('casino-name').textContent = data.suscriptores.nombre_casino;
+    if (userData.suscriptores?.nombre_casino) {
+        document.getElementById('casino-name').textContent = userData.suscriptores.nombre_casino;
     }
 
     switchTab(0);
