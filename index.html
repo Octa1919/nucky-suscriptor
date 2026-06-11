@@ -664,6 +664,32 @@ async function switchTab(tab) {
         }, 100);
     } 
     else if (tab === 3) { // Difu
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        const contenido = document.getElementById(`tab-content-${tab}`);
+        const boton = document.getElementById(`tab-btn-${tab}`);
+
+        if (contenido) contenido.style.display = 'block';
+        if (boton) boton.classList.add('active');
+
+        // === BLOQUEO DE DIFU (Premium) ===
+        if (tab === 3 && !esPremiumSuscriptor) {
+            mostrarModalPremium(
+                "Función Exclusiva Premium",
+                "La sección de Difusión y Notificaciones está disponible solo para planes Premium."
+            );
+            // Volvemos a la pestaña anterior (Vivo)
+            setTimeout(() => switchTab(0), 50);
+            return;
+        }
+
+        // Cargar contenido según la pestaña
+        if (tab === 0) cargarVivo();
+        if (tab === 1) cargarCBU();
+        if (tab === 2) cargarUsuarios();
+        if (tab === 3 && esPremiumSuscriptor) cargarDifu(); // Solo si es premium
+    }
         content.innerHTML = `
             <div class="card">
                 <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
