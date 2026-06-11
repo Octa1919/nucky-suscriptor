@@ -545,6 +545,7 @@ input:checked + .slider:before {
     let deferredPrompt = null;
     let premiosVivoCache = [];
     let esPremiumSuscriptor = false;
+    let suscripcionPlan = null;
 
     // === REALTIME ===
     let suscripcionVivo = null;
@@ -599,6 +600,7 @@ async function loginSuscriptor() {
     }
 
     esPremiumSuscriptor = esPremium;
+    iniciarSuscripcionPlan();
 
     console.log("=== LOGIN ===");
     console.log("Usuario:", username);
@@ -1309,8 +1311,14 @@ async function crearNuevoUsuario() {
         }
     }
     
-       function logout() {
-    desuscribirseDeTodo();           // ← Importante
+   function logout() {
+    desuscribirseDeTodo();
+    
+    if (suscripcionPlan) {
+        _supabase.removeChannel(suscripcionPlan);
+        suscripcionPlan = null;
+    }
+
     localStorage.removeItem('subscriber_id');
     currentSubscriberId = null;
     location.reload();
@@ -1925,6 +1933,53 @@ function suscribirseAUsuarios() {
         .subscribe();
 }
 
+    // ==================== SUSCRIPCIÓN EN TIEMPO REAL AL PLAN ====================
+function iniciarSuscripcionPlan() {
+    // Si ya existe una suscripción anterior, la eliminamos
+    if (suscripcionPlan) {
+        _supabase.removeChannel(suscripcionPlan);
+    }
+
+    suscripcionPlan = _supabase
+        .channel('plan-changes-' + currentSubscriberId)
+        .on(
+            'postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'suscriptores_users',
+                filter: `id=eq.${suscriptorActual?.id || ''}`   // Mejor si tenés el id del suscriptores_users
+            },
+            async (payload) => {
+                console.log('🔄 Cambio detectado en el plan del suscriptor:', payload);
+
+                // Si cambió el plan_id
+                if (payload.new.plan_id !== payload.old.plan_id) {
+                    // Traemos el nuevo estado de premium
+                    const { data: planData } = await _supabase
+                        .from('planes')
+                        .select('es_premium, nombre')
+                        .eq('id', payload.new.plan_id)
+                        .single();
+
+                    const nuevoEstadoPremium = planData?.es_premium === true;
+
+                    // Solo actualizamos si realmente cambió el estado
+                    if (nuevoEstadoPremium !== esPremiumSuscriptor) {
+                        esPremiumSuscriptor = nuevoEstadoPremium;
+
+                        // Mostramos un aviso lindo al usuario
+                        mostrarAvisoPlanActualizado(planData?.nombre || 'tu plan');
+
+                        // Opcional: si está en una pestaña bloqueada y ahora es premium, podemos recargar
+                        // (por ahora lo dejamos simple)
+                    }
+                }
+            }
+        )
+        .subscribe();
+}
+
 function desuscribirseDeTodo() {
     if (suscripcionVivo) {
         _supabase.removeChannel(suscripcionVivo);
@@ -2025,5 +2080,28 @@ function mostrarAvisoNativo(mensaje) {
         aviso.style.opacity = '0';
         setTimeout(() => aviso.remove(), 300);
     }, 2300);
+}
+
+    function mostrarAvisoPlanActualizado(nombrePlan) {
+    const aviso = document.createElement('div');
+    aviso.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1e2937; color:#e5e7eb; padding:16px 24px; border-radius:14px; border:1px solid #334155; box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.3); z-index:99999; max-width:92%; text-align:center;';
+    
+    aviso.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px; justify-content:center;">
+            <i class="fas fa-sync-alt" style="color:#22d3ee; font-size:1.3rem;"></i>
+            <div>
+                <strong style="color:#22d3ee;">¡Plan actualizado!</strong><br>
+                <span style="font-size:0.95rem;">Ahora tenés acceso a: <strong>${nombrePlan}</strong></span>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(aviso);
+
+    setTimeout(() => {
+        aviso.style.transition = 'all 0.4s ease';
+        aviso.style.opacity = '0';
+        setTimeout(() => aviso.remove(), 400);
+    }, 3800);
 }
 </script>
