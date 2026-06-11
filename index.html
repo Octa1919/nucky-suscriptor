@@ -544,6 +544,7 @@ input:checked + .slider:before {
     let usuarioAEditarId = null;
     let deferredPrompt = null;
     let premiosVivoCache = [];
+    let esPremiumSuscriptor = false;
 
     // === REALTIME ===
     let suscripcionVivo = null;
@@ -565,32 +566,29 @@ async function loginSuscriptor() {
         return alert("Usuario y contraseña son obligatorios");
     }
 
-    console.log("Intentando login con:", username);
-
     const { data, error } = await _supabase
         .from('suscriptores_users')
-        .select('*, suscriptores(id)')
+        .select(`
+            *,
+            suscriptores (id, nombre_casino),
+            planes (id, nombre, es_premium)
+        `)
         .eq('nombre', username)
         .eq('password', password)
         .single();
 
-    console.log("Respuesta de Supabase:", { data, error });
-
-    if (error) {
-        console.error("Error de Supabase:", error);
-        return alert("Error de base de datos: " + error.message);
-    }
-
-    if (!data) {
+    if (error || !data) {
         return alert("Credenciales incorrectas");
     }
 
     currentSubscriberId = data.suscriptores?.id;
     
     if (!currentSubscriberId) {
-        console.error("No se pudo obtener el subscriber_id");
         return alert("Error: No se detectó el suscriptor asociado");
     }
+
+    // === GUARDAMOS EL ESTADO PREMIUM ===
+    esPremiumSuscriptor = data.planes?.es_premium || false;
 
     localStorage.setItem('subscriber_id', currentSubscriberId);
     localStorage.setItem('subscriber_username', username);
@@ -599,15 +597,8 @@ async function loginSuscriptor() {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('header-logged').style.display = 'flex';
 
-    // Cargar nombre del casino
-    const { data: casinoData } = await _supabase
-        .from('suscriptores')
-        .select('nombre_casino')
-        .eq('id', currentSubscriberId)
-        .single();
-
-    if (casinoData && casinoData.nombre_casino) {
-        document.getElementById('casino-name').textContent = casinoData.nombre_casino;
+    if (data.suscriptores?.nombre_casino) {
+        document.getElementById('casino-name').textContent = data.suscriptores.nombre_casino;
     }
 
     switchTab(0);
@@ -688,8 +679,19 @@ async function switchTab(tab) {
         }, 100);
     } 
     else if (tab === 3) { // Difu
-        content.innerHTML = `
-            <div class="card">
+    // === BLOQUEO PREMIUM ===
+    if (!esPremiumSuscriptor) {
+        mostrarModalPremium(
+            "Función Exclusiva Premium",
+            "La sección de Difusión y Notificaciones está disponible solo para planes Premium (Anual+ y Premium)."
+        );
+        // Volvemos automáticamente a la pestaña Vivo
+        setTimeout(() => switchTab(0), 80);
+        return;
+    }
+
+    content.innerHTML = `
+        <div class="card">
                 <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
     
                 <div style="background:#1e2937; border-radius:20px; padding:28px;">
@@ -1936,7 +1938,11 @@ function togglePasswordVisibility(inputId, iconId) {
 
     // ==================== PESTAÑAS INTERNAS DEL MODAL CONFIGURAR ====================
 function switchConfigTab(tabIndex) {
-    // Ocultar todos los contenidos
+    // === BLOQUEO DE RULETA EN CONFIG (Premium) ===
+    if (tabIndex === 3 && !esPremiumSuscriptor) {
+        mostrarAvisoNativo("La configuración de Ruleta es exclusiva de planes Premium.");
+        return; // No permite cambiar a la pestaña
+    }
     for (let i = 0; i < 4; i++) {
         const content = document.getElementById('config-tab-content-' + i);
         const btn = document.getElementById('config-tab-btn-' + i);
@@ -1957,5 +1963,40 @@ function switchConfigTab(tabIndex) {
         activeBtn.style.background = '#22d3ee';
         activeBtn.style.color = '#0f172a';
     }
+}
+
+    // ==================== MODAL PREMIUM LINDO ====================
+function mostrarModalPremium(titulo, mensaje) {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:99999;';
+    
+    modal.innerHTML = `
+        <div style="background:#111827; border:1px solid #334155; border-radius:20px; padding:32px 28px; max-width:380px; text-align:center; box-shadow:0 25px 50px -12px rgb(0 0 0 / 0.4);">
+            <div style="font-size:3rem; margin-bottom:12px;">⭐</div>
+            <h3 style="margin:0 0 12px 0; color:#fbbf24; font-size:1.35rem;">${titulo}</h3>
+            <p style="color:#94a3b8; margin-bottom:24px; line-height:1.5;">${mensaje}</p>
+            
+            <button onclick="this.closest('div[style*=\'position:fixed\']').remove()" 
+                    style="background:#22c55e; color:white; border:none; padding:12px 32px; border-radius:12px; font-weight:700; cursor:pointer; font-size:1rem;">
+                Entendido
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// ==================== AVISO NATIVO (Toast) ====================
+function mostrarAvisoNativo(mensaje) {
+    const aviso = document.createElement('div');
+    aviso.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1f2937; color:#e5e7eb; padding:14px 24px; border-radius:12px; border:1px solid #334155; box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.3); z-index:99999; font-size:0.95rem; max-width:90%;';
+    aviso.innerHTML = `<strong style="color:#fbbf24;">⭐</strong> ${mensaje}`;
+    
+    document.body.appendChild(aviso);
+    
+    setTimeout(() => {
+        aviso.style.transition = 'all 0.3s ease';
+        aviso.style.opacity = '0';
+        setTimeout(() => aviso.remove(), 300);
+    }, 2300);
 }
 </script>
