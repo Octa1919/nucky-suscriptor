@@ -571,13 +571,14 @@ async function loginSuscriptor() {
         .select(`
             *,
             suscriptores (id, nombre_casino),
-            planes (id, nombre, es_premium)
+            planes:plan_id (id, nombre, es_premium)
         `)
         .eq('nombre', username)
         .eq('password', password)
         .single();
 
     if (error || !data) {
+        console.error("Error de login:", error);
         return alert("Credenciales incorrectas");
     }
 
@@ -587,8 +588,11 @@ async function loginSuscriptor() {
         return alert("Error: No se detectó el suscriptor asociado");
     }
 
-    // === GUARDAMOS EL ESTADO PREMIUM ===
-    esPremiumSuscriptor = data.planes?.es_premium || false;
+    // === DETECCIÓN DE PLAN PREMIUM ===
+    esPremiumSuscriptor = data.planes?.es_premium === true;
+
+    console.log("Usuario logueado:", username);
+    console.log("¿Es plan Premium?:", esPremiumSuscriptor);
 
     localStorage.setItem('subscriber_id', currentSubscriberId);
     localStorage.setItem('subscriber_username', username);
@@ -1965,9 +1969,14 @@ function switchConfigTab(tabIndex) {
     }
 }
 
-    // ==================== MODAL PREMIUM LINDO ====================
+// ==================== MODAL PREMIUM LINDO (CORREGIDO) ====================
 function mostrarModalPremium(titulo, mensaje) {
+    // Eliminar modal anterior si existe
+    const anterior = document.querySelector('.modal-premium');
+    if (anterior) anterior.remove();
+
     const modal = document.createElement('div');
+    modal.className = 'modal-premium';
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:99999;';
     
     modal.innerHTML = `
@@ -1976,13 +1985,20 @@ function mostrarModalPremium(titulo, mensaje) {
             <h3 style="margin:0 0 12px 0; color:#fbbf24; font-size:1.35rem;">${titulo}</h3>
             <p style="color:#94a3b8; margin-bottom:24px; line-height:1.5;">${mensaje}</p>
             
-            <button onclick="this.closest('div[style*=\'position:fixed\']').remove()" 
+            <button class="btn-cerrar-modal-premium"
                     style="background:#22c55e; color:white; border:none; padding:12px 32px; border-radius:12px; font-weight:700; cursor:pointer; font-size:1rem;">
                 Entendido
             </button>
         </div>
     `;
+    
     document.body.appendChild(modal);
+
+    // Evento para cerrar el modal (más confiable)
+    const btnCerrar = modal.querySelector('.btn-cerrar-modal-premium');
+    if (btnCerrar) {
+        btnCerrar.onclick = () => modal.remove();
+    }
 }
 
 // ==================== AVISO NATIVO (Toast) ====================
