@@ -1,0 +1,24 @@
+{
+  "name": "Nucky - App Suscriptores",
+  "short_name": "Nucky - Members",
+  "description": "App oficial de Nucky para suscriptores",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#a855f7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "nuckymembers.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "nuckymembers.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
