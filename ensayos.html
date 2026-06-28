@@ -800,28 +800,25 @@ function toggleSpecificUser() {
     field.style.display = document.getElementById('target-type').value === 'specific' ? 'block' : 'none';
 }
 
-// ============================================
-// SINCRONIZAR COLOR PICKER CON INPUT DE TEXTO
-// ============================================
+// ======================================================
+// FUNCIONES PARA SINCRONIZAR COLOR PICKER + INPUT TEXTO
+// ======================================================
 function syncColorInput(textInput, pickerId) {
     const picker = document.getElementById(pickerId);
-    if (picker) {
-        picker.value = textInput.value;
-    }
+    if (picker) picker.value = textInput.value;
 }
 
-// También sincronizar cuando se usa el color picker
 function setupColorSync() {
     const primaryPicker = document.getElementById('config-primary-color');
-    const primaryText = document.getElementById('config-primary-color-text');
-    const accentPicker = document.getElementById('config-accent-color');
-    const accentText = document.getElementById('config-accent-color-text');
+    const primaryText   = document.getElementById('config-primary-color-text');
+    const accentPicker  = document.getElementById('config-accent-color');
+    const accentText    = document.getElementById('config-accent-color-text');
 
     if (primaryPicker && primaryText) {
-        primaryPicker.oninput = () => primaryText.value = primaryPicker.value;
+        primaryPicker.oninput = () => { primaryText.value = primaryPicker.value; };
     }
     if (accentPicker && accentText) {
-        accentPicker.oninput = () => accentText.value = accentPicker.value;
+        accentPicker.oninput = () => { accentText.value = accentPicker.value; };
     }
 }
 
