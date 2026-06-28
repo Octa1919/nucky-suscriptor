@@ -949,7 +949,7 @@ async function showConfigModal() {
 
     const { data } = await _supabase
         .from('suscriptores')
-        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada')
+        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada, primary_color, accent_color')
         .eq('id', currentSubscriberId)
         .single();
 
@@ -965,10 +965,25 @@ async function showConfigModal() {
         document.getElementById('config-premios-normal').value = data.premios_normal || '';
         document.getElementById('config-premios-dorada').value = data.premios_dorada || '';
         document.getElementById('config-dias-dorada').value = data.dias_dorada || 7;
+
+        // === NUEVO: Cargar colores ===
+        const primary = data.primary_color || '#a855f7';
+        const accent  = data.accent_color  || '#c026d3';
+
+        document.getElementById('config-primary-color').value = primary;
+        document.getElementById('config-primary-color-text').value = primary;
+
+        document.getElementById('config-accent-color').value = accent;
+        document.getElementById('config-accent-color-text').value = accent;
     }
 
     document.getElementById('modal-config').style.display = 'flex';
     switchConfigTab(0);
+
+    // Inicializar sincronización de colores
+    setTimeout(() => {
+        setupColorSync();
+    }, 150);
 }
 
 function hideConfigModal() {
