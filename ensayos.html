@@ -1006,11 +1006,9 @@ async function guardarConfigCompleta() {
     const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
     const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
 
-    console.log("🔍 Datos que se van a guardar:", {
-        premios_normal: premiosNormal,
-        premios_dorada: premiosDorada,
-        dias_dorada: diasDorada
-    });
+    // === NUEVO: Leer colores ===
+    const primaryColor = document.getElementById('config-primary-color').value;
+    const accentColor  = document.getElementById('config-accent-color').value;
 
     // Validación básica de links
     const urlRegex = /^https?:\/\//i;
@@ -1033,15 +1031,17 @@ async function guardarConfigCompleta() {
             telegram: telegram || null,
             premios_normal: premiosNormal || null,
             premios_dorada: premiosDorada || null,
-            dias_dorada: diasDorada
+            dias_dorada: diasDorada,
+            primary_color: primaryColor,
+            accent_color: accentColor
         })
         .eq('id', currentSubscriberId);
 
     if (error) {
         alert("Error al guardar: " + error.message);
     } else {
-        alert("✅ Configuración guardada correctamente");
-        await cargarNombreCasino();     // ← Esta línea actualiza el nombre en el header
+        alert("✅ Configuración guardada correctamente (incluyendo colores)");
+        await cargarNombreCasino();
         hideConfigModal();
     }
 }
