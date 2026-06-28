@@ -417,51 +417,52 @@ input:checked + .slider:before {
             <!-- PESTAÑA 0: GENERAL -->
             <div id="config-tab-content-0">
                 <h3 style="margin:8px 0 14px; color:#67e8f9; font-size:1.1rem;">General</h3>
+    
                 <label>Nombre del Casino</label>
                 <input type="text" id="config-nombre" style="width:100%; padding:14px; margin-bottom:16px; border-radius:12px; background:#0f172a; color:white; border:none;">
 
                 <label>WhatsApp de atención</label>
                 <input type="text" id="config-whatsapp" style="width:100%; padding:14px; margin-bottom:8px; border-radius:12px; background:#0f172a; color:white; border:none;">
-            </div>
 
-            <!-- ============================================ -->
-            <!-- NUEVO: Colores de la App de Jugadores -->
-            <!-- ============================================ -->
-            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #334155;">
-                <h4 style="color:#67e8f9; font-size:1.05rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-palette"></i> 
-                    <span>Colores de la App de Jugadores</span>
-                </h4>
-                <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:16px; line-height:1.4;">
-                    Estos colores se aplicarán automáticamente en la App de todos tus jugadores.
-                </p>
-    
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
-        
-                    <!-- Color Principal -->
-                    <div>
-                        <label style="margin-bottom:6px; display:block; color:#cbd5e1; font-size:0.95rem;">Color Principal</label>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <input type="color" id="config-primary-color" value="#a855f7" 
-                                   style="width:58px; height:46px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer; box-shadow:0 0 0 1px #334155;">
-                            <input type="text" id="config-primary-color-text" value="#a855f7" 
-                                   style="flex:1; padding:11px 14px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace; font-size:0.95rem;"
-                                   oninput="syncColorInput(this, 'config-primary-color')">
+                <!-- ============================================ -->
+                <!-- COLORES DE LA APP DE JUGADORES (SOLO AQUÍ) -->
+                <!-- ============================================ -->
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #334155;">
+                    <h4 style="color:#67e8f9; font-size:1.05rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-palette"></i> 
+                        <span>Colores de la App de Jugadores</span>
+                    </h4>
+                    <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:16px; line-height:1.4;">
+                        Estos colores se aplicarán automáticamente en la App de todos tus jugadores.
+                    </p>
+            
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+            
+                        <!-- Color Principal -->
+                        <div>
+                            <label style="margin-bottom:6px; display:block; color:#cbd5e1; font-size:0.95rem;">Color Principal</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <input type="color" id="config-primary-color" value="#a855f7" 
+                                       style="width:58px; height:46px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer; box-shadow:0 0 0 1px #334155;">
+                                <input type="text" id="config-primary-color-text" value="#a855f7" 
+                                       style="flex:1; padding:11px 14px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace; font-size:0.95rem;"
+                                       oninput="syncColorInput(this, 'config-primary-color')">
+                            </div>
                         </div>
-                    </div>
-        
-                    <!-- Color Acento -->
-                    <div>
-                        <label style="margin-bottom:6px; display:block; color:#cbd5e1; font-size:0.95rem;">Color Acento</label>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <input type="color" id="config-accent-color" value="#c026d3" 
-                       style="width:58px; height:46px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer; box-shadow:0 0 0 1px #334155;">
-                            <input type="text" id="config-accent-color-text" value="#c026d3" 
-                                   style="flex:1; padding:11px 14px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace; font-size:0.95rem;"
-                                   oninput="syncColorInput(this, 'config-accent-color')">
+            
+                        <!-- Color Acento -->
+                        <div>
+                            <label style="margin-bottom:6px; display:block; color:#cbd5e1; font-size:0.95rem;">Color Acento</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <input type="color" id="config-accent-color" value="#c026d3" 
+                                       style="width:58px; height:46px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer; box-shadow:0 0 0 1px #334155;">
+                                <input type="text" id="config-accent-color-text" value="#c026d3" 
+                                       style="flex:1; padding:11px 14px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace; font-size:0.95rem;"
+                                       oninput="syncColorInput(this, 'config-accent-color')">
+                            </div>
                         </div>
+            
                     </div>
-        
                 </div>
             </div>
 
