@@ -1038,6 +1038,24 @@ async function showConfigModal() {
 
         document.getElementById('config-accent-color').value = accent;
         document.getElementById('config-accent-color-text').value = accent;
+
+        // Cargar valores de la sección "Estilo"
+        if (suscriptor.button_color) {
+            document.getElementById('config-button-color').value = suscriptor.button_color;
+            document.getElementById('config-button-color-text').value = suscriptor.button_color;
+        }
+        if (suscriptor.button_style) {
+            document.getElementById('config-button-style').value = suscriptor.button_style;
+        }
+        if (suscriptor.button_text_color) {
+            document.getElementById('config-button-text-color').value = suscriptor.button_text_color;
+            document.getElementById('config-button-text-color-text').value = suscriptor.button_text_color;
+        }
+
+        // Actualizar la vista previa del botón
+        setTimeout(() => {
+            updateButtonPreview();
+        }, 100);
     }
 
     document.getElementById('modal-config').style.display = 'flex';
