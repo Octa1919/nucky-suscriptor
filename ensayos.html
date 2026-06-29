@@ -2226,12 +2226,12 @@ function adjustColor(hex, percent) {
 }
 
 function restablecerEstiloBotones() {
-    // Colores originales que aparecen en index.html (producción)
+    // Valores originales de index.html (producción)
     const originalButtonColor = '#22d3ee';      // Cian original
     const originalButtonStyle = 'gradient';
-    const originalTextColor = '#0f172a';        // Texto oscuro (como en .btn-cargar y .btn-atencion)
+    const originalTextColor   = '#0f172a';      // Texto oscuro original
 
-    // Aplicar a los campos
+    // Aplicar a los inputs
     document.getElementById('config-button-color').value = originalButtonColor;
     document.getElementById('config-button-color-text').value = originalButtonColor;
 
@@ -2240,7 +2240,7 @@ function restablecerEstiloBotones() {
     document.getElementById('config-button-text-color').value = originalTextColor;
     document.getElementById('config-button-text-color-text').value = originalTextColor;
 
-    // Actualizar la vista previa
+    // Actualizar la vista previa del botón
     updateButtonPreview();
 
     alert("✅ Se restablecieron los colores originales de la App de Jugadores.");
