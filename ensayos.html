@@ -514,7 +514,7 @@ input:checked + .slider:before {
                         </div>
                     </div>
 
-                    <!-- Vista Previa del Botón -->
+                  <!-- Vista Previa del Botón -->
                     <div>
                         <label style="display:block; margin-bottom: 8px; color:#94a3b8; font-size:0.9rem;">
                             Vista previa
@@ -525,19 +525,18 @@ input:checked + .slider:before {
                         </button>
                     </div>
 
-                </div>
-            </div>
+                    <!-- Botón de Restablecer (DENTRO de la tarjeta) -->
+                    <div style="margin-top: 16px; text-align: center;">
+                        <button onclick="restablecerEstiloBotones()" 
+                                style="background: #475569; color: white; border: none; padding: 10px 18px; 
+                                       border-radius: 10px; font-size: 0.9rem; cursor: pointer; display: flex; 
+                                       align-items: center; gap: 8px; margin: 0 auto;">
+                            <i class="fas fa-undo"></i>
+                            <span>Restablecer colores originales</span>
+                        </button>
+                    </div>
 
-            <!-- Botón de Restablecer -->
-            <div style="margin-top: 16px; text-align: center;">
-                <button onclick="restablecerEstiloBotones()" 
-                        style="background: #475569; color: white; border: none; padding: 10px 20px; 
-                               border-radius: 10px; font-size: 0.9rem; cursor: pointer; display: flex; 
-                               align-items: center; gap: 8px; margin: 0 auto;">
-                    <i class="fas fa-undo"></i>
-                    <span>Restablecer a valores originales</span>
-                </button>
-            </div>
+                </div>
 
             <!-- PESTAÑA 1: SALAS DE JUEGO -->
             <div id="config-tab-content-1" style="display:none;">
