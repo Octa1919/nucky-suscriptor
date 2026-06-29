@@ -2226,26 +2226,26 @@ function adjustColor(hex, percent) {
 }
 
 function restablecerEstiloBotones() {
-    // Valores originales (tema cian nativo)
-    const defaultButtonColor = '#22d3ee';
-    const defaultButtonStyle = 'gradient';
-    const defaultTextColor = '#0f172a';   // Texto oscuro (como era originalmente)
+    // Colores originales que aparecen en index.html (producción)
+    const originalButtonColor = '#22d3ee';      // Cian original
+    const originalButtonStyle = 'gradient';
+    const originalTextColor = '#0f172a';        // Texto oscuro (como en .btn-cargar y .btn-atencion)
 
-    // Aplicar valores a los campos
-    document.getElementById('config-button-color').value = defaultButtonColor;
-    document.getElementById('config-button-color-text').value = defaultButtonColor;
+    // Aplicar a los campos
+    document.getElementById('config-button-color').value = originalButtonColor;
+    document.getElementById('config-button-color-text').value = originalButtonColor;
 
-    document.getElementById('config-button-style').value = defaultButtonStyle;
+    document.getElementById('config-button-style').value = originalButtonStyle;
 
-    document.getElementById('config-button-text-color').value = defaultTextColor;
-    document.getElementById('config-button-text-color-text').value = defaultTextColor;
+    document.getElementById('config-button-text-color').value = originalTextColor;
+    document.getElementById('config-button-text-color-text').value = originalTextColor;
 
-    // Actualizar vista previa
+    // Actualizar la vista previa
     updateButtonPreview();
 
-    alert("✅ Se restablecieron los valores originales del estilo de botones.");
+    alert("✅ Se restablecieron los colores originales de la App de Jugadores.");
 }
-
+    
     // ==================== PESTAÑAS INTERNAS DEL MODAL CONFIGURAR ====================
 function switchConfigTab(tabIndex) {
     // === BLOQUEO DE RULETA EN CONFIG (Premium) ===
