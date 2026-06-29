@@ -467,63 +467,73 @@ input:checked + .slider:before {
                 <!-- ====================================================== -->
                 <!-- SECCIÓN: ESTILO DE BOTONES (NUEVA) -->
                 <!-- ====================================================== -->
-                <h3 style="margin: 24px 0 12px 0; color: #e2e8f0;">Estilo</h3>
+               <h3 style="margin: 24px 0 12px 0; color: #e2e8f0;">Estilo</h3>
 
                 <div style="background: #1e2937; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
 
-                    <!-- Color del Botón -->
-                    <div style="margin-bottom: 18px;">
-                        <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
-                            Color de los botones
-                        </label>
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            <input type="color" id="config-button-color" value="#a855f7" 
-                                   style="width:60px; height:42px; border:none; border-radius:8px; cursor:pointer;"
-                                   oninput="syncColorInput(this, 'config-button-color-text'); updateButtonPreview();">
-                            <input type="text" id="config-button-color-text" value="#a855f7" 
-                                   style="flex:1; padding:10px; background:#0f172a; border:1px solid #475569; border-radius:8px; color:white;"
-                                   oninput="syncColorInput(this, 'config-button-color'); updateButtonPreview();">
-                        </div>
+                <!-- Color del Botón -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
+                        Color de los botones
+                    </label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="color" id="config-button-color" value="#22d3ee" 
+                               style="width:58px; height:46px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer; box-shadow:0 0 0 1px #334155;">
+                        <input type="text" id="config-button-color-text" value="#22d3ee" 
+                               style="flex:1; padding:11px 14px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace; font-size:0.95rem;"
+                               oninput="syncColorInput(this, 'config-button-color'); updateButtonPreview();">
                     </div>
+                </div>
 
-                    <!-- Estilo del Botón -->
-                    <div style="margin-bottom: 18px;">
-                        <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
-                            Estilo del botón
-                        </label>
-                        <select id="config-button-style" 
-                                style="width:100%; padding:12px; background:#0f172a; border:1px solid #475569; border-radius:10px; color:white; font-size:1rem;"
-                                onchange="updateButtonPreview()">
-                            <option value="gradient">Degradado</option>
-                            <option value="solid">Sólido</option>
-                        </select>
+                <!-- Estilo del Botón -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
+                        Estilo del botón
+                    </label>
+                    <select id="config-button-style" 
+                            style="width:100%; padding:12px; background:#0f172a; border:1px solid #475569; border-radius:10px; color:white; font-size:1rem;"
+                            onchange="updateButtonPreview()">
+                        <option value="gradient">Degradado</option>
+                        <option value="solid">Sólido</option>
+                    </select>
+                </div>
+
+                <!-- Color del Texto -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
+                        Color del texto de los botones
+                    </label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="color" id="config-button-text-color" value="#0f172a" 
+                               style="width:58px; height:46px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer; box-shadow:0 0 0 1px #334155;">
+                        <input type="text" id="config-button-text-color-text" value="#0f172a" 
+                               style="flex:1; padding:11px 14px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace; font-size:0.95rem;"
+                               oninput="syncColorInput(this, 'config-button-text-color'); updateButtonPreview();">
                     </div>
+                </div>
 
-                    <!-- Color del Texto -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
-                            Color del texto de los botones
-                        </label>
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            <input type="color" id="config-button-text-color" value="#ffffff" 
-                                   style="width:60px; height:42px; border:none; border-radius:8px; cursor:pointer;"
-                                   oninput="syncColorInput(this, 'config-button-text-color-text'); updateButtonPreview();">
-                            <input type="text" id="config-button-text-color-text" value="#ffffff" 
-                                   style="flex:1; padding:10px; background:#0f172a; border:1px solid #475569; border-radius:8px; color:white;"
-                                   oninput="syncColorInput(this, 'config-button-text-color'); updateButtonPreview();">
-                        </div>
-                    </div>
+                <!-- Vista Previa + Restablecer -->
+                <div>
+                    <label style="display:block; margin-bottom: 8px; color:#94a3b8; font-size:0.9rem;">
+                        Vista previa
+                    </label>
+                    <button id="button-preview" 
+                            style="width:100%; padding:14px; border-radius:12px; font-size:1rem; font-weight:700; border:none; cursor:default; margin-bottom:12px;">
+                        Botón de ejemplo
+                    </button>
 
-                  <!-- Vista Previa del Botón -->
-                    <div>
-                        <label style="display:block; margin-bottom: 8px; color:#94a3b8; font-size:0.9rem;">
-                            Vista previa
-                        </label>
-                        <button id="button-preview" 
-                                style="width:100%; padding:14px; border-radius:12px; font-size:1rem; font-weight:700; border:none; cursor:default;">
-                            Botón de ejemplo
+                    <div style="text-align: center;">
+                        <button onclick="restablecerEstiloBotones()" 
+                                style="background: #475569; color: white; border: none; padding: 8px 16px; 
+                                       border-radius: 8px; font-size: 0.85rem; cursor: pointer; display: inline-flex; 
+                                       align-items: center; gap: 6px;">
+                            <i class="fas fa-undo"></i>
+                            <span>Restablecer colores originales</span>
                         </button>
                     </div>
+            </div>
+
+            </div>
 
                     <!-- Botón de Restablecer (DENTRO de la tarjeta) -->
                     <div style="margin-top: 16px; text-align: center;">
