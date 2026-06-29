@@ -1012,7 +1012,7 @@ async function showConfigModal() {
 
     const { data } = await _supabase
         .from('suscriptores')
-        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada, primary_color, accent_color')
+        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada, primary_color, accent_color, button_color, button_style, button_text_color')
         .eq('id', currentSubscriberId)
         .single();
 
@@ -1029,7 +1029,7 @@ async function showConfigModal() {
         document.getElementById('config-premios-dorada').value = data.premios_dorada || '';
         document.getElementById('config-dias-dorada').value = data.dias_dorada || 7;
 
-        // === NUEVO: Cargar colores ===
+        // === Colores principales ===
         const primary = data.primary_color || '#a855f7';
         const accent  = data.accent_color  || '#c026d3';
 
@@ -1039,20 +1039,20 @@ async function showConfigModal() {
         document.getElementById('config-accent-color').value = accent;
         document.getElementById('config-accent-color-text').value = accent;
 
-        // Cargar valores de la sección "Estilo"
-        if (suscriptor.button_color) {
-            document.getElementById('config-button-color').value = suscriptor.button_color;
-            document.getElementById('config-button-color-text').value = suscriptor.button_color;
+        // === NUEVO: Cargar sección "Estilo" ===
+        if (data.button_color) {
+            document.getElementById('config-button-color').value = data.button_color;
+            document.getElementById('config-button-color-text').value = data.button_color;
         }
-        if (suscriptor.button_style) {
-            document.getElementById('config-button-style').value = suscriptor.button_style;
+        if (data.button_style) {
+            document.getElementById('config-button-style').value = data.button_style;
         }
-        if (suscriptor.button_text_color) {
-            document.getElementById('config-button-text-color').value = suscriptor.button_text_color;
-            document.getElementById('config-button-text-color-text').value = suscriptor.button_text_color;
+        if (data.button_text_color) {
+            document.getElementById('config-button-text-color').value = data.button_text_color;
+            document.getElementById('config-button-text-color-text').value = data.button_text_color;
         }
 
-        // Actualizar la vista previa del botón
+        // Actualizar vista previa del botón
         setTimeout(() => {
             updateButtonPreview();
         }, 100);
