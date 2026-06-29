@@ -2225,44 +2225,24 @@ function adjustColor(hex, percent) {
 }
 
 function restablecerEstiloBotones() {
-    console.log('%c[Restablecer] Intentando restablecer colores...', 'color:#f59e0b');
-
-    const colorInput = document.getElementById('config-button-color');
-    const colorText  = document.getElementById('config-button-color-text');
-    const styleSelect = document.getElementById('config-button-style');
-    const textColorInput = document.getElementById('config-button-text-color');
-    const textColorText  = document.getElementById('config-button-text-color-text');
-    const preview = document.getElementById('button-preview');
-
-    if (!colorInput || !styleSelect || !textColorInput) {
-        console.error('%c[Restablecer] No se encontraron los campos del formulario', 'color:#ef4444');
-        alert("Error: No se pudieron encontrar los campos de configuración.");
-        return;
-    }
-
-    // Valores originales de index.html
-    const originalButtonColor = '#22d3ee';
+    // Valores originales de index.html (producción)
+    const originalButtonColor = '#22d3ee';      // Cian original
     const originalButtonStyle = 'gradient';
-    const originalTextColor   = '#0f172a';
+    const originalTextColor   = '#0f172a';      // Texto oscuro original
 
-    // Aplicar valores
-    colorInput.value = originalButtonColor;
-    if (colorText) colorText.value = originalButtonColor;
+    // Aplicar a los inputs
+    document.getElementById('config-button-color').value = originalButtonColor;
+    document.getElementById('config-button-color-text').value = originalButtonColor;
 
-    styleSelect.value = originalButtonStyle;
+    document.getElementById('config-button-style').value = originalButtonStyle;
 
-    textColorInput.value = originalTextColor;
-    if (textColorText) textColorText.value = originalTextColor;
+    document.getElementById('config-button-text-color').value = originalTextColor;
+    document.getElementById('config-button-text-color-text').value = originalTextColor;
 
-    // Actualizar vista previa
-    if (typeof updateButtonPreview === 'function') {
-        updateButtonPreview();
-    } else {
-        console.warn('%c[Restablecer] updateButtonPreview no está definida', 'color:#f59e0b');
-    }
+    // Actualizar la vista previa del botón
+    updateButtonPreview();
 
-    console.log('%c[Restablecer] Colores restablecidos correctamente', 'color:#22c55e');
-    alert("✅ Se restablecieron los colores originales.");
+    alert("✅ Se restablecieron los colores originales de la App de Jugadores.");
 }
     
     // ==================== PESTAÑAS INTERNAS DEL MODAL CONFIGURAR ====================
