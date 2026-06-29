@@ -1004,14 +1004,7 @@ async function showConfigModal() {
         document.getElementById('config-accent-color').value = accent;
         document.getElementById('config-accent-color-text').value = accent;
 
-        // === NUEVO: Cargar sección "Estilo" ===
-        if (data.button_color) {
-            document.getElementById('config-button-color').value = data.button_color;
-            document.getElementById('config-button-color-text').value = data.button_color;
-        }
-        if (data.button_style) {
-            document.getElementById('config-button-style').value = data.button_style;
-        }
+        // Cargar color del texto de los botones
         if (data.button_text_color) {
             document.getElementById('config-button-text-color').value = data.button_text_color;
             document.getElementById('config-button-text-color-text').value = data.button_text_color;
