@@ -2225,12 +2225,14 @@ function adjustColor(hex, percent) {
 }
 
 function restablecerEstiloBotones() {
-    // Valores originales de index.html (producción)
-    const originalButtonColor = '#22d3ee';      // Cian original
-    const originalButtonStyle = 'gradient';
-    const originalTextColor   = '#0f172a';      // Texto oscuro original
+    console.log('%c[Restablecer] Restableciendo colores originales...', 'color:#f59e0b');
 
-    // Aplicar a los inputs
+    // Valores originales de index.html
+    const originalButtonColor = '#22d3ee';
+    const originalButtonStyle = 'gradient';
+    const originalTextColor   = '#0f172a';
+
+    // Aplicar a los campos del formulario
     document.getElementById('config-button-color').value = originalButtonColor;
     document.getElementById('config-button-color-text').value = originalButtonColor;
 
@@ -2239,10 +2241,16 @@ function restablecerEstiloBotones() {
     document.getElementById('config-button-text-color').value = originalTextColor;
     document.getElementById('config-button-text-color-text').value = originalTextColor;
 
-    // Actualizar la vista previa del botón
-    updateButtonPreview();
+    // Actualizar vista previa
+    if (typeof updateButtonPreview === 'function') {
+        updateButtonPreview();
+    }
 
-    alert("✅ Se restablecieron los colores originales de la App de Jugadores.");
+    // === IMPORTANTE: Guardar automáticamente los cambios ===
+    alert("Colores restablecidos. Guardando cambios...");
+
+    // Llamamos directamente a guardarConfigCompleta()
+    guardarConfigCompleta();
 }
     
     // ==================== PESTAÑAS INTERNAS DEL MODAL CONFIGURAR ====================
