@@ -1087,12 +1087,14 @@ async function guardarConfigCompleta() {
     const premiosDorada = document.getElementById('config-premios-dorada').value.trim();
     const diasDorada = parseInt(document.getElementById('config-dias-dorada').value) || 7;
 
-    // === NUEVO: Leer colores ===
+    // === Colores principales ===
     const primaryColor = document.getElementById('config-primary-color').value;
     const accentColor  = document.getElementById('config-accent-color').value;
-    button_color: document.getElementById('config-button-color').value,
-    button_style: document.getElementById('config-button-style').value,
-    button_text_color: document.getElementById('config-button-text-color').value,
+
+    // === NUEVO: Campos de la sección "Estilo" ===
+    const buttonColor     = document.getElementById('config-button-color').value;
+    const buttonStyle     = document.getElementById('config-button-style').value;
+    const buttonTextColor = document.getElementById('config-button-text-color').value;
 
     // Validación básica de links
     const urlRegex = /^https?:\/\//i;
@@ -1117,14 +1119,18 @@ async function guardarConfigCompleta() {
             premios_dorada: premiosDorada || null,
             dias_dorada: diasDorada,
             primary_color: primaryColor,
-            accent_color: accentColor
+            accent_color: accentColor,
+            // === NUEVO: Guardar configuración de estilo de botones ===
+            button_color: buttonColor,
+            button_style: buttonStyle,
+            button_text_color: buttonTextColor
         })
         .eq('id', currentSubscriberId);
 
     if (error) {
         alert("Error al guardar: " + error.message);
     } else {
-        alert("✅ Configuración guardada correctamente (incluyendo colores)");
+        alert("✅ Configuración guardada correctamente");
         await cargarNombreCasino();
         hideConfigModal();
     }
