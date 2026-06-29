@@ -528,6 +528,17 @@ input:checked + .slider:before {
                 </div>
             </div>
 
+            <!-- Botón de Restablecer -->
+            <div style="margin-top: 16px; text-align: center;">
+                <button onclick="restablecerEstiloBotones()" 
+                        style="background: #475569; color: white; border: none; padding: 10px 20px; 
+                               border-radius: 10px; font-size: 0.9rem; cursor: pointer; display: flex; 
+                               align-items: center; gap: 8px; margin: 0 auto;">
+                    <i class="fas fa-undo"></i>
+                    <span>Restablecer a valores originales</span>
+                </button>
+            </div>
+
             <!-- PESTAÑA 1: SALAS DE JUEGO -->
             <div id="config-tab-content-1" style="display:none;">
                 <h3 style="margin:8px 0 14px; color:#67e8f9; font-size:1.1rem;">Salas de Juego</h3>
@@ -2212,6 +2223,27 @@ function adjustColor(hex, percent) {
     b = Math.max(0, Math.min(255, b + percent));
 
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function restablecerEstiloBotones() {
+    // Valores originales (tema cian nativo)
+    const defaultButtonColor = '#22d3ee';
+    const defaultButtonStyle = 'gradient';
+    const defaultTextColor = '#0f172a';   // Texto oscuro (como era originalmente)
+
+    // Aplicar valores a los campos
+    document.getElementById('config-button-color').value = defaultButtonColor;
+    document.getElementById('config-button-color-text').value = defaultButtonColor;
+
+    document.getElementById('config-button-style').value = defaultButtonStyle;
+
+    document.getElementById('config-button-text-color').value = defaultTextColor;
+    document.getElementById('config-button-text-color-text').value = defaultTextColor;
+
+    // Actualizar vista previa
+    updateButtonPreview();
+
+    alert("✅ Se restablecieron los valores originales del estilo de botones.");
 }
 
     // ==================== PESTAÑAS INTERNAS DEL MODAL CONFIGURAR ====================
