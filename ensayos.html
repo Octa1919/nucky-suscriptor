@@ -464,6 +464,68 @@ input:checked + .slider:before {
             
                     </div>
                 </div>
+                <!-- ====================================================== -->
+                <!-- SECCIÓN: ESTILO DE BOTONES (NUEVA) -->
+                <!-- ====================================================== -->
+                <h3 style="margin: 24px 0 12px 0; color: #e2e8f0;">Estilo</h3>
+
+                <div style="background: #1e2937; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
+
+                    <!-- Color del Botón -->
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
+                            Color de los botones
+                        </label>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="color" id="config-button-color" value="#a855f7" 
+                                   style="width:60px; height:42px; border:none; border-radius:8px; cursor:pointer;"
+                                   oninput="syncColorInput(this, 'config-button-color-text'); updateButtonPreview();">
+                            <input type="text" id="config-button-color-text" value="#a855f7" 
+                                   style="flex:1; padding:10px; background:#0f172a; border:1px solid #475569; border-radius:8px; color:white;"
+                                   oninput="syncColorInput(this, 'config-button-color'); updateButtonPreview();">
+                        </div>
+                    </div>
+
+                    <!-- Estilo del Botón -->
+                    <div style="margin-bottom: 18px;">
+                        <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
+                            Estilo del botón
+                        </label>
+                        <select id="config-button-style" 
+                                style="width:100%; padding:12px; background:#0f172a; border:1px solid #475569; border-radius:10px; color:white; font-size:1rem;"
+                                onchange="updateButtonPreview()">
+                            <option value="gradient">Degradado</option>
+                            <option value="solid">Sólido</option>
+                        </select>
+                    </div>
+
+                    <!-- Color del Texto -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom: 8px; color:#cbd5e1; font-size:0.95rem;">
+                            Color del texto de los botones
+                        </label>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="color" id="config-button-text-color" value="#ffffff" 
+                                   style="width:60px; height:42px; border:none; border-radius:8px; cursor:pointer;"
+                                   oninput="syncColorInput(this, 'config-button-text-color-text'); updateButtonPreview();">
+                            <input type="text" id="config-button-text-color-text" value="#ffffff" 
+                                   style="flex:1; padding:10px; background:#0f172a; border:1px solid #475569; border-radius:8px; color:white;"
+                                   oninput="syncColorInput(this, 'config-button-text-color'); updateButtonPreview();">
+                        </div>
+                    </div>
+
+                    <!-- Vista Previa del Botón -->
+                    <div>
+                        <label style="display:block; margin-bottom: 8px; color:#94a3b8; font-size:0.9rem;">
+                            Vista previa
+                        </label>
+                        <button id="button-preview" 
+                                style="width:100%; padding:14px; border-radius:12px; font-size:1rem; font-weight:700; border:none; cursor:default;">
+                            Botón de ejemplo
+                        </button>
+                    </div>
+
+                </div>
             </div>
 
             <!-- PESTAÑA 1: SALAS DE JUEGO -->
@@ -2085,6 +2147,44 @@ function togglePasswordVisibility(inputId, iconId) {
         icon.classList.remove("fa-eye-slash");
         icon.classList.add("fa-eye");
     }
+}
+
+    // ======================================================
+    // FUNCIONES PARA LA SECCIÓN "ESTILO" DE BOTONES
+    // ======================================================
+
+function syncColorInput(source, targetId) {
+    const target = document.getElementById(targetId);
+    if (target) target.value = source.value;
+}
+
+function updateButtonPreview() {
+    const preview = document.getElementById('button-preview');
+    if (!preview) return;
+
+    const color = document.getElementById('config-button-color')?.value || '#a855f7';
+    const style = document.getElementById('config-button-style')?.value || 'gradient';
+    const textColor = document.getElementById('config-button-text-color')?.value || '#ffffff';
+
+    preview.style.color = textColor;
+
+    if (style === 'solid') {
+        preview.style.background = color;
+    } else {
+        preview.style.background = `linear-gradient(90deg, ${color}, ${adjustColor(color, -30)})`;
+    }
+}
+
+function adjustColor(hex, percent) {
+    let r = parseInt(hex.substring(1,3), 16);
+    let g = parseInt(hex.substring(3,5), 16);
+    let b = parseInt(hex.substring(5,7), 16);
+
+    r = Math.max(0, Math.min(255, r + percent));
+    g = Math.max(0, Math.min(255, g + percent));
+    b = Math.max(0, Math.min(255, b + percent));
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
     // ==================== PESTAÑAS INTERNAS DEL MODAL CONFIGURAR ====================
