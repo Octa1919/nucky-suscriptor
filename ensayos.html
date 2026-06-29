@@ -977,7 +977,7 @@ async function showConfigModal() {
 
     const { data } = await _supabase
         .from('suscriptores')
-        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada, primary_color, accent_color, button_color, button_style, button_text_color')
+        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada, primary_color, accent_color, button_text_color')
         .eq('id', currentSubscriberId)
         .single();
 
