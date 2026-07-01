@@ -689,6 +689,7 @@ async function loginSuscriptor() {
     }
 
     currentSubscriberId = userData.suscriptores?.id;
+    await cargarEstadoPlanSuscriptor();
 
     if (!currentSubscriberId) {
         return alert("Error: No se detectó el suscriptor asociado");
