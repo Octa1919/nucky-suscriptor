@@ -2419,17 +2419,36 @@ async function guardarConfigTrivia() {
     const periodicidad = parseInt(document.getElementById('trivia-periodicidad').value) || 24;
     const premio = document.getElementById('trivia-premio').value.trim();
 
-    const { error } = await _supabase
+    // Primero intentamos insertar
+    const { error: insertError } = await _supabase
         .from('trivias')
-        .upsert({
+        .insert({
             subscriber_id: currentSubscriberId,
             activa: activa,
             periodicidad_horas: periodicidad,
             premio_correcto: premio || null
-        }, { onConflict: 'subscriber_id' });
+        });
 
-    if (error) {
-        alert("Error al guardar: " + error.message);
+    if (insertError) {
+        // Si ya existe, actualizamos
+        if (insertError.code === '23505') { // duplicate key
+            const { error: updateError } = await _supabase
+                .from('trivias')
+                .update({
+                    activa: activa,
+                    periodicidad_horas: periodicidad,
+                    premio_correcto: premio || null
+                })
+                .eq('subscriber_id', currentSubscriberId);
+
+            if (updateError) {
+                alert("Error al guardar: " + updateError.message);
+            } else {
+                alert("✅ Configuración de Trivia actualizada");
+            }
+        } else {
+            alert("Error al guardar: " + insertError.message);
+        }
     } else {
         alert("✅ Configuración de Trivia guardada");
     }
