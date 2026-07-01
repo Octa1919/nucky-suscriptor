@@ -2630,7 +2630,149 @@ async function eliminarPregunta(id) {
 }
 
 async function editarPregunta(id) {
-    alert("Función de edición en desarrollo. Por ahora podés eliminar y volver a crear la pregunta.");
+    // 1. Traemos la pregunta actual
+    const { data: preguntaData, error } = await _supabase
+        .from('trivia_preguntas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !preguntaData) {
+        return alert("No se pudo cargar la pregunta");
+    }
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;';
+    modal.className = 'modal-premium';
+
+    let respuestasHTML = '';
+
+    preguntaData.respuestas.forEach((resp, index) => {
+        respuestasHTML += `
+            <div class="respuesta-edit-item" data-index="${index}" style="display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+                <input type="text" value="${resp.texto}" 
+                       style="flex:1; min-width:180px; padding:12px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155;">
+                
+                <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                    <input type="radio" name="correcta-edit" ${resp.es_correcta ? 'checked' : ''} style="accent-color:#22d3ee; width:18px; height:18px;">
+                    <span style="font-size:0.9rem; color:#cbd5e1;">Correcta</span>
+                </div>
+
+                <button onclick="this.parentElement.remove()" 
+                        style="background:#ef4444; color:white; border:none; width:32px; height:32px; border-radius:8px; font-size:1.1rem; cursor:pointer; flex-shrink:0;">
+                    ×
+                </button>
+            </div>
+        `;
+    });
+
+    modal.innerHTML = `
+        <div style="background:#1e2937; width:92%; max-width:520px; border-radius:20px; padding:28px; color:white; max-height:90vh; overflow-y:auto;">
+            <h3 style="margin-bottom:20px; color:#67e8f9;">Editar Pregunta de Trivia</h3>
+
+            <label style="display:block; margin-bottom:6px; color:#cbd5e1;">Pregunta</label>
+            <input type="text" id="edit-pregunta" value="${preguntaData.pregunta}" 
+                   style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; margin-bottom:20px;">
+
+            <label style="display:block; margin-bottom:10px; color:#cbd5e1;">Respuestas</label>
+            <div id="respuestas-edit-container">
+                ${respuestasHTML}
+            </div>
+
+            <button onclick="agregarCampoRespuestaEdicion()" 
+                    style="width:100%; padding:12px; background:#334155; color:white; border:none; border-radius:12px; margin-bottom:24px; margin-top:10px;">
+                + Agregar Respuesta
+            </button>
+
+            <div style="display:flex; gap:12px;">
+                <button onclick="this.closest('.modal-premium').remove()" 
+                        style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">
+                    Cancelar
+                </button>
+                <button onclick="guardarEdicionPregunta('${id}', this)" 
+                        style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">
+                    Guardar Cambios
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+// Función auxiliar para agregar respuesta en modo edición
+function agregarCampoRespuestaEdicion() {
+    const container = document.getElementById('respuestas-edit-container');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = 'respuesta-edit-item';
+    div.style.cssText = 'display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;';
+    div.innerHTML = `
+        <input type="text" placeholder="Texto de la respuesta" 
+               style="flex:1; min-width:180px; padding:12px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155;">
+        
+        <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+            <input type="radio" name="correcta-edit" style="accent-color:#22d3ee; width:18px; height:18px;">
+            <span style="font-size:0.9rem; color:#cbd5e1;">Correcta</span>
+        </div>
+
+        <button onclick="this.parentElement.remove()" 
+                style="background:#ef4444; color:white; border:none; width:32px; height:32px; border-radius:8px; font-size:1.1rem; cursor:pointer; flex-shrink:0;">
+            ×
+        </button>
+    `;
+    container.appendChild(div);
+}
+
+// Guardar la edición
+async function guardarEdicionPregunta(id, btn) {
+    const preguntaInput = document.getElementById('edit-pregunta');
+    const container = document.getElementById('respuestas-edit-container');
+
+    if (!preguntaInput || !preguntaInput.value.trim()) {
+        return alert("La pregunta no puede estar vacía");
+    }
+
+    const respuestas = [];
+    let tieneCorrecta = false;
+
+    container.querySelectorAll('.respuesta-edit-item').forEach(div => {
+        const input = div.querySelector('input[type="text"]');
+        const radio = div.querySelector('input[type="radio"]');
+
+        if (input && input.value.trim()) {
+            respuestas.push({
+                texto: input.value.trim(),
+                es_correcta: radio ? radio.checked : false
+            });
+            if (radio && radio.checked) tieneCorrecta = true;
+        }
+    });
+
+    if (respuestas.length < 2) {
+        return alert("Debes tener al menos 2 respuestas");
+    }
+    if (!tieneCorrecta) {
+        return alert("Debes marcar una respuesta como correcta");
+    }
+
+    // Actualizamos en la base de datos
+    const { error } = await _supabase
+        .from('trivia_preguntas')
+        .update({
+            pregunta: preguntaInput.value.trim(),
+            respuestas: respuestas
+        })
+        .eq('id', id);
+
+    if (error) {
+        alert("Error al guardar los cambios: " + error.message);
+    } else {
+        btn.closest('.modal-premium').remove();
+        alert("✅ Pregunta actualizada correctamente");
+        await cargarListaPreguntas();
+    }
 }
 </script>
 </body>
