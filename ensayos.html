@@ -2551,14 +2551,20 @@ function agregarCampoRespuesta() {
     if (!container) return;
 
     const div = document.createElement('div');
-    div.style.cssText = 'display:flex; gap:10px; align-items:center;';
+    // Mejora responsive para celular
+    div.style.cssText = 'display:flex; gap:8px; align-items:center; flex-wrap:wrap;';
     div.innerHTML = `
-        <input type="text" placeholder="Texto de la respuesta" style="flex:1; padding:12px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155;">
-        <label style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:0.9rem;">
-            <input type="radio" name="correcta" style="accent-color:#22d3ee;">
-            Correcta
-        </label>
-        <button onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer;">×</button>
+        <input type="text" placeholder="Texto de la respuesta" style="flex:1; min-width:180px; padding:12px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155;">
+        
+        <div style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+            <input type="radio" name="correcta" style="accent-color:#22d3ee; width:18px; height:18px;">
+            <span style="font-size:0.9rem; color:#cbd5e1;">Correcta</span>
+        </div>
+
+        <button onclick="this.parentElement.remove()" 
+                style="background:#ef4444; color:white; border:none; width:32px; height:32px; border-radius:8px; font-size:1.1rem; cursor:pointer; flex-shrink:0;">
+            ×
+        </button>
     `;
     container.appendChild(div);
 }
