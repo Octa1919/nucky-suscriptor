@@ -2428,20 +2428,44 @@ async function guardarConfigTrivia() {
     const periodicidad = parseInt(document.getElementById('trivia-periodicidad').value) || 24;
     const premio = document.getElementById('trivia-premio').value.trim();
 
-    const { error } = await _supabase
+    // 1. Verificamos si ya existe un registro para este suscriptor
+    const { data: existente } = await _supabase
         .from('trivias')
-        .upsert({
-            subscriber_id: currentSubscriberId,
-            activa: activa,
-            periodicidad_horas: periodicidad,
-            premio_correcto: premio || null
-        }, {
-            onConflict: 'subscriber_id'
-        });
+        .select('id')
+        .eq('subscriber_id', currentSubscriberId)
+        .single();
+
+    let error;
+
+    if (existente) {
+        // Ya existe → actualizamos
+        const { error: updateError } = await _supabase
+            .from('trivias')
+            .update({
+                activa: activa,
+                periodicidad_horas: periodicidad,
+                premio_correcto: premio || null
+            })
+            .eq('subscriber_id', currentSubscriberId);
+
+        error = updateError;
+    } else {
+        // No existe → insertamos
+        const { error: insertError } = await _supabase
+            .from('trivias')
+            .insert({
+                subscriber_id: currentSubscriberId,
+                activa: activa,
+                periodicidad_horas: periodicidad,
+                premio_correcto: premio || null
+            });
+
+        error = insertError;
+    }
 
     if (error) {
         console.error("Error guardando Trivia:", error);
-        alert("Error al guardar la configuración");
+        alert("Error al guardar la configuración de Trivia");
     } else {
         alert("✅ Configuración de Trivia guardada correctamente");
     }
