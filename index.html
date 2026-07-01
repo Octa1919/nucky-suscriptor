@@ -620,6 +620,44 @@ input:checked + .slider:before {
     // === REALTIME ===
     let suscripcionVivo = null;
     let suscripcionUsuarios = null;
+
+    // ======================================================
+    // FUNCIÓN REUTILIZABLE: Cargar estado Premium
+    // ======================================================
+    async function cargarEstadoPlanSuscriptor() {
+        if (!currentSubscriberId) {
+            esPremiumSuscriptor = false;
+            return false;
+        }
+
+        try {
+            const { data: susUser } = await _supabase
+                .from('suscriptores_users')
+                .select('plan_id')
+                .eq('subscriber_id', currentSubscriberId)
+                .single();
+
+            if (!susUser || !susUser.plan_id) {
+                esPremiumSuscriptor = false;
+                return false;
+            }
+
+            const { data: planData } = await _supabase
+                .from('planes')
+                .select('es_premium')
+                .eq('id', susUser.plan_id)
+                .single();
+
+            esPremiumSuscriptor = planData?.es_premium === true;
+            console.log('%c[PLAN] Estado Premium cargado:', 'color:#22c55e', esPremiumSuscriptor);
+            return esPremiumSuscriptor;
+
+        } catch (err) {
+            console.error('Error cargando plan:', err);
+            esPremiumSuscriptor = false;
+            return false;
+        }
+    }
     
  // ==================== COPIAR AL PORTAPAPELES ====================
     function copiarAlPortapapeles(texto) {
@@ -651,6 +689,7 @@ async function loginSuscriptor() {
     }
 
     currentSubscriberId = userData.suscriptores?.id;
+    await cargarEstadoPlanSuscriptor();
 
     if (!currentSubscriberId) {
         return alert("Error: No se detectó el suscriptor asociado");
@@ -1732,7 +1771,7 @@ async function guardarNuevaPassword() {
     }
 }
 
-    window.onload = () => {
+   window.onload = async () => {
     currentSubscriberId = localStorage.getItem('subscriber_id');
     
     if (currentSubscriberId) {
@@ -1740,7 +1779,12 @@ async function guardarNuevaPassword() {
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('header-logged').style.display = 'flex';
         cargarNombreCasino();
-        switchTab(0);   // ← Ahora abre en "Vivo"
+        
+        // === FIX PRINCIPAL: Cargar estado del plan al restaurar sesión ===
+        await cargarEstadoPlanSuscriptor();
+        iniciarSuscripcionPlan();
+        
+        switchTab(0);
     } else {
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('dashboard').style.display = 'none';
