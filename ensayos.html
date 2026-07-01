@@ -2399,16 +2399,25 @@ async function mostrarSeccionTrivia() {
 async function cargarConfigTrivia() {
     if (!currentSubscriberId) return;
 
-    const { data } = await _supabase
+    const { data, error } = await _supabase
         .from('trivias')
         .select('*')
         .eq('subscriber_id', currentSubscriberId)
         .single();
 
-    if (data) {
-        document.getElementById('trivia-activa').checked = data.activa;
-        document.getElementById('trivia-periodicidad').value = data.periodicidad_horas || 24;
-        document.getElementById('trivia-premio').value = data.premio_correcto || '';
+    const activaEl = document.getElementById('trivia-activa');
+    const periodicidadEl = document.getElementById('trivia-periodicidad');
+    const premioEl = document.getElementById('trivia-premio');
+
+    if (data && !error) {
+        if (activaEl) activaEl.checked = data.activa === true;
+        if (periodicidadEl) periodicidadEl.value = data.periodicidad_horas || 24;
+        if (premioEl) premioEl.value = data.premio_correcto || '';
+    } else {
+        // Si no existe registro aún, dejamos valores por defecto
+        if (activaEl) activaEl.checked = false;
+        if (periodicidadEl) periodicidadEl.value = 24;
+        if (premioEl) premioEl.value = '';
     }
 }
 
