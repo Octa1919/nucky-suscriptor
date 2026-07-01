@@ -1426,7 +1426,7 @@ async function crearNuevoUsuario() {
     const telefono = document.getElementById('edit-telefono').value.trim();
 
     if (!username) {
-        return alert("El nombre de usuario is obligatorio");
+        return alert("El nombre de usuario es obligatorio");
     }
 
     // === VALIDACIÓN DE CONTRASEÑA (solo si se escribió una nueva) ===
@@ -1435,6 +1435,7 @@ async function crearNuevoUsuario() {
 
         if (!passwordRegex.test(password)) {
             return alert("La contraseña debe tener:\n\n• Mínimo 8 caracteres\n• Al menos una letra mayúscula\n• Al menos una letra minúscula");
+        }
     }
 
     // Preparar los datos a actualizar
@@ -1510,7 +1511,7 @@ async function guardarEdicionCbu() {
     const alias = document.getElementById('edit-alias').value.trim();
     const banco = document.getElementById('edit-banco').value.trim();
 
-    if (!cbu || !alias || !banco) return alert("Todos los campos are obligatorios");
+    if (!cbu || !alias || !banco) return alert("Todos los campos son obligatorios");
 
     const { error } = await _supabase
         .from('cbus')
@@ -1768,7 +1769,7 @@ async function guardarNuevaPassword() {
     if (error) {
         alert("Error al guardar: " + error.message);
     } else {
-        alert("✅ Contraseña actualizada correctly");
+        alert("✅ Contraseña actualizada correctamente");
         hidePerfilModal();
     }
 }
@@ -2197,7 +2198,7 @@ function updateButtonPreview() {
     if (style === 'solid') {
         preview.style.background = color;
     } else {
-        preview.style.background = `linear-gradient(90deg, ${color}, {adjustColor(color, -30)})`;
+        preview.style.background = `linear-gradient(90deg, ${color}, ${adjustColor(color, -30)})`;
     }
 }
 
@@ -2339,274 +2340,6 @@ function mostrarAvisoNativo(mensaje) {
         aviso.style.opacity = '0';
         setTimeout(() => aviso.remove(), 400);
     }, 3800);
-}
-
-// ==================== NUEVA SECCIÓN: TRIVIA ====================
-async function mostrarSeccionTrivia() {
-    toggleHamburgerMenu(); // Cierra el menú
-
-    const content = document.getElementById('tab-content');
-    content.innerHTML = `
-        <div class="card">
-            <h2 style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
-                <i class="fas fa-question-circle"></i> Configuración de Trivia
-            </h2>
-
-            <div style="margin-bottom:24px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                    <div>
-                        <strong style="font-size:1.1rem;">Activar Trivia</strong><br>
-                        <small style="color:#94a3b8;">Los jugadores verán preguntas cuando abran la app</small>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="trivia-activa" onchange="guardarConfigTrivia()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div style="margin-top:20px;">
-                    <label style="display:block; margin-bottom:8px; color:#cbd5e1; font-size:0.95rem;">
-                        Periodicidad (cada cuántas horas se muestra)
-                    </label>
-                    <input type="number" id="trivia-periodicidad" value="24" min="1" style="width:120px; padding:12px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155;">
-                    <small style="color:#94a3b8; margin-left:8px;">horas</small>
-                </div>
-
-                <div style="margin-top:20px;">
-                    <label style="display:block; margin-bottom:8px; color:#cbd5e1; font-size:0.95rem;">
-                        Premio por respuesta correcta
-                    </label>
-                    <input type="text" id="trivia-premio" placeholder="Ej: 500 fichas gratis" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155;">
-                </div>
-            </div>
-
-            <div style="margin-top:30px; padding-top:20px; border-top:1px solid #334155;">
-                <button onclick="guardarConfigTrivia()" class="btn-primary" style="margin-bottom:12px;">
-                    💾 Guardar Configuración
-                </button>
-
-                <button onclick="mostrarGestionPreguntas()" style="width:100%; padding:16px; background:#1e2937; color:white; border:none; border-radius:14px; font-weight:600;">
-                    📝 Gestionar Preguntas
-                </button>
-            </div>
-        </div>
-    `;
-
-    // Cargar configuración actual
-    await cargarConfigTrivia();
-}
-
-async function cargarConfigTrivia() {
-    if (!currentSubscriberId) return;
-
-    const { data } = await _supabase
-        .from('trivias')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .single();
-
-    if (data) {
-        document.getElementById('trivia-activa').checked = data.activa;
-        document.getElementById('trivia-periodicidad').value = data.periodicidad_horas || 24;
-        document.getElementById('trivia-premio').value = data.premio_correcto || '';
-    }
-}
-
-async function guardarConfigTrivia() {
-    if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
-
-    const activa = document.getElementById('trivia-activa').checked;
-    const periodicidad = parseInt(document.getElementById('trivia-periodicidad').value) || 24;
-    const premio = document.getElementById('trivia-premio').value.trim();
-
-    const { error } = await _supabase
-        .from('trivias')
-        .upsert({
-            subscriber_id: currentSubscriberId,
-            activa: activa,
-            periodicidad_horas: periodicidad,
-            premio_correcto: premio || null
-        }, { onConflict: 'subscriber_id' });
-
-    if (error) {
-        alert("Error al guardar: " + error.message);
-    } else {
-        alert("✅ Configuración de Trivia guardada");
-    }
-}
-
-async function mostrarGestionPreguntas() {
-    const content = document.getElementById('tab-content');
-    content.innerHTML = `
-        <div class="card">
-            <h2 style="margin-bottom:20px;">📝 Gestionar Preguntas de Trivia</h2>
-            <button onclick="mostrarFormularioNuevaPregunta()" class="btn-primary" style="margin-bottom:20px;">
-                + Agregar Nueva Pregunta
-            </button>
-            <div id="lista-preguntas-trivia">Cargando preguntas...</div>
-            <button onclick="mostrarSeccionTrivia()" style="margin-top:20px; width:100%; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">
-                ← Volver a Configuración
-            </button>
-        </div>
-    `;
-
-    await cargarListaPreguntas();
-}
-
-async function cargarListaPreguntas() {
-    const contenedor = document.getElementById('lista-preguntas-trivia');
-    if (!contenedor) return;
-
-    const { data, error } = await _supabase
-        .from('trivia_preguntas')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .order('created_at', { ascending: false });
-
-    if (error || !data || data.length === 0) {
-        contenedor.innerHTML = `<p style="color:#94a3b8;">Aún no hay preguntas cargadas.</p>`;
-        return;
-    }
-
-    contenedor.innerHTML = data.map(p => {
-        const respuestas = p.respuestas || [];
-        const correcta = respuestas.find(r => r.es_correcta);
-
-        return `
-            <div class="user-item" style="margin-bottom:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:start;">
-                    <div style="flex:1;">
-                        <strong style="font-size:1.05rem;">${p.pregunta}</strong>
-                        <div style="margin-top:10px; font-size:0.9rem; color:#94a3b8;">
-                            ${respuestas.length} respuestas • Correcta: <span style="color:#22c55e;">${correcta ? correcta.texto : 'No definida'}</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:8px; margin-left:12px;">
-                        <button onclick="editarPregunta('${p.id}')" style="padding:8px 14px; background:#1e2937; color:white; border:none; border-radius:10px; font-size:0.85rem;">Editar</button>
-                        <button onclick="eliminarPregunta('${p.id}')" style="padding:8px 14px; background:#ef4444; color:white; border:none; border-radius:10px; font-size:0.85rem;">Eliminar</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-async function mostrarFormularioNuevaPregunta() {
-    const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;';
-
-    modal.innerHTML = `
-        <div style="background:#1e2937; width:92%; max-width:520px; border-radius:20px; padding:28px; color:white;">
-            <h3 style="margin-bottom:20px; color:#67e8f9;">Nueva Pregunta de Trivia</h3>
-
-            <label style="display:block; margin-bottom:6px; color:#cbd5e1;">Pregunta</label>
-            <input type="text" id="nueva-pregunta" placeholder="Ej: ¿Cuál es la capital de Argentina?" style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; margin-bottom:20px;">
-
-            <label style="display:block; margin-bottom:10px; color:#cbd5e1;">Respuestas (marcá la correcta)</label>
-
-            <div id="respuestas-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-                <!-- Se generan dinámicamente -->
-            </div>
-
-            <button onclick="agregarCampoRespuesta()" style="width:100%; padding:12px; background:#334155; color:white; border:none; border-radius:12px; margin-bottom:24px;">
-                + Agregar Respuesta
-            </button>
-
-            <div style="display:flex; gap:12px;">
-                <button onclick="this.closest('.modal-premium').remove()" style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">Cancelar</button>
-                <button onclick="guardarNuevaPregunta(this)" style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">Guardar Pregunta</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Agregar 2 respuestas por defecto
-    setTimeout(() => {
-        agregarCampoRespuesta();
-        agregarCampoRespuesta();
-    }, 100);
-}
-
-function agregarCampoRespuesta() {
-    const container = document.getElementById('respuestas-container');
-    if (!container) return;
-
-    const div = document.createElement('div');
-    div.style.cssText = 'display:flex; gap:10px; align-items:center;';
-    div.innerHTML = `
-        <input type="text" placeholder="Texto de la respuesta" style="flex:1; padding:12px; border-radius:10px; background:#0f172a; color:white; border:1px solid #334155;">
-        <label style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:0.9rem;">
-            <input type="radio" name="correcta" style="accent-color:#22d3ee;">
-            Correcta
-        </label>
-        <button onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer;">×</button>
-    `;
-    container.appendChild(div);
-}
-
-async function guardarNuevaPregunta(btn) {
-    const container = document.getElementById('respuestas-container');
-    const preguntaInput = document.getElementById('nueva-pregunta');
-
-    if (!preguntaInput || !preguntaInput.value.trim()) {
-        return alert("La pregunta no puede estar vacía");
-    }
-
-    const respuestas = [];
-    let tieneCorrecta = false;
-
-    container.querySelectorAll('div').forEach(div => {
-        const input = div.querySelector('input[type="text"]');
-        const radio = div.querySelector('input[type="radio"]');
-
-        if (input && input.value.trim()) {
-            respuestas.push({
-                texto: input.value.trim(),
-                es_correcta: radio ? radio.checked : false
-            });
-            if (radio && radio.checked) tieneCorrecta = true;
-        }
-    });
-
-    if (respuestas.length < 2) {
-        return alert("Debes agregar al menos 2 respuestas");
-    }
-    if (!tieneCorrecta) {
-        return alert("Debes marcar una respuesta como correcta");
-    }
-
-    const { error } = await _supabase.from('trivia_preguntas').insert({
-        subscriber_id: currentSubscriberId,
-        pregunta: preguntaInput.value.trim(),
-        respuestas: respuestas,
-        activa: true
-    });
-
-    if (error) {
-        alert("Error al guardar: " + error.message);
-    } else {
-        btn.closest('.modal-premium').remove();
-        alert("✅ Pregunta guardada correctamente");
-        await cargarListaPreguntas();
-    }
-}
-
-async function eliminarPregunta(id) {
-    if (!confirm("¿Eliminar esta pregunta?")) return;
-
-    const { error } = await _supabase.from('trivia_preguntas').delete().eq('id', id);
-
-    if (error) {
-        alert("Error al eliminar: " + error.message);
-    } else {
-        alert("✅ Pregunta eliminada");
-        await cargarListaPreguntas();
-    }
-}
-
-async function editarPregunta(id) {
-    alert("Función de edición en desarrollo. Por ahora podés eliminar y volver a crear la pregunta.");
 }
 </script>
 </body>
