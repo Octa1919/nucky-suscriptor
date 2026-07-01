@@ -620,6 +620,44 @@ input:checked + .slider:before {
     // === REALTIME ===
     let suscripcionVivo = null;
     let suscripcionUsuarios = null;
+
+    // ======================================================
+    // FUNCIÓN REUTILIZABLE: Cargar estado Premium
+    // ======================================================
+    async function cargarEstadoPlanSuscriptor() {
+        if (!currentSubscriberId) {
+            esPremiumSuscriptor = false;
+            return false;
+        }
+
+        try {
+            const { data: susUser } = await _supabase
+                .from('suscriptores_users')
+                .select('plan_id')
+                .eq('subscriber_id', currentSubscriberId)
+                .single();
+
+            if (!susUser || !susUser.plan_id) {
+                esPremiumSuscriptor = false;
+                return false;
+            }
+
+            const { data: planData } = await _supabase
+                .from('planes')
+                .select('es_premium')
+                .eq('id', susUser.plan_id)
+                .single();
+
+            esPremiumSuscriptor = planData?.es_premium === true;
+            console.log('%c[PLAN] Estado Premium cargado:', 'color:#22c55e', esPremiumSuscriptor);
+            return esPremiumSuscriptor;
+
+        } catch (err) {
+            console.error('Error cargando plan:', err);
+            esPremiumSuscriptor = false;
+            return false;
+        }
+    }
     
  // ==================== COPIAR AL PORTAPAPELES ====================
     function copiarAlPortapapeles(texto) {
