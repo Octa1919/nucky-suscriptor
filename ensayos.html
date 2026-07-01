@@ -223,6 +223,10 @@ input:checked + .slider:before {
         <div onclick="mostrarHistorialEntregados()" class="menu-item">
             <i class="fas fa-history" style="margin-right:15px; width:24px;"></i> Historial de premios
         </div>
+        <!-- NUEVO: Trivia -->
+        <div onclick="mostrarSeccionTrivia()" class="menu-item">
+            <i class="fas fa-question-circle" style="margin-right:15px; width:24px;"></i> Trivia
+        </div>
         <div onclick="showCronogramaModal()" class="menu-item">
             <i class="fas fa-calendar-alt" style="margin-right:15px; width:24px;"></i> Cronograma
         </div>
@@ -1229,7 +1233,6 @@ function renderizarPremiosVivo(lista) {
             <div style="font-size:1.1rem; margin-bottom:18px;">
                 <strong>Premio:</strong> ${p.premio}
             </div>
-            
             <div style="display:flex; gap:12px;">
                 <button onclick="denegarPremio('${p.id}')" 
                         style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">
@@ -2339,3 +2342,5 @@ function mostrarAvisoNativo(mensaje) {
     }, 3800);
 }
 </script>
+</body>
+</html>
