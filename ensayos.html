@@ -2399,25 +2399,38 @@ async function mostrarSeccionTrivia() {
 async function cargarConfigTrivia() {
     if (!currentSubscriberId) return;
 
-    const { data, error } = await _supabase
-        .from('trivias')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .single();
-
     const activaEl = document.getElementById('trivia-activa');
     const periodicidadEl = document.getElementById('trivia-periodicidad');
     const premioEl = document.getElementById('trivia-premio');
 
-    if (data && !error) {
-        if (activaEl) activaEl.checked = data.activa === true;
-        if (periodicidadEl) periodicidadEl.value = data.periodicidad_horas || 24;
-        if (premioEl) premioEl.value = data.premio_correcto || '';
-    } else {
-        // Si no existe registro aún, dejamos valores por defecto
-        if (activaEl) activaEl.checked = false;
-        if (periodicidadEl) periodicidadEl.value = 24;
-        if (premioEl) premioEl.value = '';
+    try {
+        const { data, error } = await _supabase
+            .from('trivias')
+            .select('*')
+            .eq('subscriber_id', currentSubscriberId)
+            .maybeSingle();   // ← Cambiado a maybeSingle()
+
+        if (error) {
+            console.warn("No se pudo cargar config de Trivia:", error.message);
+            // Dejamos valores por defecto
+            if (activaEl) activaEl.checked = false;
+            if (periodicidadEl) periodicidadEl.value = 24;
+            if (premioEl) premioEl.value = '';
+            return;
+        }
+
+        if (data) {
+            if (activaEl) activaEl.checked = data.activa === true;
+            if (periodicidadEl) periodicidadEl.value = data.periodicidad_horas || 24;
+            if (premioEl) premioEl.value = data.premio_correcto || '';
+        } else {
+            // No existe registro todavía
+            if (activaEl) activaEl.checked = false;
+            if (periodicidadEl) periodicidadEl.value = 24;
+            if (premioEl) premioEl.value = '';
+        }
+    } catch (e) {
+        console.error("Error inesperado cargando Trivia:", e);
     }
 }
 
