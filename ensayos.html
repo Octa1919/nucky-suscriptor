@@ -3071,7 +3071,9 @@ async function guardarEdicionEtiqueta(id, btn) {
     const nombre = nombreInput.value.trim();
     const color = colorInput.value;
 
-    if (!nombre) return alert("El nombre es obligatorio");
+    if (!nombre) {
+        return alert("El nombre de la etiqueta es obligatorio");
+    }
 
     const { error } = await _supabase
         .from('etiquetas')
@@ -3081,12 +3083,12 @@ async function guardarEdicionEtiqueta(id, btn) {
     if (error) {
         alert("Error al actualizar: " + error.message);
     } else {
-        btn.closest('div[style*="position:fixed"]').remove();
-        alert("✅ Etiqueta actualizada");
+        cerrarModalEtiqueta(btn); // ← Cierre seguro
+        alert("✅ Etiqueta actualizada correctamente");
         await cargarEtiquetas();
     }
 }
-
+    
 function editarEtiqueta(id, nombreActual, colorActual) {
     const modal = document.createElement('div');
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;';
@@ -3129,28 +3131,10 @@ function editarEtiqueta(id, nombreActual, colorActual) {
     text.oninput = () => picker.value = text.value;
 }
 
-async function guardarEdicionEtiqueta(id, btn) {
-    const nombreInput = document.getElementById('edit-etiqueta-nombre');
-    const colorInput = document.getElementById('edit-etiqueta-color');
-
-    const nombre = nombreInput.value.trim();
-    const color = colorInput.value;
-
-    if (!nombre) {
-        return alert("El nombre de la etiqueta es obligatorio");
-    }
-
-    const { error } = await _supabase
-        .from('etiquetas')
-        .update({ nombre, color })
-        .eq('id', id);
-
-    if (error) {
-        alert("Error al actualizar la etiqueta: " + error.message);
-    } else {
-        btn.closest('div[style*="position:fixed"]').remove();
-        alert("✅ Etiqueta actualizada correctamente");
-        await cargarEtiquetas();
+function cerrarModalEtiqueta(elemento) {
+    const modal = elemento.closest('.modal-etiqueta');
+    if (modal) {
+        modal.remove();
     }
 }
 </script>
