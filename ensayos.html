@@ -3004,6 +3004,44 @@ function mostrarFormularioNuevaEtiqueta() {
     colorPicker.oninput = () => colorText.value = colorPicker.value;
     colorText.oninput = () => colorPicker.value = colorText.value;
 }
+
+    async function guardarNuevaEtiqueta(btn) {
+    const nombreInput = document.getElementById('nueva-etiqueta-nombre');
+    const colorInput = document.getElementById('nueva-etiqueta-color');
+
+    const nombre = nombreInput.value.trim();
+    const color = colorInput.value;
+
+    if (!nombre) {
+        return alert("El nombre de la etiqueta es obligatorio");
+    }
+
+    // Verificar si ya existe una etiqueta con ese nombre para este suscriptor
+    const { data: existente } = await _supabase
+        .from('etiquetas')
+        .select('id')
+        .eq('subscriber_id', currentSubscriberId)
+        .ilike('nombre', nombre)
+        .limit(1);
+
+    if (existente && existente.length > 0) {
+        return alert("Ya existe una etiqueta con ese nombre.");
+    }
+
+    const { error } = await _supabase.from('etiquetas').insert({
+        subscriber_id: currentSubscriberId,
+        nombre: nombre,
+        color: color
+    });
+
+    if (error) {
+        alert("Error al guardar la etiqueta: " + error.message);
+    } else {
+        btn.closest('div[style*="position:fixed"]').remove();
+        alert("✅ Etiqueta creada correctamente");
+        await cargarEtiquetas(); // Refresca la lista
+    }
+}
 </script>
 </body>
 </html>
