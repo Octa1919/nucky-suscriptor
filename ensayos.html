@@ -2894,6 +2894,72 @@ async function guardarEdicionPregunta(id, btn) {
     link.click();
     document.body.removeChild(link);
 }
+
+    // ==================== SECCIÓN ETIQUETAS ====================
+async function mostrarSeccionEtiquetas() {
+    toggleHamburgerMenu(); // Cierra el menú
+
+    const content = document.getElementById('tab-content');
+    content.innerHTML = `
+        <div class="card">
+            <h2 style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+                <i class="fas fa-tags"></i> Gestión de Etiquetas
+            </h2>
+
+            <button onclick="mostrarFormularioNuevaEtiqueta()" class="btn-primary" style="margin-bottom:24px;">
+                + Crear Nueva Etiqueta
+            </button>
+
+            <div id="lista-etiquetas">
+                <p>Cargando etiquetas...</p>
+            </div>
+        </div>
+    `;
+
+    await cargarEtiquetas();
+}
+
+async function cargarEtiquetas() {
+    const contenedor = document.getElementById('lista-etiquetas');
+    if (!contenedor) return;
+
+    const { data, error } = await _supabase
+        .from('etiquetas')
+        .select('*')
+        .eq('subscriber_id', currentSubscriberId)
+        .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        contenedor.innerHTML = `<p style="color:#94a3b8;">Aún no has creado ninguna etiqueta.</p>`;
+        return;
+    }
+
+    contenedor.innerHTML = data.map(et => `
+        <div class="user-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="
+                    width: 28px; 
+                    height: 28px; 
+                    background: ${et.color}; 
+                    border-radius: 8px;
+                    border: 2px solid #475569;
+                "></div>
+                <strong style="font-size:1.1rem;">${et.nombre}</strong>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <button onclick="editarEtiqueta('${et.id}', '${et.nombre}', '${et.color}')" 
+                        style="padding:8px 14px; background:#1e2937; color:white; border:none; border-radius:10px; font-size:0.9rem;">
+                    Editar
+                </button>
+                <button onclick="eliminarEtiqueta('${et.id}', '${et.nombre}')" 
+                        style="padding:8px 14px; background:#ef4444; color:white; border:none; border-radius:10px; font-size:0.9rem;">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 </script>
 </body>
 </html>
