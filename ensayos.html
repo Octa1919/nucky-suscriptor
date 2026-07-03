@@ -2866,6 +2866,24 @@ async function guardarEdicionPregunta(id, btn) {
         await cargarListaPreguntas();
     }
 }
+
+    function abrirWhatsApp(telefono) {
+    if (!telefono) {
+        alert("Este usuario no tiene teléfono registrado.");
+        return;
+    }
+
+    // Limpiamos el número
+    let numeroLimpio = telefono.replace(/\D/g, '');
+
+    // Si no empieza con 54, lo agregamos (Argentina)
+    if (!numeroLimpio.startsWith('54')) {
+        numeroLimpio = '54' + numeroLimpio;
+    }
+
+    const url = `https://wa.me/${numeroLimpio}`;
+    window.location.href = url;   // Más confiable en móviles que window.open
+}
 </script>
 </body>
 </html>
