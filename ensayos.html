@@ -3005,7 +3005,7 @@ function mostrarFormularioNuevaEtiqueta() {
     colorText.oninput = () => colorPicker.value = colorText.value;
 }
 
-    async function guardarNuevaEtiqueta(btn) {
+async function guardarNuevaEtiqueta(btn) {
     const nombreInput = document.getElementById('nueva-etiqueta-nombre');
     const colorInput = document.getElementById('nueva-etiqueta-color');
 
@@ -3016,7 +3016,7 @@ function mostrarFormularioNuevaEtiqueta() {
         return alert("El nombre de la etiqueta es obligatorio");
     }
 
-    // Verificar si ya existe una etiqueta con ese nombre para este suscriptor
+    // Verificar duplicado
     const { data: existente } = await _supabase
         .from('etiquetas')
         .select('id')
@@ -3037,9 +3037,12 @@ function mostrarFormularioNuevaEtiqueta() {
     if (error) {
         alert("Error al guardar la etiqueta: " + error.message);
     } else {
-        btn.closest('div[style*="position:fixed"]').remove();
+        // Cierra el modal de forma segura
+        const modal = btn.closest('div[style*="position:fixed"]');
+        if (modal) modal.remove();
+
         alert("✅ Etiqueta creada correctamente");
-        await cargarEtiquetas(); // Refresca la lista
+        await cargarEtiquetas();
     }
 }
 </script>
