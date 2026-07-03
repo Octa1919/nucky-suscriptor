@@ -3005,45 +3005,47 @@ function mostrarFormularioNuevaEtiqueta() {
     colorText.oninput = () => colorPicker.value = colorText.value;
 }
 
-async function guardarNuevaEtiqueta(btn) {
-    const nombreInput = document.getElementById('nueva-etiqueta-nombre');
-    const colorInput = document.getElementById('nueva-etiqueta-color');
+function editarEtiqueta(id, nombreActual, colorActual) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-etiqueta'; // ← Clase para cerrar fácilmente
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;';
 
-    const nombre = nombreInput.value.trim();
-    const color = colorInput.value;
+    modal.innerHTML = `
+        <div style="background:#1e2937; width:92%; max-width:420px; border-radius:20px; padding:28px; color:white;">
+            <h3 style="margin-bottom:24px; color:#67e8f9;">Editar Etiqueta</h3>
 
-    if (!nombre) {
-        return alert("El nombre de la etiqueta es obligatorio");
-    }
+            <label style="display:block; margin-bottom:8px; color:#cbd5e1;">Nombre de la etiqueta</label>
+            <input type="text" id="edit-etiqueta-nombre" value="${nombreActual}" 
+                   style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; margin-bottom:20px;">
 
-    // Verificar duplicado
-    const { data: existente } = await _supabase
-        .from('etiquetas')
-        .select('id')
-        .eq('subscriber_id', currentSubscriberId)
-        .ilike('nombre', nombre)
-        .limit(1);
+            <label style="display:block; margin-bottom:8px; color:#cbd5e1;">Color</label>
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:28px;">
+                <input type="color" id="edit-etiqueta-color" value="${colorActual}" 
+                       style="width:60px; height:48px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer;">
+                <input type="text" id="edit-etiqueta-color-text" value="${colorActual}" 
+                       style="flex:1; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace;">
+            </div>
 
-    if (existente && existente.length > 0) {
-        return alert("Ya existe una etiqueta con ese nombre.");
-    }
+            <div style="display:flex; gap:12px;">
+                <button onclick="cerrarModalEtiqueta(this)" 
+                        style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">
+                    Cancelar
+                </button>
+                <button onclick="guardarEdicionEtiqueta('${id}', this)" 
+                        style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">
+                    Guardar Cambios
+                </button>
+            </div>
+        </div>
+    `;
 
-    const { error } = await _supabase.from('etiquetas').insert({
-        subscriber_id: currentSubscriberId,
-        nombre: nombre,
-        color: color
-    });
+    document.body.appendChild(modal);
 
-    if (error) {
-        alert("Error al guardar la etiqueta: " + error.message);
-    } else {
-        // Cierra el modal de forma segura
-        const modal = btn.closest('div[style*="position:fixed"]');
-        if (modal) modal.remove();
-
-        alert("✅ Etiqueta creada correctamente");
-        await cargarEtiquetas();
-    }
+    // Sincronizar color picker
+    const picker = modal.querySelector('#edit-etiqueta-color');
+    const text = modal.querySelector('#edit-etiqueta-color-text');
+    picker.oninput = () => text.value = picker.value;
+    text.oninput = () => picker.value = text.value;
 }
 
 async function eliminarEtiqueta(id, nombre) {
