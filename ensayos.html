@@ -2867,22 +2867,28 @@ async function guardarEdicionPregunta(id, btn) {
     }
 }
 
-    function abrirWhatsApp(telefono) {
+ function abrirWhatsApp(telefono) {
     if (!telefono) {
         alert("Este usuario no tiene teléfono registrado.");
         return;
     }
 
-    // Limpiamos el número
     let numeroLimpio = telefono.replace(/\D/g, '');
 
-    // Si no empieza con 54, lo agregamos (Argentina)
     if (!numeroLimpio.startsWith('54')) {
         numeroLimpio = '54' + numeroLimpio;
     }
 
     const url = `https://wa.me/${numeroLimpio}`;
-    window.location.href = url;   // Más confiable en móviles que window.open
+
+    // Método más compatible para abrir en nueva pestaña
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 </script>
 </body>
