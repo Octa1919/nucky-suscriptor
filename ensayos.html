@@ -3045,6 +3045,45 @@ async function guardarNuevaEtiqueta(btn) {
         await cargarEtiquetas();
     }
 }
+
+async function eliminarEtiqueta(id, nombre) {
+    if (!confirm(`¿Eliminar la etiqueta "${nombre}"?`)) return;
+
+    const { error } = await _supabase
+        .from('etiquetas')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Error al eliminar: " + error.message);
+    } else {
+        alert("✅ Etiqueta eliminada");
+        await cargarEtiquetas();
+    }
+}
+
+async function guardarEdicionEtiqueta(id, btn) {
+    const nombreInput = document.getElementById('edit-etiqueta-nombre');
+    const colorInput = document.getElementById('edit-etiqueta-color');
+
+    const nombre = nombreInput.value.trim();
+    const color = colorInput.value;
+
+    if (!nombre) return alert("El nombre es obligatorio");
+
+    const { error } = await _supabase
+        .from('etiquetas')
+        .update({ nombre, color })
+        .eq('id', id);
+
+    if (error) {
+        alert("Error al actualizar: " + error.message);
+    } else {
+        btn.closest('div[style*="position:fixed"]').remove();
+        alert("✅ Etiqueta actualizada");
+        await cargarEtiquetas();
+    }
+}
 </script>
 </body>
 </html>
