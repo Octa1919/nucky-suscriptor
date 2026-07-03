@@ -2960,6 +2960,50 @@ async function cargarEtiquetas() {
         </div>
     `).join('');
 }
+
+    // ==================== CREAR NUEVA ETIQUETA ====================
+function mostrarFormularioNuevaEtiqueta() {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;';
+    
+    modal.innerHTML = `
+        <div style="background:#1e2937; width:92%; max-width:420px; border-radius:20px; padding:28px; color:white;">
+            <h3 style="margin-bottom:24px; color:#67e8f9;">Crear Nueva Etiqueta</h3>
+
+            <label style="display:block; margin-bottom:8px; color:#cbd5e1;">Nombre de la etiqueta</label>
+            <input type="text" id="nueva-etiqueta-nombre" placeholder="Ej: VIP, Inactivo, Deudor..." 
+                   style="width:100%; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; margin-bottom:20px;">
+
+            <label style="display:block; margin-bottom:8px; color:#cbd5e1;">Color de la etiqueta</label>
+            <div style="display:flex; gap:12px; align-items:center; margin-bottom:28px;">
+                <input type="color" id="nueva-etiqueta-color" value="#22d3ee" 
+                       style="width:60px; height:48px; padding:4px; border:none; border-radius:10px; background:#0f172a; cursor:pointer;">
+                <input type="text" id="nueva-etiqueta-color-text" value="#22d3ee" 
+                       style="flex:1; padding:14px; border-radius:12px; background:#0f172a; color:white; border:1px solid #334155; font-family:monospace;">
+            </div>
+
+            <div style="display:flex; gap:12px;">
+                <button onclick="this.closest('div[style*=\"position:fixed\"]').remove()" 
+                        style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">
+                    Cancelar
+                </button>
+                <button onclick="guardarNuevaEtiqueta(this)" 
+                        style="flex:1; padding:14px; background:linear-gradient(90deg,#22d3ee,#67e8f9); color:#0f172a; border:none; border-radius:12px; font-weight:bold;">
+                    Guardar Etiqueta
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Sincronizar color picker con input de texto
+    const colorPicker = modal.querySelector('#nueva-etiqueta-color');
+    const colorText = modal.querySelector('#nueva-etiqueta-color-text');
+
+    colorPicker.oninput = () => colorText.value = colorPicker.value;
+    colorText.oninput = () => colorPicker.value = colorText.value;
+}
 </script>
 </body>
 </html>
