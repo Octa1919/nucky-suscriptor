@@ -812,61 +812,76 @@ async function switchTab(tab) {
             if (buscador) buscador.addEventListener('input', cargarUsuarios);
         }, 100);
     } 
-    else if (tab === 3) { // Difu
-    // === BLOQUEO PREMIUM ===
+else if (tab === 3) { // Difu
     if (!esPremiumSuscriptor) {
         mostrarModalPremium(
             "Función Exclusiva Premium",
-            "La sección de Difusión y Notificaciones está disponible solo para planes Premium (Anual+ y Premium)."
+            "La sección de Difusión y Notificaciones está disponible solo para planes Premium."
         );
-        // Volvemos automáticamente a la pestaña Vivo
         setTimeout(() => switchTab(0), 80);
         return;
     }
 
     content.innerHTML = `
         <div class="card">
-                <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
-    
-                <div style="background:#1e2937; border-radius:20px; padding:28px;">
-    
-                    <div style="margin-bottom:20px">
-                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
-                        <select id="target-type" onchange="toggleSpecificUser()" 
-                                style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
-                            <option value="all">Todos mis jugadores</option>
-                            <option value="specific">Un jugador específico</option>
-                        </select>
-                    </div>
+            <h2 style="margin-bottom:24px; color:white;">📢 Difusión OneSignal</h2>
 
-                    <div id="specific-user-field" style="display:none; margin-bottom:20px">
-                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
-                        <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
-                               style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
-                    </div>
+            <div style="background:#1e2937; border-radius:20px; padding:28px;">
 
-                    <div style="margin-bottom:20px">
-                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
-                        <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
-                               style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
-                    </div>
-
-                    <div style="margin-bottom:20px">
-                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
-                        <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
-                                  style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
-                    </div>
-
-                    <button onclick="enviarNotificacion()" 
-                            style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
-                        🚀 Enviar Notificación
-                    </button>
-
-                    <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
+                <!-- Tipo de envío -->
+                <div style="margin-bottom:20px">
+                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
+                    <select id="target-type" onchange="toggleTargetFields()" 
+                            style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
+                        <option value="all">Todos mis jugadores</option>
+                        <option value="specific">Un jugador específico</option>
+                        <option value="tags">Por etiquetas</option>
+                    </select>
                 </div>
+
+                <!-- Campo para usuario específico -->
+                <div id="specific-user-field" style="display:none; margin-bottom:20px">
+                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Nombre de usuario exacto:</label>
+                    <input type="text" id="specific-username" placeholder="Ej: Octa.nucky09" 
+                           style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                </div>
+
+                <!-- Selector de etiquetas -->
+                <div id="tags-field" style="display:none; margin-bottom:20px">
+                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Seleccionar etiquetas:</label>
+                    <div id="tags-checkboxes" style="max-height:180px; overflow-y:auto; background:#0f172a; border:1px solid #334155; border-radius:12px; padding:12px;">
+                        <!-- Se carga dinámicamente con JS -->
+                    </div>
+                    <small style="color:#94a3b8;">Se enviará a los usuarios que tengan al menos una de las etiquetas seleccionadas.</small>
+                </div>
+
+                <!-- Título y mensaje -->
+                <div style="margin-bottom:20px">
+                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Título de la notificación</label>
+                    <input type="text" id="notif-title" placeholder="Ej: 🎉 Nueva promoción disponible" 
+                           style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                </div>
+
+                <div style="margin-bottom:20px">
+                    <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
+                    <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
+                              style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
+                </div>
+
+                <button onclick="enviarNotificacion()" 
+                        style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
+                    🚀 Enviar Notificación
+                </button>
+
+                <div id="notif-status" style="margin-top:20px; text-align:center; min-height:30px; font-weight:600;"></div>
             </div>
-        `;
-    }
+        </div>
+    `;
+
+    // Cargar las etiquetas disponibles cuando se renderiza la pestaña
+    setTimeout(() => {
+        cargarEtiquetasParaDifu();
+    }, 100);
 }
         
 function toggleSpecificUser() {
@@ -3213,6 +3228,41 @@ async function eliminarEtiquetaDeUsuario(usuarioId, nombreEtiqueta) {
     } else {
         await cargarUsuarios();
     }
+}
+
+    // Cargar etiquetas en la sección Difu
+async function cargarEtiquetasParaDifu() {
+    const container = document.getElementById('tags-checkboxes');
+    if (!container) return;
+
+    const { data, error } = await _supabase
+        .from('etiquetas')
+        .select('nombre')
+        .eq('subscriber_id', currentSubscriberId)
+        .order('nombre');
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = `<p style="color:#94a3b8; padding:10px;">No tienes etiquetas creadas aún.</p>`;
+        return;
+    }
+
+    container.innerHTML = data.map(et => `
+        <label style="display:flex; align-items:center; gap:10px; padding:6px 4px; cursor:pointer;">
+            <input type="checkbox" value="${et.nombre}" style="accent-color:#22d3ee; width:18px; height:18px;">
+            <span>${et.nombre}</span>
+        </label>
+    `).join('');
+}
+
+// Mostrar u ocultar campos según el tipo de envío seleccionado
+function toggleTargetFields() {
+    const targetType = document.getElementById('target-type').value;
+
+    const specificField = document.getElementById('specific-user-field');
+    const tagsField = document.getElementById('tags-field');
+
+    if (specificField) specificField.style.display = targetType === 'specific' ? 'block' : 'none';
+    if (tagsField) tagsField.style.display = targetType === 'tags' ? 'block' : 'none';
 }
 </script>
 </body>
