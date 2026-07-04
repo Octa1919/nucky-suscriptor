@@ -1541,7 +1541,7 @@ async function crearNuevoUsuario() {
         usuarioAEditarId = null;
     }
     
-   async function guardarEdicionUsuario() {
+async function guardarEdicionUsuario() {
     if (!usuarioAEditarId) return;
 
     const username = document.getElementById('edit-username').value.trim();
@@ -1598,7 +1598,7 @@ async function crearNuevoUsuario() {
         }
     }
     
-   function logout() {
+function logout() {
     desuscribirseDeTodo();
     
     if (suscripcionPlan) {
