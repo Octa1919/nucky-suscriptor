@@ -899,6 +899,41 @@ function toggleTargetFields() {
     }
 }
 
+async function cargarEtiquetasParaDifu() {
+    const container = document.getElementById('tags-checkboxes');
+    if (!container) return;
+
+    container.innerHTML = '<p style="color:#94a3b8; font-size:0.9rem;">Cargando etiquetas...</p>';
+
+    const { data: etiquetas, error } = await _supabase
+        .from('etiquetas')
+        .select('nombre, color')
+        .eq('subscriber_id', currentSubscriberId)
+        .order('nombre');
+
+    if (error || !etiquetas || etiquetas.length === 0) {
+        container.innerHTML = '<p style="color:#94a3b8; font-size:0.9rem;">No tenés etiquetas creadas todavía.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    etiquetas.forEach(et => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex; align-items:center; gap:8px; background:#1e2937; padding:8px 14px; border-radius:10px; margin-bottom:6px;';
+
+        div.innerHTML = `
+            <input type="checkbox" id="tag-${et.nombre}" value="${et.nombre}" style="accent-color:#22d3ee; width:18px; height:18px;">
+            <label for="tag-${et.nombre}" style="color:white; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <span style="display:inline-block; width:14px; height:14px; background:${et.color}; border-radius:4px;"></span>
+                ${et.nombre}
+            </label>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
 // ======================================================
 // FUNCIONES PARA SINCRONIZAR COLOR PICKER + INPUT TEXTO
 // ======================================================
