@@ -830,13 +830,23 @@ async function switchTab(tab) {
     
                 <div style="background:#1e2937; border-radius:20px; padding:28px;">
     
-                    <div style="margin-bottom:20px">
+                   <div style="margin-bottom:20px">
                         <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Enviar a:</label>
-                        <select id="target-type" onchange="toggleSpecificUser()" 
+                        <select id="target-type" onchange="toggleTargetFields()" 
                                 style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
                             <option value="all">Todos mis jugadores</option>
                             <option value="specific">Un jugador específico</option>
+                            <option value="tags">Por etiquetas</option>
                         </select>
+                    </div>
+
+                    <!-- Contenedor para etiquetas (nuevo) -->
+                    <div id="tags-field" style="display:none; margin-bottom:20px">
+                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Seleccionar etiquetas:</label>
+                        <div id="tags-checkboxes" style="display:flex; flex-wrap:wrap; gap:8px; background:#0f172a; padding:14px; border-radius:12px; border:1px solid #334155;">
+                            <!-- Se cargan dinámicamente las etiquetas con checkboxes -->
+                        </div>
+                        <small style="color:#94a3b8; font-size:0.8rem;">Se enviará la notificación solo a los jugadores que tengan al menos una de las etiquetas seleccionadas.</small>
                     </div>
 
                     <div id="specific-user-field" style="display:none; margin-bottom:20px">
