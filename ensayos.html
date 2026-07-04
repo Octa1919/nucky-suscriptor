@@ -879,10 +879,24 @@ async function switchTab(tab) {
     }
 }
         
-function toggleSpecificUser() {
-    const field = document.getElementById('specific-user-field');
-    if (!field) return;
-    field.style.display = document.getElementById('target-type').value === 'specific' ? 'block' : 'none';
+function toggleTargetFields() {
+    const targetType = document.getElementById('target-type').value;
+    
+    const specificField = document.getElementById('specific-user-field');
+    const tagsField = document.getElementById('tags-field');
+
+    // Ocultamos todo primero
+    if (specificField) specificField.style.display = 'none';
+    if (tagsField) tagsField.style.display = 'none';
+
+    // Mostramos según lo que eligió
+    if (targetType === 'specific' && specificField) {
+        specificField.style.display = 'block';
+    } 
+    else if (targetType === 'tags' && tagsField) {
+        tagsField.style.display = 'block';
+        cargarEtiquetasParaDifu(); // Esta función la vamos a crear después
+    }
 }
 
 // ======================================================
