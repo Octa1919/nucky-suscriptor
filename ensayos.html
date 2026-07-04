@@ -3245,7 +3245,8 @@ async function eliminarEtiquetaDeUsuario(usuarioId, nombreEtiqueta) {
     }
 }
 
-    // Cargar etiquetas en la sección Difu
+ // === FUNCIONES NUEVAS PARA DIFU CON ETIQUETAS ===
+
 async function cargarEtiquetasParaDifu() {
     const container = document.getElementById('tags-checkboxes');
     if (!container) return;
@@ -3269,15 +3270,78 @@ async function cargarEtiquetasParaDifu() {
     `).join('');
 }
 
-// Mostrar u ocultar campos según el tipo de envío seleccionado
 function toggleTargetFields() {
     const targetType = document.getElementById('target-type').value;
-
     const specificField = document.getElementById('specific-user-field');
     const tagsField = document.getElementById('tags-field');
 
     if (specificField) specificField.style.display = targetType === 'specific' ? 'block' : 'none';
     if (tagsField) tagsField.style.display = targetType === 'tags' ? 'block' : 'none';
+}
+
+async function enviarNotificacion() {
+    const status = document.getElementById('notif-status');
+    status.innerHTML = `<span style="color:#67e8f9">Enviando notificación...</span>`;
+
+    const target = document.getElementById('target-type').value;
+    const specificUser = document.getElementById('specific-username')?.value.trim() || null;
+    const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
+    const message = document.getElementById('notif-message').value.trim();
+
+    if (!message) {
+        status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío.</span>`;
+        return;
+    }
+
+    let selectedTags = [];
+    if (target === 'tags') {
+        const checkboxes = document.querySelectorAll('#tags-checkboxes input[type="checkbox"]:checked');
+        selectedTags = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (selectedTags.length === 0) {
+            status.innerHTML = `<span style="color:#ef4444">Debes seleccionar al menos una etiqueta.</span>`;
+            return;
+        }
+    }
+
+    try {
+        const response = await fetch(
+            "https://vevptiayzleigkjtmyhc.supabase.co/functions/v1/send-push-notification",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": "sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd",
+                    "Authorization": "Bearer sb_publishable_VBu6hcwr-NKDyxcOc60wDQ_RFDkKQjd"
+                },
+                body: JSON.stringify({
+                    subscriber_id: currentSubscriberId,
+                    title: title,
+                    message: message,
+                    target: target,
+                    username: target === "specific" ? specificUser : null,
+                    tags: target === "tags" ? selectedTags : null
+                })
+            }
+        );
+
+        const result = await response.json();
+
+        if (response.ok) {
+            status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
+            document.getElementById('notif-title').value = '';
+            document.getElementById('notif-message').value = '';
+            if (target === "specific" && document.getElementById('specific-username')) {
+                document.getElementById('specific-username').value = '';
+            }
+        } else {
+            console.error("Error de Edge Function:", result);
+            status.innerHTML = `<span style="color:#ef4444">Error: ${result.error || result.message || 'Desconocido'}</span>`;
+        }
+    } catch (err) {
+        console.error(err);
+        status.innerHTML = `<span style="color:#ef4444">Error de conexión</span>`;
+    }
 }
 </script>
 </body>
