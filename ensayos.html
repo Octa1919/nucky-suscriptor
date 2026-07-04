@@ -3190,6 +3190,30 @@ async function agregarEtiquetaAUsuario(usuarioId, nombreEtiqueta, selectElement)
         await cargarUsuarios();
     }
 }
+
+async function eliminarEtiquetaDeUsuario(usuarioId, nombreEtiqueta) {
+    if (!confirm(`¿Quitar la etiqueta "${nombreEtiqueta}"?`)) return;
+
+    const { data: user } = await _supabase
+        .from('usuarios')
+        .select('etiquetas')
+        .eq('id', usuarioId)
+        .single();
+
+    let etiquetasActuales = user?.etiquetas || [];
+    etiquetasActuales = etiquetasActuales.filter(e => e !== nombreEtiqueta);
+
+    const { error } = await _supabase
+        .from('usuarios')
+        .update({ etiquetas: etiquetasActuales })
+        .eq('id', usuarioId);
+
+    if (error) {
+        alert("Error al quitar la etiqueta");
+    } else {
+        await cargarUsuarios();
+    }
+}
 </script>
 </body>
 </html>
