@@ -3149,6 +3149,42 @@ function cerrarModalEtiqueta(elemento) {
         modal.remove();
     }
 }
+
+async function agregarEtiquetaAUsuario(usuarioId, nombreEtiqueta, selectElement) {
+    if (!nombreEtiqueta) return;
+
+    // Traemos las etiquetas actuales del usuario
+    const { data: user } = await _supabase
+        .from('usuarios')
+        .select('etiquetas')
+        .eq('id', usuarioId)
+        .single();
+
+    let etiquetasActuales = user?.etiquetas || [];
+
+    // Si ya tiene la etiqueta, no hacemos nada
+    if (etiquetasActuales.includes(nombreEtiqueta)) {
+        selectElement.value = '';
+        return;
+    }
+
+    // Agregamos la nueva etiqueta
+    etiquetasActuales.push(nombreEtiqueta);
+
+    // Guardamos en la base de datos
+    const { error } = await _supabase
+        .from('usuarios')
+        .update({ etiquetas: etiquetasActuales })
+        .eq('id', usuarioId);
+
+    if (error) {
+        alert("Error al agregar la etiqueta");
+        console.error(error);
+    } else {
+        // Refrescamos la lista de usuarios
+        await cargarUsuarios();
+    }
+}
 </script>
 </body>
 </html>
