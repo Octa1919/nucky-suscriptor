@@ -1157,13 +1157,25 @@ async function enviarNotificacion() {
     status.innerHTML = `<span style="color:#67e8f9">Enviando notificación...</span>`;
 
     const target = document.getElementById('target-type').value;
-    const specificUser = document.getElementById('specific-username').value.trim();
+    const specificUser = document.getElementById('specific-username')?.value.trim() || null;
     const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
     const message = document.getElementById('notif-message').value.trim();
 
     if (!message) {
         status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío.</span>`;
         return;
+    }
+
+    // Obtener etiquetas seleccionadas (si aplica)
+    let selectedTags = [];
+    if (target === 'tags') {
+        const checkboxes = document.querySelectorAll('#tags-checkboxes input[type="checkbox"]:checked');
+        selectedTags = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (selectedTags.length === 0) {
+            status.innerHTML = `<span style="color:#ef4444">Debes seleccionar al menos una etiqueta.</span>`;
+            return;
+        }
     }
 
     try {
@@ -1181,7 +1193,8 @@ async function enviarNotificacion() {
                     title: title,
                     message: message,
                     target: target,
-                    username: target === "specific" ? specificUser : null
+                    username: target === "specific" ? specificUser : null,
+                    tags: target === "tags" ? selectedTags : null   // ← Nuevo campo
                 })
             }
         );
@@ -1192,7 +1205,9 @@ async function enviarNotificacion() {
             status.innerHTML = `<span style="color:#22c55e">✅ Notificación enviada correctamente</span>`;
             document.getElementById('notif-title').value = '';
             document.getElementById('notif-message').value = '';
-            if (target === "specific") document.getElementById('specific-username').value = '';
+            if (target === "specific" && document.getElementById('specific-username')) {
+                document.getElementById('specific-username').value = '';
+            }
         } else {
             console.error("Error de Edge Function:", result);
             status.innerHTML = `<span style="color:#ef4444">Error: ${result.error || result.message || 'Desconocido'}</span>`;
