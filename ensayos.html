@@ -3146,49 +3146,17 @@ async function guardarEdicionEtiqueta(id, btn) {
     }
 }
     
-async function guardarEdicionEtiqueta(id, btn) {
-    const nombreInput = document.getElementById('edit-etiqueta-nombre');
-    const colorInput = document.getElementById('edit-etiqueta-color');
-
-    const nombre = nombreInput.value.trim();
-    const color = colorInput.value;
-
-    if (!nombre) {
-        return alert("El nombre de la etiqueta es obligatorio");
-    }
-
-    const { error } = await _supabase
-        .from('etiquetas')
-        .update({ nombre, color })
-        .eq('id', id);
-
-    if (error) {
-        alert("Error al actualizar: " + error.message);
-    } else {
-        cerrarModalEtiqueta(btn);           // ← Cierre mejorado
-        alert("✅ Etiqueta actualizada correctamente");
-        await cargarEtiquetas();
-    }
-}
+// ==================== FUNCIONES DE ETIQUETAS (LIMPIO) ====================
 
 function cerrarModalEtiqueta(elemento) {
-    // Intenta encontrar el modal desde el botón
     let modal = elemento.closest('.modal-etiqueta');
-    
-    // Si no lo encuentra, busca cualquier modal de etiquetas abierto
-    if (!modal) {
-        modal = document.querySelector('.modal-etiqueta');
-    }
-    
-    if (modal) {
-        modal.remove();
-    }
+    if (!modal) modal = document.querySelector('.modal-etiqueta');
+    if (modal) modal.remove();
 }
 
 async function agregarEtiquetaAUsuario(usuarioId, nombreEtiqueta, selectElement) {
     if (!nombreEtiqueta) return;
 
-    // Traemos las etiquetas actuales del usuario
     const { data: user } = await _supabase
         .from('usuarios')
         .select('etiquetas')
@@ -3197,26 +3165,19 @@ async function agregarEtiquetaAUsuario(usuarioId, nombreEtiqueta, selectElement)
 
     let etiquetasActuales = user?.etiquetas || [];
 
-    // Si ya tiene la etiqueta, no hacemos nada
     if (etiquetasActuales.includes(nombreEtiqueta)) {
         selectElement.value = '';
         return;
     }
 
-    // Agregamos la nueva etiqueta
     etiquetasActuales.push(nombreEtiqueta);
 
-    // Guardamos en la base de datos
     const { error } = await _supabase
         .from('usuarios')
         .update({ etiquetas: etiquetasActuales })
         .eq('id', usuarioId);
 
-    if (error) {
-        alert("Error al agregar la etiqueta");
-        console.error(error);
-    } else {
-        // Refrescamos la lista de usuarios
+    if (!error) {
         await cargarUsuarios();
     }
 }
@@ -3233,20 +3194,15 @@ async function eliminarEtiquetaDeUsuario(usuarioId, nombreEtiqueta) {
     let etiquetasActuales = user?.etiquetas || [];
     etiquetasActuales = etiquetasActuales.filter(e => e !== nombreEtiqueta);
 
-    const { error } = await _supabase
+    await _supabase
         .from('usuarios')
         .update({ etiquetas: etiquetasActuales })
         .eq('id', usuarioId);
 
-    if (error) {
-        alert("Error al quitar la etiqueta");
-    } else {
-        await cargarUsuarios();
-    }
+    await cargarUsuarios();
 }
 
- // === FUNCIONES NUEVAS PARA DIFU CON ETIQUETAS ===
-
+// === FUNCIONES DIFU ===
 async function cargarEtiquetasParaDifu() {
     const container = document.getElementById('tags-checkboxes');
     if (!container) return;
