@@ -3115,31 +3115,6 @@ async function guardarEdicionEtiqueta(id, btn) {
         await cargarEtiquetas();
     }
 }
-    
-async function guardarEdicionEtiqueta(id, btn) {
-    const nombreInput = document.getElementById('edit-etiqueta-nombre');
-    const colorInput = document.getElementById('edit-etiqueta-color');
-
-    const nombre = nombreInput.value.trim();
-    const color = colorInput.value;
-
-    if (!nombre) {
-        return alert("El nombre de la etiqueta es obligatorio");
-    }
-
-    const { error } = await _supabase
-        .from('etiquetas')
-        .update({ nombre, color })
-        .eq('id', id);
-
-    if (error) {
-        alert("Error al actualizar: " + error.message);
-    } else {
-        cerrarModalEtiqueta(btn);           // ← Cierre mejorado
-        alert("✅ Etiqueta actualizada correctamente");
-        await cargarEtiquetas();
-    }
-}
 
 function cerrarModalEtiqueta(elemento) {
     // Intenta encontrar el modal desde el botón
