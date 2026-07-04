@@ -1317,7 +1317,6 @@ async function cargarUsuarios() {
 
     div.innerHTML = "<p>Cargando usuarios...</p>";
 
-    // Traemos usuarios + todas las etiquetas disponibles del suscriptor
     const [usuariosRes, etiquetasRes] = await Promise.all([
         _supabase.from('usuarios')
             .select('*')
@@ -1344,37 +1343,43 @@ async function cargarUsuarios() {
         );
     }
 
-    // Mapa de nombre → color para los chips
     const colorMap = {};
     etiquetasDisponibles.forEach(et => {
         colorMap[et.nombre] = et.color || '#64748b';
     });
 
     div.innerHTML = usuarios.map(u => {
-        // Chips de etiquetas actuales
+        // === Chips con botón de eliminar ===
         let chipsHTML = '';
         if (u.etiquetas && Array.isArray(u.etiquetas) && u.etiquetas.length > 0) {
             chipsHTML = u.etiquetas.map(nombre => {
                 const color = colorMap[nombre] || '#64748b';
                 return `
                     <span style="
-                        display:inline-block; 
-                        background:${color}; 
-                        color:white; 
-                        font-size:0.75rem; 
-                        padding:2px 10px; 
-                        border-radius:9999px; 
-                        margin-right:6px; 
-                        margin-bottom:4px;
-                        font-weight:500;
-                    ">${nombre}</span>
+                        display: inline-flex; 
+                        align-items: center; 
+                        background: ${color}; 
+                        color: white; 
+                        font-size: 0.75rem; 
+                        padding: 2px 8px 2px 12px; 
+                        border-radius: 9999px; 
+                        margin-right: 6px; 
+                        margin-bottom: 4px;
+                        font-weight: 500;
+                    ">
+                        ${nombre}
+                        <span onclick="event.stopImmediatePropagation(); eliminarEtiquetaDeUsuario('${u.id}', '${nombre}');" 
+                              style="margin-left:6px; cursor:pointer; font-weight:bold; font-size:0.9rem;">
+                            ×
+                        </span>
+                    </span>
                 `;
             }).join('');
         } else {
             chipsHTML = `<span style="color:#64748b; font-size:0.85rem;">Sin etiquetas</span>`;
         }
 
-        // Dropdown para agregar etiqueta
+        // === Dropdown para agregar ===
         let selectHTML = '';
         if (etiquetasDisponibles.length > 0) {
             const opciones = etiquetasDisponibles
@@ -1384,7 +1389,8 @@ async function cargarUsuarios() {
 
             if (opciones) {
                 selectHTML = `
-                    <select onchange="agregarEtiquetaAUsuario('${u.id}', this.value, this)" 
+                    <select onchange="agregarEtiquetaAUsuario('${u.id}', this.value, this)"
+                            onclick="event.stopImmediatePropagation();"
                             style="margin-top:8px; padding:6px 10px; border-radius:8px; background:#0f172a; color:white; border:1px solid #334155; font-size:0.85rem; width:100%;">
                         <option value="">+ Agregar etiqueta</option>
                         ${opciones}
@@ -1398,7 +1404,6 @@ async function cargarUsuarios() {
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <strong style="font-size:1.2rem;">${u.username}</strong>
                     
-                    <!-- Botón WhatsApp -->
                     ${u.telefono ? `
                         <button onclick="event.stopImmediatePropagation(); abrirWhatsApp('${u.telefono}');" 
                                 style="background:#25D366; color:white; border:none; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
@@ -1407,12 +1412,12 @@ async function cargarUsuarios() {
                     ` : ''}
                 </div>
 
-                <!-- Etiquetas -->
-                <div style="margin:8px 0; min-height:26px;">
+                <!-- Etiquetas con chips -->
+                <div style="margin:8px 0; min-height:26px; display:flex; flex-wrap:wrap; align-items:center;">
                     ${chipsHTML}
                 </div>
 
-                <!-- Dropdown para agregar -->
+                <!-- Dropdown -->
                 ${selectHTML}
 
                 <div style="margin-top:10px; font-size:0.95rem; color:#cbd5e1;">
