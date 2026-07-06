@@ -1282,7 +1282,10 @@ async function enviarNotificacion() {
     }
 }
     
- // ==================== VIVO CON BUSCADOR ====================
+// ==================== VIVO CON BUSCADOR MEJORADO ====================
+
+let premiosVivoCache = [];
+
 async function cargarResultadosVivo() {
     const div = document.getElementById('lista-en-vivo');
     if (!div) return;
@@ -1305,6 +1308,14 @@ async function cargarResultadosVivo() {
 
     premiosVivoCache = data;
     renderizarPremiosVivo(data);
+
+    // === NUEVO: Re-aplica filtro si el usuario ya tenía algo escrito ===
+    setTimeout(() => {
+        const input = document.getElementById('buscador-codigo');
+        if (input && input.value.trim()) {
+            filtrarResultadosVivo();
+        }
+    }, 50);
 }
 
 function renderizarPremiosVivo(lista) {
@@ -1312,7 +1323,7 @@ function renderizarPremiosVivo(lista) {
     if (!div) return;
 
     if (!lista || lista.length === 0) {
-        div.innerHTML = "<p>No se encontraron premios con ese código.</p>";
+        div.innerHTML = "<p>No se encontraron premios con ese criterio.</p>";
         return;
     }
 
@@ -1347,18 +1358,33 @@ function renderizarPremiosVivo(lista) {
 
 function filtrarResultadosVivo() {
     const input = document.getElementById('buscador-codigo');
-    if (!input || !premiosVivoCache.length) return;
+    if (!input) return;
 
     const termino = input.value.trim().toLowerCase();
+
+    // Caso: no hay datos todavía
+    if (!premiosVivoCache.length) {
+        const div = document.getElementById('lista-en-vivo');
+        if (div) {
+            div.innerHTML = termino 
+                ? "<p>No hay premios pendientes para buscar.</p>" 
+                : "<p>No hay premios pendientes por entregar.</p>";
+        }
+        return;
+    }
 
     if (!termino) {
         renderizarPremiosVivo(premiosVivoCache);
         return;
     }
 
-    const filtrados = premiosVivoCache.filter(p => 
-        p.codigo && p.codigo.toLowerCase().includes(termino)
-    );
+    // === MEJORADO: busca en código + usuario + premio ===
+    const filtrados = premiosVivoCache.filter(p => {
+        const enCodigo  = p.codigo  && p.codigo.toLowerCase().includes(termino);
+        const enUsuario = p.usuario && p.usuario.toLowerCase().includes(termino);
+        const enPremio  = p.premio  && p.premio.toLowerCase().includes(termino);
+        return enCodigo || enUsuario || enPremio;
+    });
 
     renderizarPremiosVivo(filtrados);
 }
@@ -1369,36 +1395,12 @@ function limpiarBusquedaVivo() {
     renderizarPremiosVivo(premiosVivoCache);
 }
     
-    async function marcarEntregado(id, username) {
-    if (!confirm("¿Marcar como entregado?")) return;
-
-    // 1. Actualizar el premio
-    const { error: updateError } = await _supabase
-        .from('premios_ruleta')
-        .update({
-            estado: 'entregado',
-            entregado_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-    if (updateError) {
-        alert("Error al actualizar el premio: " + updateError.message);
-        return;
-    }
-
-    // 2. Actualizar ultima_ruleta del usuario + calcular racha
-    await actualizarRachaYUltimaRuleta(username);
-
-    alert("✅ Premio marcado como entregado");
-    cargarResultadosVivo();
-}
-    
 async function denegarPremio(id) {
         if (confirm("¿Denegar este premio y quitar de la lista?")) {
             await _supabase.from('premios_ruleta').delete().eq('id', id);
             cargarResultadosVivo();
         }
-    }
+}
     
         // ==================== USUARIOS ====================
 async function cargarUsuarios() {
