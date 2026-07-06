@@ -3084,6 +3084,7 @@ async function cargarEtiquetas() {
     // ==================== CREAR NUEVA ETIQUETA ====================
 function mostrarFormularioNuevaEtiqueta() {
     const modal = document.createElement('div');
+    modal.className = 'modal-etiqueta';   // ← Clase importante para cerrar
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;';
     
     modal.innerHTML = `
@@ -3103,7 +3104,7 @@ function mostrarFormularioNuevaEtiqueta() {
             </div>
 
             <div style="display:flex; gap:12px;">
-                <button onclick="this.closest('div[style*=\"position:fixed\"]').remove()" 
+                <button onclick="cerrarModalEtiqueta(this)" 
                         style="flex:1; padding:14px; background:#334155; color:white; border:none; border-radius:12px;">
                     Cancelar
                 </button>
@@ -3121,8 +3122,47 @@ function mostrarFormularioNuevaEtiqueta() {
     const colorPicker = modal.querySelector('#nueva-etiqueta-color');
     const colorText = modal.querySelector('#nueva-etiqueta-color-text');
 
-    colorPicker.oninput = () => colorText.value = colorPicker.value;
-    colorText.oninput = () => colorPicker.value = colorText.value;
+    if (colorPicker && colorText) {
+        colorPicker.oninput = () => colorText.value = colorPicker.value;
+        colorText.oninput = () => colorPicker.value = colorText.value;
+    }
+}
+
+async function guardarNuevaEtiqueta(btn) {
+    const nombreInput = document.getElementById('nueva-etiqueta-nombre');
+    const colorInput = document.getElementById('nueva-etiqueta-color');
+
+    const nombre = nombreInput ? nombreInput.value.trim() : '';
+    const color = colorInput ? colorInput.value : '#22d3ee';
+
+    if (!nombre) {
+        return alert("El nombre de la etiqueta es obligatorio");
+    }
+
+    const { error } = await _supabase
+        .from('etiquetas')
+        .insert({
+            nombre,
+            color,
+            subscriber_id: currentSubscriberId
+        });
+
+    if (error) {
+        console.error(error);
+        alert("Error al crear la etiqueta: " + error.message);
+        // Dejamos el modal abierto para que corrija
+        return;
+    }
+
+    alert("✅ Etiqueta creada correctamente");
+    
+    // Cierra el modal de forma confiable
+    cerrarModalEtiqueta(btn);
+    
+    // Refresca la lista (si estás en la sección de etiquetas)
+    if (typeof cargarEtiquetas === 'function') {
+        await cargarEtiquetas();
+    }
 }
 
 function editarEtiqueta(id, nombreActual, colorActual) {
