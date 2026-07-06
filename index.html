@@ -984,27 +984,46 @@ function setupColorSync() {
         return;
     }
 
-    div.innerHTML = data.map(c => `
-        <div class="user-item ${c.activo ? 'cbu-activo' : ''}" 
-             onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre}', '${c.banco}')">
-            
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <strong style="font-size:1.15rem;">${c.alias_nombre}</strong><br>
+   div.innerHTML = data.map(c => `
+    <div class="user-item ${c.activo ? 'cbu-activo' : ''}" 
+         onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre || ''}', '${c.banco}', '${c.alias || ''}')">
+        
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div style="flex:1;">
+                <!-- Nombre / Alias principal -->
+                <strong style="font-size:1.15rem;">${c.alias_nombre || 'Sin nombre'}</strong>
+                
+                <!-- NUEVO: Alias corto destacado y copiable -->
+                ${c.alias ? `
+                    <div onclick="event.stopImmediatePropagation(); copiarAlPortapapeles('${c.alias}');" 
+                         style="margin: 8px 0; display:inline-flex; align-items:center; gap:8px; 
+                                background:#0f172a; border: 1px dashed #22d3ee; border-radius:10px; 
+                                padding:6px 14px; cursor:pointer; font-family:monospace; color:#67e8f9;">
+                        <span style="font-weight:600;">Alias:</span> 
+                        <strong>${c.alias}</strong>
+                        <i class="fas fa-copy" style="margin-left:6px; font-size:0.9rem;"></i>
+                    </div>
+                ` : ''}
+                
+                <div style="margin-top:4px;">
                     <small style="color:#94a3b8;">${c.banco}</small><br>
-                    <span style="font-family:monospace; font-size:0.95rem;">${c.cbu}</span>
+                    <span style="font-family:monospace; font-size:0.95rem; color:#e2e8f0;" 
+                          onclick="event.stopImmediatePropagation(); copiarAlPortapapeles('${c.cbu}');">
+                        ${c.cbu}
+                    </span>
                 </div>
-
-                <!-- INTERRUPTOR -->
-                <label class="switch" onclick="event.stopImmediatePropagation();">
-                    <input type="checkbox" ${c.activo ? 'checked' : ''} 
-                           onchange="toggleCbuActivo('${c.id}', this.checked)">
-                    <span class="slider"></span>
-                </label>
             </div>
+
+            <!-- INTERRUPTOR -->
+            <label class="switch" onclick="event.stopImmediatePropagation();">
+                <input type="checkbox" ${c.activo ? 'checked' : ''} 
+                       onchange="toggleCbuActivo('${c.id}', this.checked)">
+                <span class="slider"></span>
+            </label>
         </div>
-    `).join('');
-}
+    </div>
+`).join('');
+       
     function showNuevoCbuModal() {
         document.getElementById('nuevo-cbu').value = '';
         document.getElementById('nuevo-alias').value = '';
