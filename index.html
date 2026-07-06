@@ -1024,16 +1024,16 @@ function setupColorSync() {
     </div>
 `).join('');
        
-    function showNuevoCbuModal() {
-        document.getElementById('nuevo-cbu').value = '';
-        document.getElementById('nuevo-alias').value = '';
-        document.getElementById('nuevo-banco').value = '';
-        document.getElementById('modal-nuevo-cbu').style.display = 'flex';
-    }
+function showNuevoCbuModal() {
+    document.getElementById('nuevo-cbu').value = '';
+    document.getElementById('nuevo-alias').value = '';
+    document.getElementById('nuevo-banco').value = '';
+     document.getElementById('modal-nuevo-cbu').style.display = 'flex';
+}
 
-    function hideNuevoCbuModal() {
-        document.getElementById('modal-nuevo-cbu').style.display = 'none';
-    }
+function hideNuevoCbuModal() {
+     document.getElementById('modal-nuevo-cbu').style.display = 'none';
+}
 
 async function agregarNuevoCbu() {
     const cbu = document.getElementById('nuevo-cbu').value.trim();
