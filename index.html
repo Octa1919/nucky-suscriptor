@@ -1016,28 +1016,31 @@ function setupColorSync() {
         document.getElementById('modal-nuevo-cbu').style.display = 'none';
     }
 
-    async function agregarNuevoCbu() {
-        const cbu = document.getElementById('nuevo-cbu').value.trim();
-        const alias = document.getElementById('nuevo-alias').value.trim();
-        const banco = document.getElementById('nuevo-banco').value.trim();
+async function agregarNuevoCbu() {
+    const cbu = document.getElementById('nuevo-cbu').value.trim();
+    const aliasNombre = document.getElementById('nuevo-alias').value.trim();
+    const aliasCorto = document.getElementById('nuevo-alias-corto').value.trim(); // NUEVO
+    const banco = document.getElementById('nuevo-banco').value.trim();
 
-        if (!cbu || !alias || !banco) return alert("Todos los campos son obligatorios");
+    if (!cbu || !aliasNombre || !banco) return alert("CBU, Nombre/Alias y Banco son obligatorios");
 
-        const { error } = await _supabase.from('cbus').insert({
-            subscriber_id: currentSubscriberId,
-            cbu: cbu,
-            alias_nombre: alias,
-            banco: banco,
-            activo: true
-        });
+    const { error } = await _supabase.from('cbus').insert({
+        subscriber_id: currentSubscriberId,
+        cbu: cbu,
+        alias_nombre: aliasNombre,
+        alias: aliasCorto || null,           // NUEVO
+        banco: banco,
+        activo: true
+    });
 
-        if (error) alert("Error: " + error.message);
-        else {
-            alert("✅ CBU agregado correctamente");
-            hideNuevoCbuModal();
-            cargarCbus();
-        }
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert("✅ CBU agregado correctamente");
+        hideNuevoCbuModal();
+        cargarCbus();
     }
+}
     
 async function toggleCbuActivo(id, nuevoEstado) {
     const switchElement = event.target.closest('.switch');
