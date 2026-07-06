@@ -1027,27 +1027,30 @@ async function cargarCbus() {
 function showNuevoCbuModal() {
     document.getElementById('nuevo-cbu').value = '';
     document.getElementById('nuevo-alias').value = '';
+    document.getElementById('nuevo-alias-corto').value = '';   // ← Campo nuevo
     document.getElementById('nuevo-banco').value = '';
-     document.getElementById('modal-nuevo-cbu').style.display = 'flex';
+    document.getElementById('modal-nuevo-cbu').style.display = 'flex';
 }
 
 function hideNuevoCbuModal() {
-     document.getElementById('modal-nuevo-cbu').style.display = 'none';
+    document.getElementById('modal-nuevo-cbu').style.display = 'none';
 }
 
 async function agregarNuevoCbu() {
     const cbu = document.getElementById('nuevo-cbu').value.trim();
     const aliasNombre = document.getElementById('nuevo-alias').value.trim();
-    const aliasCorto = document.getElementById('nuevo-alias-corto').value.trim(); // NUEVO
+    const aliasCorto = document.getElementById('nuevo-alias-corto').value.trim();
     const banco = document.getElementById('nuevo-banco').value.trim();
 
-    if (!cbu || !aliasNombre || !banco) return alert("CBU, Nombre/Alias y Banco son obligatorios");
+    if (!cbu || !aliasNombre || !banco) {
+        return alert("CBU, Nombre/Alias y Banco son obligatorios");
+    }
 
     const { error } = await _supabase.from('cbus').insert({
         subscriber_id: currentSubscriberId,
         cbu: cbu,
         alias_nombre: aliasNombre,
-        alias: aliasCorto || null,           // NUEVO
+        alias: aliasCorto || null,
         banco: banco,
         activo: true
     });
