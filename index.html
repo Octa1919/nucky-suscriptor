@@ -1411,6 +1411,40 @@ async function denegarPremio(id) {
             cargarResultadosVivo();
         }
 }
+
+async function marcarEntregado(id, usuario) {
+    if (!confirm(`¿Confirmás entregar el premio a "${usuario}"?`)) {
+        return;
+    }
+
+    try {
+        const { error } = await _supabase
+            .from('premios_ruleta')
+            .update({
+                estado: 'entregado',
+                entregado_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+        if (error) {
+            alert("Error al marcar como entregado: " + error.message);
+            console.error(error);
+            return;
+        }
+
+        // Actualiza racha y última ruleta del jugador (si la función existe)
+        if (typeof actualizarRachaYUltimaRuleta === 'function') {
+            await actualizarRachaYUltimaRuleta(usuario);
+        }
+
+        alert("✅ Premio entregado correctamente");
+        cargarResultadosVivo();
+
+    } catch (err) {
+        console.error("Error en marcarEntregado:", err);
+        alert("Ocurrió un error inesperado al entregar el premio.");
+    }
+}
     
         // ==================== USUARIOS ====================
 async function cargarUsuarios() {
