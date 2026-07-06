@@ -752,11 +752,11 @@ async function loginSuscriptor() {
     }, 1600);
 }
 
-async function cargarNombreCasino() {
-    if (!currentSubscriberId) return;
-    const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
-    if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
-}
+    async function cargarNombreCasino() {
+        if (!currentSubscriberId) return;
+        const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
+        if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
+    }
     
 // ==================== TABS ====================
 async function switchTab(tab) {
@@ -967,7 +967,7 @@ function setupColorSync() {
 }
 
     // ==================== CBU ====================
-async function cargarCbus() {
+   async function cargarCbus() {
     const div = document.getElementById('lista-cbus');
     if (!div) return;
 
@@ -984,73 +984,51 @@ async function cargarCbus() {
         return;
     }
 
-   div.innerHTML = data.map(c => `
-    <div class="user-item ${c.activo ? 'cbu-activo' : ''}" 
-         onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre || ''}', '${c.banco}', '${c.alias || ''}')">
-        
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div style="flex:1;">
-                <!-- Nombre / Alias principal -->
-                <strong style="font-size:1.15rem;">${c.alias_nombre || 'Sin nombre'}</strong>
-                
-                <!-- NUEVO: Alias corto destacado y copiable -->
-                ${c.alias ? `
-                    <div onclick="event.stopImmediatePropagation(); copiarAlPortapapeles('${c.alias}');" 
-                         style="margin: 8px 0; display:inline-flex; align-items:center; gap:8px; 
-                                background:#0f172a; border: 1px dashed #22d3ee; border-radius:10px; 
-                                padding:6px 14px; cursor:pointer; font-family:monospace; color:#67e8f9;">
-                        <span style="font-weight:600;">Alias:</span> 
-                        <strong>${c.alias}</strong>
-                        <i class="fas fa-copy" style="margin-left:6px; font-size:0.9rem;"></i>
-                    </div>
-                ` : ''}
-                
-                <div style="margin-top:4px;">
+    div.innerHTML = data.map(c => `
+        <div class="user-item ${c.activo ? 'cbu-activo' : ''}" 
+             onclick="abrirModalEditarCbu('${c.id}', '${c.cbu}', '${c.alias_nombre}', '${c.banco}')">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="font-size:1.15rem;">${c.alias_nombre}</strong><br>
                     <small style="color:#94a3b8;">${c.banco}</small><br>
-                    <span style="font-family:monospace; font-size:0.95rem; color:#e2e8f0;" 
-                          onclick="event.stopImmediatePropagation(); copiarAlPortapapeles('${c.cbu}');">
-                        ${c.cbu}
-                    </span>
+                    <span style="font-family:monospace; font-size:0.95rem;">${c.cbu}</span>
                 </div>
+
+                <!-- INTERRUPTOR -->
+                <label class="switch" onclick="event.stopImmediatePropagation();">
+                    <input type="checkbox" ${c.activo ? 'checked' : ''} 
+                           onchange="toggleCbuActivo('${c.id}', this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
-
-            <!-- INTERRUPTOR -->
-            <label class="switch" onclick="event.stopImmediatePropagation();">
-                <input type="checkbox" ${c.activo ? 'checked' : ''} 
-                       onchange="toggleCbuActivo('${c.id}', this.checked)">
-                <span class="slider"></span>
-            </label>
         </div>
-    </div>
-`).join('');
-       
-function showNuevoCbuModal() {
-    document.getElementById('nuevo-cbu').value = '';
-    document.getElementById('nuevo-alias').value = '';
-    document.getElementById('nuevo-alias-corto').value = '';   // ← Campo nuevo
-    document.getElementById('nuevo-banco').value = '';
-    document.getElementById('modal-nuevo-cbu').style.display = 'flex';
+    `).join('');
 }
+    function showNuevoCbuModal() {
+        document.getElementById('nuevo-cbu').value = '';
+        document.getElementById('nuevo-alias').value = '';
+        document.getElementById('nuevo-banco').value = '';
+        document.getElementById('modal-nuevo-cbu').style.display = 'flex';
+    }
 
-function hideNuevoCbuModal() {
-    document.getElementById('modal-nuevo-cbu').style.display = 'none';
-}
+    function hideNuevoCbuModal() {
+        document.getElementById('modal-nuevo-cbu').style.display = 'none';
+    }
 
 async function agregarNuevoCbu() {
     const cbu = document.getElementById('nuevo-cbu').value.trim();
     const aliasNombre = document.getElementById('nuevo-alias').value.trim();
-    const aliasCorto = document.getElementById('nuevo-alias-corto').value.trim();
+    const aliasCorto = document.getElementById('nuevo-alias-corto').value.trim(); // NUEVO
     const banco = document.getElementById('nuevo-banco').value.trim();
 
-    if (!cbu || !aliasNombre || !banco) {
-        return alert("CBU, Nombre/Alias y Banco son obligatorios");
-    }
+    if (!cbu || !aliasNombre || !banco) return alert("CBU, Nombre/Alias y Banco son obligatorios");
 
     const { error } = await _supabase.from('cbus').insert({
         subscriber_id: currentSubscriberId,
         cbu: cbu,
         alias_nombre: aliasNombre,
-        alias: aliasCorto || null,
+        alias: aliasCorto || null,           // NUEVO
         banco: banco,
         activo: true
     });
@@ -1557,14 +1535,14 @@ async function cargarUsuarios() {
     }).join('');
 }
     
- function showNewUserModal() {
-      document.getElementById('new-username').value = '';
-      document.getElementById('new-password').value = '';
-      document.getElementById('new-telefono').value = '';
-      document.getElementById('modal-nuevo-usuario').style.display = 'flex';
-}
+    function showNewUserModal() {
+        document.getElementById('new-username').value = '';
+        document.getElementById('new-password').value = '';
+        document.getElementById('new-telefono').value = '';
+        document.getElementById('modal-nuevo-usuario').style.display = 'flex';
+    }
     
-function hideNewUserModal() {
+    function hideNewUserModal() {
     document.getElementById('modal-nuevo-usuario').style.display = 'none';
 }
 
@@ -1626,20 +1604,20 @@ async function crearNuevoUsuario() {
     await cargarUsuarios();
 }
     
-function abrirModalEditar(id, username, password, telefono) {
-     usuarioAEditarId = id;
-    document.getElementById('edit-username').value = username;
-    document.getElementById('edit-password').value = password;
-    document.getElementById('edit-telefono').value = telefono;
-    document.getElementById('modal-editar-usuario').style.display = 'flex';
-}
+    function abrirModalEditar(id, username, password, telefono) {
+        usuarioAEditarId = id;
+        document.getElementById('edit-username').value = username;
+        document.getElementById('edit-password').value = password;
+        document.getElementById('edit-telefono').value = telefono;
+        document.getElementById('modal-editar-usuario').style.display = 'flex';
+    }
     
-function hideEditarModal() {
-    document.getElementById('modal-editar-usuario').style.display = 'none';
-    usuarioAEditarId = null;
-}
+    function hideEditarModal() {
+        document.getElementById('modal-editar-usuario').style.display = 'none';
+        usuarioAEditarId = null;
+    }
     
-async function guardarEdicionUsuario() {
+   async function guardarEdicionUsuario() {
     if (!usuarioAEditarId) return;
 
     const username = document.getElementById('edit-username').value.trim();
@@ -1684,7 +1662,7 @@ async function guardarEdicionUsuario() {
     }
 }
     
-async function eliminarUsuarioActual() {
+    async function eliminarUsuarioActual() {
         if (!usuarioAEditarId) return;
         if (!confirm("¿Eliminar este usuario permanentemente?")) return;
         const { error } = await _supabase.from('usuarios').delete().eq('id', usuarioAEditarId);
@@ -1694,9 +1672,9 @@ async function eliminarUsuarioActual() {
             hideEditarModal();
             await cargarUsuarios();
         }
-}
+    }
     
-function logout() {
+   function logout() {
     desuscribirseDeTodo();
     
     if (suscripcionPlan) {
@@ -1920,7 +1898,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     console.log("✅ PWA install prompt guardado");
 });
 
-function instalarApp() {
+    function instalarApp() {
     toggleHamburgerMenu();   // Cerrar el menú hamburguesa
 
     // Detectar si es iOS
@@ -2030,7 +2008,7 @@ async function guardarNuevaPassword() {
     }
 };
     
-function showInstallIOSModal() {
+    function showInstallIOSModal() {
     document.getElementById('modal-install-ios').style.display = 'flex';
 }
 
@@ -3040,7 +3018,7 @@ async function guardarEdicionPregunta(id, btn) {
     }
 }
 
-function abrirWhatsApp(telefono) {
+ function abrirWhatsApp(telefono) {
     if (!telefono) {
         alert("Este usuario no tiene teléfono registrado.");
         return;
