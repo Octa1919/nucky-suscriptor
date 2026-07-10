@@ -649,24 +649,22 @@ input:checked + .slider:before {
         }
 
         try {
-            const { data: susUser } = await _supabase
-                .from('suscriptores_users')
-                .select('plan_id')
-                .eq('subscriber_id', currentSubscriberId)
-                .single();
+            const resp = await fetch(`${SUPABASE_URL}/functions/v1/plan-suscriptor`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ subscriber_id: currentSubscriberId })
+            });
+            const data = await resp.json();
 
-            if (!susUser || !susUser.plan_id) {
+            if (!resp.ok) {
                 esPremiumSuscriptor = false;
                 return false;
             }
 
-            const { data: planData } = await _supabase
-                .from('planes')
-                .select('es_premium')
-                .eq('id', susUser.plan_id)
-                .single();
-
-            esPremiumSuscriptor = planData?.es_premium === true;
+            esPremiumSuscriptor = data.es_premium === true;
             console.log('%c[PLAN] Estado Premium cargado:', 'color:#22c55e', esPremiumSuscriptor);
             return esPremiumSuscriptor;
 
@@ -1989,18 +1987,7 @@ async function showPerfilModal() {
         return;
     }
 
-    const { data, error } = await _supabase
-        .from('suscriptores_users')
-        .select('nombre')
-        .eq('nombre', username)
-        .single();
-
-    if (error || !data) {
-        alert("Error al cargar perfil");
-        return;
-    }
-
-    document.getElementById('perfil-username').value = data.nombre;
+    document.getElementById('perfil-username').value = username;
     document.getElementById('perfil-nueva-password').value = '';
     document.getElementById('modal-perfil').style.display = 'flex';
 }
@@ -2013,15 +2000,23 @@ async function guardarNuevaPassword() {
     const nuevaPassword = document.getElementById('perfil-nueva-password').value.trim();
     if (!nuevaPassword) return alert("La contraseña no puede estar vacía");
 
-    const username = localStorage.getItem('subscriber_username');
+    let data;
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/cambiar-password-suscriptor`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, nueva_password: nuevaPassword })
+        });
+        data = await resp.json();
+    } catch (e) {
+        return alert("Error de conexión. Intentá nuevamente.");
+    }
 
-    const { error } = await _supabase
-        .from('suscriptores_users')
-        .update({ password: nuevaPassword })
-        .eq('nombre', username);
-
-    if (error) {
-        alert("Error al guardar: " + error.message);
+    if (!data.success) {
+        alert("Error al guardar: " + (data.error || "intentá nuevamente"));
     } else {
         alert("✅ Contraseña actualizada correctamente");
         hidePerfilModal();
