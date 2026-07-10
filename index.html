@@ -2362,23 +2362,18 @@ function iniciarSuscripcionPlan() {
     suscripcionPlan = _supabase
         .channel('plan-changes-' + currentSubscriberId)
         .on(
-            'postgres_changes',
-            {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'suscriptores_users',
-                filter: `subscriber_id=eq.${currentSubscriberId}`
-            },
-            async (payload) => {
+            'broadcast',
+            { event: 'estado_actualizado' },
+            async ({ payload }) => {
                 console.log('🔄 Cambio detectado en el plan del suscriptor:', payload);
 
                 // Si cambió el plan_id
-                if (payload.new.plan_id !== payload.old.plan_id) {
+                if (payload.plan_id !== payload.old_plan_id) {
                     // Traemos el nuevo estado de premium
                     const { data: planData } = await _supabase
                         .from('planes')
                         .select('es_premium, nombre')
-                        .eq('id', payload.new.plan_id)
+                        .eq('id', payload.plan_id)
                         .single();
 
                     const nuevoEstadoPremium = planData?.es_premium === true;
