@@ -688,25 +688,32 @@ input:checked + .slider:before {
 async function loginSuscriptor() {
     const username = document.getElementById('login-user').value.trim();
     const password = document.getElementById('login-pass').value.trim();
-    
+
     if (!username || !password) {
         return alert("Usuario y contraseña son obligatorios");
     }
 
-    // 1. Traemos el usuario + suscriptor
-    const { data: userData, error: userError } = await _supabase
-        .from('suscriptores_users')
-        .select('*, suscriptores(id, nombre_casino)')
-        .eq('nombre', username)
-        .eq('password', password)
-        .single();
+    // 1. Verificamos credenciales via Edge Function segura
+    let userData;
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/login-suscriptor`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+        userData = await resp.json();
 
-    if (userError || !userData) {
-        console.error("Error de login:", userError);
-        return alert("Credenciales incorrectas");
+        if (!resp.ok || !userData.success) {
+            return alert("Credenciales incorrectas");
+        }
+    } catch (e) {
+        return alert("Error de conexión. Intentá nuevamente.");
     }
 
-    currentSubscriberId = userData.suscriptores?.id;
+    currentSubscriberId = userData.subscriber_id;
     await cargarEstadoPlanSuscriptor();
 
     if (!currentSubscriberId) {
@@ -741,8 +748,8 @@ async function loginSuscriptor() {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('header-logged').style.display = 'flex';
 
-    if (userData.suscriptores?.nombre_casino) {
-        document.getElementById('casino-name').textContent = userData.suscriptores.nombre_casino;
+    if (userData.nombre_casino) {
+        document.getElementById('casino-name').textContent = userData.nombre_casino;
     }
 
     switchTab(0);
