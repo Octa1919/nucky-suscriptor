@@ -1463,10 +1463,14 @@ async function cargarUsuarios() {
     div.innerHTML = "<p>Cargando usuarios...</p>";
 
     const [usuariosRes, etiquetasRes] = await Promise.all([
-        _supabase.from('usuarios')
-            .select('*')
-            .eq('subscriber_id', currentSubscriberId)
-            .order('created_at', { ascending: false }),
+        fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-usuarios`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId })
+        }).then(r => r.json()),
 
         _supabase.from('etiquetas')
             .select('nombre, color')
@@ -1604,37 +1608,24 @@ async function crearNuevoUsuario() {
         return alert("La contraseña debe tener:\n\n• Mínimo 8 caracteres\n• Al menos una letra mayúscula\n• Al menos una letra minúscula");
     }
 
-    // === VERIFICAR SI EL USUARIO YA EXISTE (case-insensitive) ===
-    const { data: existente, error: errorCheck } = await _supabase
-        .from('usuarios')
-        .select('id')
-        .eq('subscriber_id', currentSubscriberId)
-        .ilike('username', username)
-        .limit(1);
-
-    if (errorCheck) {
-        return alert("Error al verificar el usuario: " + errorCheck.message);
+    // === CREAR EL USUARIO (verificacion de duplicado incluida) ===
+    let data;
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-crear-usuario`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, username, password, telefono })
+        });
+        data = await resp.json();
+    } catch (e) {
+        return alert("Error de conexión. Intentá nuevamente.");
     }
 
-    if (existente && existente.length > 0) {
-        return alert(`El usuario "${username}" ya existe. Por favor elegí otro nombre.`);
-    }
-
-    // === INTENTAR CREAR EL USUARIO ===
-    const { error } = await _supabase.from('usuarios').insert({
-        subscriber_id: currentSubscriberId,
-        username: username,
-        password: password,
-        telefono: telefono || null
-    });
-
-    if (error) {
-        // Manejo específico cuando la base de datos rechaza el duplicado (índice único)
-        if (error.code === '23505') {
-            return alert(`El usuario "${username}" ya existe. Por favor elegí otro nombre.`);
-        } else {
-            return alert("Error al crear el usuario: " + error.message);
-        }
+    if (!data.success) {
+        return alert(data.error || "Error al crear el usuario.");
     }
 
     // Éxito
@@ -1676,24 +1667,27 @@ async function crearNuevoUsuario() {
         }
     }
 
-    // Preparar los datos a actualizar
-    const datosActualizar = {
-        username: username,
-        telefono: telefono || null
-    };
-
-    // Solo actualizamos la contraseña si el campo no está vacío
-    if (password) {
-        datosActualizar.password = password;
+    let data;
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-editar-usuario`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                subscriber_id: currentSubscriberId,
+                usuario_id: usuarioAEditarId,
+                username, password: password || null, telefono
+            })
+        });
+        data = await resp.json();
+    } catch (e) {
+        return alert("Error de conexión. Intentá nuevamente.");
     }
 
-    const { error } = await _supabase
-        .from('usuarios')
-        .update(datosActualizar)
-        .eq('id', usuarioAEditarId);
-
-    if (error) {
-        alert("Error: " + error.message);
+    if (!data.success) {
+        alert("Error: " + (data.error || ''));
     } else {
         alert("✅ Usuario actualizado correctamente");
         hideEditarModal();
@@ -1704,8 +1698,23 @@ async function crearNuevoUsuario() {
     async function eliminarUsuarioActual() {
         if (!usuarioAEditarId) return;
         if (!confirm("¿Eliminar este usuario permanentemente?")) return;
-        const { error } = await _supabase.from('usuarios').delete().eq('id', usuarioAEditarId);
-        if (error) alert("Error: " + error.message);
+
+        let data;
+        try {
+            const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-eliminar-usuario`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ subscriber_id: currentSubscriberId, usuario_id: usuarioAEditarId })
+            });
+            data = await resp.json();
+        } catch (e) {
+            return alert("Error de conexión. Intentá nuevamente.");
+        }
+
+        if (!data.success) alert("Error: " + (data.error || ''));
         else {
             alert("✅ Usuario eliminado");
             hideEditarModal();
