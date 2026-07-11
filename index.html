@@ -759,7 +759,15 @@ async function loginSuscriptor() {
 
     async function cargarNombreCasino() {
         if (!currentSubscriberId) return;
-        const { data } = await _supabase.from('suscriptores').select('nombre_casino').eq('id', currentSubscriberId).single();
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-obtener-config`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId })
+        });
+        const { data } = await resp.json();
         if (data && data.nombre_casino) document.getElementById('casino-name').textContent = data.nombre_casino;
     }
     
@@ -1095,11 +1103,15 @@ async function toggleCbuActivo(id, nuevoEstado) {
 async function showConfigModal() {
     if (!currentSubscriberId) return alert("Error: No se detectó el suscriptor");
 
-    const { data } = await _supabase
-        .from('suscriptores')
-        .select('nombre_casino, whatsapp, sala1_link, sala2_link, sala3_link, sala4_link, instagram, telegram, premios_normal, premios_dorada, dias_dorada, primary_color, accent_color, button_text_color')
-        .eq('id', currentSubscriberId)
-        .single();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-obtener-config`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data } = await resp.json();
 
     if (data) {
         document.getElementById('config-nombre').value = data.nombre_casino || '';
@@ -1180,28 +1192,34 @@ async function guardarConfigCompleta() {
         return alert("Los enlaces deben comenzar con http:// o https://");
     }
 
-    const { error } = await _supabase
-        .from('suscriptores')
-        .update({
-            nombre_casino: nombre || null,
-            whatsapp: whatsapp || null,
-            sala1_link: sala1 || null,
-            sala2_link: sala2 || null,
-            sala3_link: sala3 || null,
-            sala4_link: sala4 || null,
-            instagram: instagram || null,
-            telegram: telegram || null,
-            premios_normal: premiosNormal || null,
-            premios_dorada: premiosDorada || null,
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-guardar-config`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            subscriber_id: currentSubscriberId,
+            nombre_casino: nombre,
+            whatsapp,
+            sala1_link: sala1,
+            sala2_link: sala2,
+            sala3_link: sala3,
+            sala4_link: sala4,
+            instagram,
+            telegram,
+            premios_normal: premiosNormal,
+            premios_dorada: premiosDorada,
             dias_dorada: diasDorada,
             primary_color: primaryColor,
             accent_color: accentColor,
             button_text_color: buttonTextColor
         })
-        .eq('id', currentSubscriberId);
+    });
+    const data = await resp.json();
 
-    if (error) {
-        alert("Error al guardar: " + error.message);
+    if (!data.success) {
+        alert("Error al guardar: " + (data.error || ''));
     } else {
         alert("✅ Configuración guardada correctamente");
         await cargarNombreCasino();
@@ -1843,11 +1861,15 @@ async function cargarPreviewCronograma() {
     const previewContainer = document.getElementById('cronograma-preview');
     previewContainer.innerHTML = `<p style="color:#64748b;">Cargando...</p>`;
 
-    const { data, error } = await _supabase
-        .from('suscriptores')
-        .select('cronograma_url, cronograma_updated_at')
-        .eq('id', currentSubscriberId)
-        .single();
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-cronograma-info`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data, error } = await resp.json();
 
     if (error || !data || !data.cronograma_url) {
         previewContainer.innerHTML = `
@@ -1929,17 +1951,17 @@ async function uploadCronograma() {
             .getPublicUrl(fileName);
 
         // 4. Guardar URL + timestamp
-        const ahora = new Date().toISOString();
+        const respGuardar = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-guardar-cronograma`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, cronograma_url: urlData.publicUrl })
+        });
+        const dataGuardar = await respGuardar.json();
 
-        const { error: updateError } = await _supabase
-            .from('suscriptores')
-            .update({ 
-                cronograma_url: urlData.publicUrl,
-                cronograma_updated_at: ahora
-            })
-            .eq('id', currentSubscriberId);
-
-        if (updateError) {
+        if (!dataGuardar.success) {
             alert("Error al guardar el cronograma");
             cargarPreviewCronograma();
             return;
