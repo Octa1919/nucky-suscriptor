@@ -722,11 +722,15 @@ async function loginSuscriptor() {
     let esPremium = false;
 
     if (userData.plan_id) {
-        const { data: planData } = await _supabase
-            .from('planes')
-            .select('es_premium')
-            .eq('id', userData.plan_id)
-            .single();
+        const respPlan = await fetch(`${SUPABASE_URL}/functions/v1/plan-por-id`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plan_id: userData.plan_id })
+        });
+        const { data: planData } = await respPlan.json();
 
         esPremium = planData?.es_premium === true;
     }
@@ -928,11 +932,15 @@ async function cargarEtiquetasParaDifu() {
 
     container.innerHTML = '<p style="color:#94a3b8; font-size:0.9rem;">Cargando etiquetas...</p>';
 
-    const { data: etiquetas, error } = await _supabase
-        .from('etiquetas')
-        .select('nombre, color')
-        .eq('subscriber_id', currentSubscriberId)
-        .order('nombre');
+    const respEtiquetas = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-etiquetas`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data: etiquetas, error } = await respEtiquetas.json();
 
     if (error || !etiquetas || etiquetas.length === 0) {
         container.innerHTML = '<p style="color:#94a3b8; font-size:0.9rem;">No tenés etiquetas creadas todavía.</p>';
@@ -1496,9 +1504,14 @@ async function cargarUsuarios() {
             body: JSON.stringify({ subscriber_id: currentSubscriberId })
         }).then(r => r.json()),
 
-        _supabase.from('etiquetas')
-            .select('nombre, color')
-            .eq('subscriber_id', currentSubscriberId)
+        fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-etiquetas`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId })
+        }).then(r => r.json()).then(r => ({ data: r.data }))
     ]);
 
     if (usuariosRes.error || !usuariosRes.data) {
@@ -2383,11 +2396,15 @@ function iniciarSuscripcionPlan() {
                 // Si cambió el plan_id
                 if (payload.plan_id !== payload.old_plan_id) {
                     // Traemos el nuevo estado de premium
-                    const { data: planData } = await _supabase
-                        .from('planes')
-                        .select('es_premium, nombre')
-                        .eq('id', payload.plan_id)
-                        .single();
+                    const respPlan = await fetch(`${SUPABASE_URL}/functions/v1/plan-por-id`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ plan_id: payload.plan_id })
+                    });
+                    const { data: planData } = await respPlan.json();
 
                     const nuevoEstadoPremium = planData?.es_premium === true;
 
@@ -3114,11 +3131,15 @@ async function cargarEtiquetas() {
     const contenedor = document.getElementById('lista-etiquetas');
     if (!contenedor) return;
 
-    const { data, error } = await _supabase
-        .from('etiquetas')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .order('created_at', { ascending: false });
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-etiquetas`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data, error } = await resp.json();
 
     if (error || !data || data.length === 0) {
         contenedor.innerHTML = `<p style="color:#94a3b8;">Aún no has creado ninguna etiqueta.</p>`;
@@ -3210,13 +3231,16 @@ async function guardarNuevaEtiqueta(btn) {
         return alert("El nombre de la etiqueta es obligatorio");
     }
 
-    const { error } = await _supabase
-        .from('etiquetas')
-        .insert({
-            nombre,
-            color,
-            subscriber_id: currentSubscriberId
-        });
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-crear-etiqueta`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, nombre, color })
+    });
+    const data = await resp.json();
+    const error = data.success ? null : { message: data.error };
 
     if (error) {
         console.error(error);
@@ -3282,13 +3306,18 @@ function editarEtiqueta(id, nombreActual, colorActual) {
 async function eliminarEtiqueta(id, nombre) {
     if (!confirm(`¿Eliminar la etiqueta "${nombre}"?`)) return;
 
-    const { error } = await _supabase
-        .from('etiquetas')
-        .delete()
-        .eq('id', id);
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-eliminar-etiqueta`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, etiqueta_id: id })
+    });
+    const data = await resp.json();
 
-    if (error) {
-        alert("Error al eliminar: " + error.message);
+    if (!data.success) {
+        alert("Error al eliminar: " + (data.error || ''));
     } else {
         alert("✅ Etiqueta eliminada");
         await cargarEtiquetas();
@@ -3306,13 +3335,18 @@ async function guardarEdicionEtiqueta(id, btn) {
         return alert("El nombre de la etiqueta es obligatorio");
     }
 
-    const { error } = await _supabase
-        .from('etiquetas')
-        .update({ nombre, color })
-        .eq('id', id);
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-editar-etiqueta`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, etiqueta_id: id, nombre, color })
+    });
+    const data = await resp.json();
 
-    if (error) {
-        alert("Error al actualizar: " + error.message);
+    if (!data.success) {
+        alert("Error al actualizar: " + (data.error || ''));
     } else {
         cerrarModalEtiqueta(btn); // ← Cierre seguro
         alert("✅ Etiqueta actualizada correctamente");
