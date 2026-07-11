@@ -2062,39 +2062,14 @@ function hideInstallIOSModal() {
 }
 
 async function actualizarRachaYUltimaRuleta(username) {
-    // Buscar el usuario
-    const { data: user } = await _supabase
-        .from('usuarios')
-        .select('id, racha_ruleta, ultima_ruleta')
-        .eq('username', username)
-        .eq('subscriber_id', currentSubscriberId)
-        .single();
-
-    if (!user) return;
-
-    const ahora = new Date();
-    let nuevaRacha = 1;
-
-    if (user.ultima_ruleta) {
-        const ultimaEntrega = new Date(user.ultima_ruleta);
-        const horasPasadas = (ahora - ultimaEntrega) / (1000 * 60 * 60);
-
-        // Si entregó dentro de las últimas 48hs → suma racha
-        if (horasPasadas < 48) {
-            nuevaRacha = (user.racha_ruleta || 0) + 1;
-        } else {
-            nuevaRacha = 1; // Reinicia racha
-        }
-    }
-
-    // Actualizar usuario
-    await _supabase
-        .from('usuarios')
-        .update({
-            ultima_ruleta: ahora.toISOString(),
-            racha_ruleta: nuevaRacha
-        })
-        .eq('id', user.id);
+    await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-actualizar-racha`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, username })
+    });
 }
 
     // ==================== HISTORIAL DE PREMIOS ENTREGADOS ====================
@@ -2340,15 +2315,10 @@ function suscribirseAUsuarios() {
     }
 
     suscripcionUsuarios = _supabase
-        .channel('usuarios-changes')
+        .channel('usuarios-changes-' + currentSubscriberId)
         .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'usuarios',
-                filter: `subscriber_id=eq.${currentSubscriberId}`
-            },
+            'broadcast',
+            { event: 'cambio' },
             (payload) => {
                 console.log('🔄 Cambio en usuarios:', payload);
                 const tabActivo = document.querySelector('.tab.active');
@@ -3333,33 +3303,27 @@ function cerrarModalEtiqueta(elemento) {
 async function agregarEtiquetaAUsuario(usuarioId, nombreEtiqueta, selectElement) {
     if (!nombreEtiqueta) return;
 
-    // Traemos las etiquetas actuales del usuario
-    const { data: user } = await _supabase
-        .from('usuarios')
-        .select('etiquetas')
-        .eq('id', usuarioId)
-        .single();
-
-    let etiquetasActuales = user?.etiquetas || [];
-
-    // Si ya tiene la etiqueta, no hacemos nada
-    if (etiquetasActuales.includes(nombreEtiqueta)) {
-        selectElement.value = '';
+    let data;
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-actualizar-etiquetas`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, usuario_id: usuarioId, etiqueta: nombreEtiqueta, accion: 'agregar' })
+        });
+        data = await resp.json();
+    } catch (e) {
+        alert("Error al agregar la etiqueta");
         return;
     }
 
-    // Agregamos la nueva etiqueta
-    etiquetasActuales.push(nombreEtiqueta);
-
-    // Guardamos en la base de datos
-    const { error } = await _supabase
-        .from('usuarios')
-        .update({ etiquetas: etiquetasActuales })
-        .eq('id', usuarioId);
-
-    if (error) {
+    if (!data.success) {
         alert("Error al agregar la etiqueta");
-        console.error(error);
+        console.error(data.error);
+    } else if (data.sin_cambios) {
+        selectElement.value = '';
     } else {
         // Refrescamos la lista de usuarios
         await cargarUsuarios();
@@ -3369,21 +3333,23 @@ async function agregarEtiquetaAUsuario(usuarioId, nombreEtiqueta, selectElement)
 async function eliminarEtiquetaDeUsuario(usuarioId, nombreEtiqueta) {
     if (!confirm(`¿Quitar la etiqueta "${nombreEtiqueta}"?`)) return;
 
-    const { data: user } = await _supabase
-        .from('usuarios')
-        .select('etiquetas')
-        .eq('id', usuarioId)
-        .single();
+    let data;
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-actualizar-etiquetas`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, usuario_id: usuarioId, etiqueta: nombreEtiqueta, accion: 'quitar' })
+        });
+        data = await resp.json();
+    } catch (e) {
+        alert("Error al quitar la etiqueta");
+        return;
+    }
 
-    let etiquetasActuales = user?.etiquetas || [];
-    etiquetasActuales = etiquetasActuales.filter(e => e !== nombreEtiqueta);
-
-    const { error } = await _supabase
-        .from('usuarios')
-        .update({ etiquetas: etiquetasActuales })
-        .eq('id', usuarioId);
-
-    if (error) {
+    if (!data.success) {
         alert("Error al quitar la etiqueta");
     } else {
         await cargarUsuarios();
