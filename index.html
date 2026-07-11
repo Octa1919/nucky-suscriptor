@@ -978,11 +978,15 @@ function setupColorSync() {
 
     div.innerHTML = "<p>Cargando CBUs...</p>";
 
-    const { data, error } = await _supabase
-        .from('cbus')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .order('created_at', { ascending: false });
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-cbus`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data, error } = await resp.json();
 
     if (error || !data || data.length === 0) {
         div.innerHTML = "<p>Aún no tienes CBUs registrados.</p>";
@@ -1029,17 +1033,18 @@ async function agregarNuevoCbu() {
 
     if (!cbu || !aliasNombre || !banco) return alert("CBU, Nombre/Alias y Banco son obligatorios");
 
-    const { error } = await _supabase.from('cbus').insert({
-        subscriber_id: currentSubscriberId,
-        cbu: cbu,
-        alias_nombre: aliasNombre,
-        alias: aliasCorto || null,           // NUEVO
-        banco: banco,
-        activo: true
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-crear-cbu`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, cbu, alias_nombre: aliasNombre, alias_corto: aliasCorto, banco })
     });
+    const data = await resp.json();
 
-    if (error) {
-        alert("Error: " + error.message);
+    if (!data.success) {
+        alert("Error: " + (data.error || ''));
     } else {
         alert("✅ CBU agregado correctamente");
         hideNuevoCbuModal();
@@ -1058,25 +1063,16 @@ async function toggleCbuActivo(id, nuevoEstado) {
     checkbox.disabled = true;
 
     try {
-        if (nuevoEstado) {
-            // Desactivamos todos los CBUs del suscriptor
-            await _supabase
-                .from('cbus')
-                .update({ activo: false })
-                .eq('subscriber_id', currentSubscriberId);
-
-            // Activamos solo el seleccionado
-            await _supabase
-                .from('cbus')
-                .update({ activo: true })
-                .eq('id', id);
-        } else {
-            // Solo desactivamos el CBU actual
-            await _supabase
-                .from('cbus')
-                .update({ activo: false })
-                .eq('id', id);
-        }
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-toggle-cbu`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, cbu_id: id, activo: nuevoEstado })
+        });
+        const data = await resp.json();
+        if (!data.success) throw new Error(data.error || 'Error');
 
         // === ÉXITO: Recargamos la lista de CBUs (rápido y limpio) ===
         switchElement.classList.remove('loading');
@@ -1778,18 +1774,18 @@ async function guardarEdicionCbu() {
         return alert("CBU, Nombre/Alias y Banco son obligatorios");
     }
 
-    const { error } = await _supabase
-        .from('cbus')
-        .update({
-            cbu,
-            alias_nombre: aliasNombre,
-            alias: aliasCorto || null,     // NUEVO
-            banco
-        })
-        .eq('id', cbuAEditarId);
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-editar-cbu`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, cbu_id: cbuAEditarId, cbu, alias_nombre: aliasNombre, alias_corto: aliasCorto, banco })
+    });
+    const data = await resp.json();
 
-    if (error) {
-        alert("Error: " + error.message);
+    if (!data.success) {
+        alert("Error: " + (data.error || ''));
     } else {
         alert("✅ CBU actualizado");
         hideEditarCbuModal();
@@ -1801,8 +1797,17 @@ async function eliminarCbuActual() {
     if (!cbuAEditarId) return;
     if (!confirm("¿Eliminar este CBU permanentemente?")) return;
 
-    const { error } = await _supabase.from('cbus').delete().eq('id', cbuAEditarId);
-    if (error) alert("Error: " + error.message);
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-eliminar-cbu`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, cbu_id: cbuAEditarId })
+    });
+    const data = await resp.json();
+
+    if (!data.success) alert("Error: " + (data.error || ''));
     else {
         alert("✅ CBU eliminado");
         hideEditarCbuModal();
