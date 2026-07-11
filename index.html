@@ -1307,13 +1307,15 @@ async function cargarResultadosVivo() {
 
     div.innerHTML = "<p>Cargando resultados en vivo...</p>";
 
-    const { data, error } = await _supabase
-        .from('premios_ruleta')
-        .select('*')
-        .eq('subscriber_id', currentSubscriberId)
-        .eq('estado', 'pendiente')
-        .order('created_at', { ascending: false })
-        .limit(50);
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-premios-vivo`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data, error } = await resp.json();
 
     if (error || !data || data.length === 0) {
         div.innerHTML = "<p>No hay premios pendientes por entregar.</p>";
@@ -1412,7 +1414,14 @@ function limpiarBusquedaVivo() {
     
 async function denegarPremio(id) {
         if (confirm("¿Denegar este premio y quitar de la lista?")) {
-            await _supabase.from('premios_ruleta').delete().eq('id', id);
+            await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-denegar-premio`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ subscriber_id: currentSubscriberId, premio_id: id })
+            });
             cargarResultadosVivo();
         }
 }
@@ -1423,17 +1432,18 @@ async function marcarEntregado(id, usuario) {
     }
 
     try {
-        const { error } = await _supabase
-            .from('premios_ruleta')
-            .update({
-                estado: 'entregado',
-                entregado_at: new Date().toISOString()
-            })
-            .eq('id', id);
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-entregar-premio`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, premio_id: id })
+        });
+        const data = await resp.json();
 
-        if (error) {
-            alert("Error al marcar como entregado: " + error.message);
-            console.error(error);
+        if (!data.success) {
+            alert("Error al marcar como entregado: " + (data.error || ''));
             return;
         }
 
@@ -2086,13 +2096,15 @@ async function mostrarHistorialEntregados() {
         </div>
     `;
 
-    const { data, error } = await _supabase
-        .from('premios_ruleta')
-        .select('usuario, premio, codigo, created_at, entregado_at')
-        .eq('subscriber_id', currentSubscriberId)
-        .eq('estado', 'entregado')
-        .order('entregado_at', { ascending: false })
-        .limit(100);
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-historial-premios`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+    });
+    const { data, error } = await resp.json();
 
     const contenedor = document.getElementById('historial-lista');
 
@@ -2288,15 +2300,10 @@ function suscribirseAVivo() {
     }
 
     suscripcionVivo = _supabase
-        .channel('premios-ruleta-changes')
+        .channel('premios-ruleta-changes-' + currentSubscriberId)
         .on(
-            'postgres_changes',
-            {
-                event: '*', // INSERT, UPDATE, DELETE
-                schema: 'public',
-                table: 'premios_ruleta',
-                filter: `subscriber_id=eq.${currentSubscriberId}`
-            },
+            'broadcast',
+            { event: 'cambio' },
             (payload) => {
                 console.log('🔄 Cambio en premios_ruleta:', payload);
                 // Solo refrescamos si estamos en la pestaña Vivo
