@@ -890,11 +890,19 @@ async function switchTab(tab) {
 
                     <div style="margin-bottom:20px">
                         <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Mensaje</label>
-                        <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..." 
+                        <textarea id="notif-message" rows="5" placeholder="Escribe aquí el mensaje que recibirán tus jugadores..."
                                   style="width:100%; padding:16px 18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; resize:vertical;"></textarea>
                     </div>
 
-                    <button onclick="enviarNotificacion()" 
+                    <div style="margin-bottom:20px">
+                        <label style="display:block; margin-bottom:8px; color:#67e8f9; font-weight:600;">Imagen (opcional)</label>
+                        <input type="file" id="notif-image" accept="image/png, image/jpeg, image/jpg, image/webp"
+                               onchange="previsualizarImagenNotificacion()"
+                               style="width:100%; padding:12px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px;">
+                        <div id="notif-image-preview" style="margin-top:12px;"></div>
+                    </div>
+
+                    <button onclick="enviarNotificacion()"
                             style="width:100%; padding:18px; font-size:1.15rem; font-weight:700; background:linear-gradient(90deg, #22d3ee, #67e8f9); color:#0f172a; border:none; border-radius:16px; cursor:pointer;">
                         🚀 Enviar Notificación
                     </button>
@@ -1235,6 +1243,29 @@ async function guardarConfigCompleta() {
     }
 }
     
+// ==================== PREVIEW DE IMAGEN PARA LA NOTIFICACIÓN ====================
+function previsualizarImagenNotificacion() {
+    const input = document.getElementById('notif-image');
+    const preview = document.getElementById('notif-image-preview');
+    const file = input.files[0];
+
+    if (!file) {
+        preview.innerHTML = '';
+        return;
+    }
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert("Solo se permiten archivos PNG, JPG o WEBP");
+        input.value = '';
+        preview.innerHTML = '';
+        return;
+    }
+
+    const url = URL.createObjectURL(file);
+    preview.innerHTML = `<img src="${url}" style="max-width:100%; max-height:180px; object-fit:contain; border-radius:12px;">`;
+}
+
  // ==================== ENVÍO REAL A ONESIGNAL ====================
 async function enviarNotificacion() {
     const status = document.getElementById('notif-status');
@@ -1244,10 +1275,35 @@ async function enviarNotificacion() {
     const specificUser = document.getElementById('specific-username')?.value.trim();
     const title = document.getElementById('notif-title').value.trim() || "Nucky Casino";
     const message = document.getElementById('notif-message').value.trim();
+    const imageInput = document.getElementById('notif-image');
+    const imageFile = imageInput?.files[0];
 
     if (!message) {
         status.innerHTML = `<span style="color:#ef4444">El mensaje no puede estar vacío.</span>`;
         return;
+    }
+
+    // === Si hay imagen, la subimos primero a Storage ===
+    let imageUrl = null;
+    if (imageFile) {
+        status.innerHTML = `<span style="color:#67e8f9">Subiendo imagen...</span>`;
+
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `notificaciones/${currentSubscriberId}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await _supabase.storage
+            .from('notificaciones')
+            .upload(fileName, imageFile);
+
+        if (uploadError) {
+            status.innerHTML = `<span style="color:#ef4444">Error al subir la imagen: ${uploadError.message}</span>`;
+            return;
+        }
+
+        const { data: urlData } = _supabase.storage.from('notificaciones').getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+
+        status.innerHTML = `<span style="color:#67e8f9">Enviando notificación...</span>`;
     }
 
     // === Preparar payload base ===
@@ -1255,7 +1311,8 @@ async function enviarNotificacion() {
         subscriber_id: currentSubscriberId,
         title: title,
         message: message,
-        target: target
+        target: target,
+        image_url: imageUrl
     };
 
     // === Caso: Jugador específico ===
@@ -1304,10 +1361,12 @@ async function enviarNotificacion() {
             // Limpiar campos
             document.getElementById('notif-title').value = '';
             document.getElementById('notif-message').value = '';
+            if (imageInput) imageInput.value = '';
+            document.getElementById('notif-image-preview').innerHTML = '';
             if (target === "specific" && document.getElementById('specific-username')) {
                 document.getElementById('specific-username').value = '';
             }
-            
+
             // Desmarcar checkboxes si era por etiquetas
             if (target === "tags") {
                 document.querySelectorAll('#tags-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
