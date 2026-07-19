@@ -1445,7 +1445,7 @@ function renderizarPremiosVivo(lista) {
                         style="flex:1; background:#334155; color:white; padding:14px; border-radius:12px; font-weight:600;">
                     Denegar
                 </button>
-                <button onclick="marcarEntregado('${p.id}', '${p.usuario}')" 
+                <button onclick="marcarEntregado('${p.id}', '${p.usuario}', '${p.origen}')"
                         style="flex:1; background:#22d3ee; color:#000; padding:14px; border-radius:12px; font-weight:700;">
                     Entregar
                 </button>
@@ -1507,7 +1507,7 @@ async function denegarPremio(id) {
         }
 }
 
-async function marcarEntregado(id, usuario) {
+async function marcarEntregado(id, usuario, origen) {
     if (!confirm(`¿Confirmás entregar el premio a "${usuario}"?`)) {
         return;
     }
@@ -1528,8 +1528,9 @@ async function marcarEntregado(id, usuario) {
             return;
         }
 
-        // Actualiza racha y última ruleta del jugador (si la función existe)
-        if (typeof actualizarRachaYUltimaRuleta === 'function') {
+        // Solo actualizamos la racha de ruleta si el premio entregado es de la ruleta
+        // (un premio de trivia no debe sumar racha ni tocar el cooldown de la ruleta)
+        if (origen === 'ruleta' && typeof actualizarRachaYUltimaRuleta === 'function') {
             await actualizarRachaYUltimaRuleta(usuario);
         }
 
