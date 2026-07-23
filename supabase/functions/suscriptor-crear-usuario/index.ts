@@ -5,6 +5,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Escapa los caracteres especiales de ILIKE (%, _, \) para que la comparación
+// sea una igualdad exacta (sin distinguir mayúsculas/minúsculas), no un patrón.
+function escaparIlike(valor: string): string {
+  return valor.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -29,7 +35,7 @@ Deno.serve(async (req) => {
       .from("usuarios")
       .select("id")
       .eq("subscriber_id", subscriber_id)
-      .ilike("username", username)
+      .ilike("username", escaparIlike(username))
       .limit(1);
 
     if (errorCheck) {
