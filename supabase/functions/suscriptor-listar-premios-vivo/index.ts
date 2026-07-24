@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { subscriber_id } = await req.json();
+    const { subscriber_id, busqueda } = await req.json();
 
     if (!subscriber_id) {
       return new Response(
@@ -25,13 +25,27 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("premios_ruleta")
       .select("*")
       .eq("subscriber_id", subscriber_id)
-      .eq("estado", "pendiente")
+      .eq("estado", "pendiente");
+
+    const termino = typeof busqueda === "string" ? busqueda.trim() : "";
+    let limite = 50;
+
+    if (termino) {
+      // Comas y paréntesis rompen la sintaxis del .or() de PostgREST.
+      const limpio = termino.replace(/[,()]/g, "");
+      const patron = `%${limpio}%`;
+      query = query.or(`usuario.ilike.${patron},codigo.ilike.${patron},premio.ilike.${patron}`);
+      // Al buscar no queremos que el límite oculte el resultado que se busca.
+      limite = 500;
+    }
+
+    const { data, error } = await query
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(limite);
 
     if (error) {
       return new Response(
@@ -41,7 +55,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify({ data, truncado: !termino && data.length === limite }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch {
