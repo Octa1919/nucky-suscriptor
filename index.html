@@ -2192,9 +2192,25 @@ async function mostrarHistorialEntregados() {
             <h2 style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
                 <i class="fas fa-history"></i> Historial de Premios Entregados
             </h2>
+            <input type="text" id="buscador-historial" placeholder="Buscar por nombre de usuario o código..."
+                   style="width:100%; padding:14px 16px; margin-bottom:18px; background:#0f172a; color:white; border:1px solid #334155; border-radius:12px; font-size:1rem;">
             <div id="historial-lista">Cargando historial...</div>
         </div>
     `;
+
+    await cargarHistorialEntregados();
+
+    let debounceHistorial;
+    document.getElementById('buscador-historial').addEventListener('input', () => {
+        clearTimeout(debounceHistorial);
+        debounceHistorial = setTimeout(cargarHistorialEntregados, 350);
+    });
+}
+
+async function cargarHistorialEntregados() {
+    const busqueda = document.getElementById('buscador-historial')?.value.trim() || '';
+    const contenedor = document.getElementById('historial-lista');
+    contenedor.innerHTML = 'Cargando historial...';
 
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/suscriptor-historial-premios`, {
         method: 'POST',
@@ -2202,14 +2218,14 @@ async function mostrarHistorialEntregados() {
             'Authorization': `Bearer ${SUPABASE_KEY}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ subscriber_id: currentSubscriberId })
+        body: JSON.stringify({ subscriber_id: currentSubscriberId, busqueda })
     });
     const { data, error } = await resp.json();
 
-    const contenedor = document.getElementById('historial-lista');
-
     if (error || !data || data.length === 0) {
-        contenedor.innerHTML = `<p style="color:#94a3b8;">No hay premios entregados aún.</p>`;
+        contenedor.innerHTML = busqueda
+            ? `<p style="color:#94a3b8;">No se encontraron premios para "${busqueda}".</p>`
+            : `<p style="color:#94a3b8;">No hay premios entregados aún.</p>`;
         return;
     }
 

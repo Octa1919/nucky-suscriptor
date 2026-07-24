@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { subscriber_id } = await req.json();
+    const { subscriber_id, busqueda } = await req.json();
 
     if (!subscriber_id) {
       return new Response(
@@ -25,11 +25,22 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("premios_ruleta")
       .select("usuario, premio, codigo, created_at, entregado_at")
       .eq("subscriber_id", subscriber_id)
-      .eq("estado", "entregado")
+      .eq("estado", "entregado");
+
+    const termino = typeof busqueda === "string" ? busqueda.trim() : "";
+    if (termino) {
+      // Comas y paréntesis rompen la sintaxis del .or() de PostgREST, así que
+      // los sacamos: no son caracteres que alguien busque en un nombre o código.
+      const limpio = termino.replace(/[,()]/g, "");
+      const patron = `%${limpio}%`;
+      query = query.or(`usuario.ilike.${patron},codigo.ilike.${patron}`);
+    }
+
+    const { data, error } = await query
       .order("entregado_at", { ascending: false })
       .limit(100);
 
