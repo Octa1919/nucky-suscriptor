@@ -27,9 +27,9 @@ Deno.serve(async (req) => {
 
     let query = supabaseAdmin
       .from("premios_ruleta")
-      .select("usuario, premio, codigo, created_at, entregado_at")
+      .select("usuario, premio, codigo, estado, created_at, entregado_at, denegado_at")
       .eq("subscriber_id", subscriber_id)
-      .eq("estado", "entregado");
+      .in("estado", ["entregado", "denegado"]);
 
     const termino = typeof busqueda === "string" ? busqueda.trim() : "";
     if (termino) {
@@ -40,8 +40,10 @@ Deno.serve(async (req) => {
       query = query.or(`usuario.ilike.${patron},codigo.ilike.${patron}`);
     }
 
+    // Ordenamos por created_at (siempre existe) en vez de entregado_at, porque
+    // los denegados no tienen entregado_at y quedarían todos amontonados.
     const { data, error } = await query
-      .order("entregado_at", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(100);
 
     if (error) {
