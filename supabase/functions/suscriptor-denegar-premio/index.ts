@@ -25,9 +25,12 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Antes esto borraba la fila directamente. Ahora la marcamos como
+    // "denegado" para que quede un rastro (deja de mostrarse en vivo/historial
+    // igual que antes, pero sigue existiendo si alguna vez hace falta revisarla).
     const { error } = await supabaseAdmin
       .from("premios_ruleta")
-      .delete()
+      .update({ estado: "denegado", denegado_at: new Date().toISOString() })
       .eq("id", premio_id)
       .eq("subscriber_id", subscriber_id);
 
