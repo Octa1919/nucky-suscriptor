@@ -835,7 +835,11 @@ async function switchTab(tab) {
 
         setTimeout(() => {
             const buscador = document.getElementById('buscador-usuarios');
-            if (buscador) buscador.addEventListener('input', cargarUsuarios);
+            let debounceUsuarios;
+            if (buscador) buscador.addEventListener('input', () => {
+                clearTimeout(debounceUsuarios);
+                debounceUsuarios = setTimeout(cargarUsuarios, 350);
+            });
         }, 100);
     } 
     else if (tab === 3) { // Difu
@@ -1519,9 +1523,10 @@ async function cargarUsuarios() {
     const div = document.getElementById('lista-usuarios');
     if (!div) return;
 
-    const termino = document.getElementById('buscador-usuarios') 
-        ? document.getElementById('buscador-usuarios').value.toLowerCase().trim() 
+    const termino = document.getElementById('buscador-usuarios')
+        ? document.getElementById('buscador-usuarios').value.trim()
         : '';
+    const pedidoId = ++ultimoPedidoUsuarios;
 
     div.innerHTML = "<p>Cargando usuarios...</p>";
 
@@ -1532,7 +1537,7 @@ async function cargarUsuarios() {
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ subscriber_id: currentSubscriberId })
+            body: JSON.stringify({ subscriber_id: currentSubscriberId, busqueda: termino })
         }).then(r => r.json()),
 
         fetch(`${SUPABASE_URL}/functions/v1/suscriptor-listar-etiquetas`, {
@@ -1545,19 +1550,19 @@ async function cargarUsuarios() {
         }).then(r => r.json()).then(r => ({ data: r.data }))
     ]);
 
+    if (pedidoId !== ultimoPedidoUsuarios) return;
+
     if (usuariosRes.error || !usuariosRes.data) {
         div.innerHTML = "<p>Error al cargar usuarios.</p>";
         return;
     }
 
-    let usuarios = usuariosRes.data;
+    const usuarios = usuariosRes.data;
     const etiquetasDisponibles = etiquetasRes.data || [];
 
-    if (termino) {
-        usuarios = usuarios.filter(u =>
-            (u.username && u.username.toLowerCase().includes(termino)) ||
-            (u.telefono && u.telefono.toLowerCase().includes(termino))
-        );
+    if (termino && usuarios.length === 0) {
+        div.innerHTML = `<p style="color:#94a3b8;">No se encontraron usuarios para "${termino.replace(/</g, '&lt;')}".</p>`;
+        return;
     }
 
     const colorMap = {};
@@ -1644,8 +1649,13 @@ async function cargarUsuarios() {
             </div>
         `;
     }).join('');
+
+    if (usuariosRes.truncado) {
+        div.insertAdjacentHTML('beforeend', `<p style="color:#f59e0b; text-align:center; margin-top:12px;">Mostrando los ${usuarios.length} más recientes — usá el buscador para encontrar otros.</p>`);
+    }
 }
-    
+let ultimoPedidoUsuarios = 0;
+
     function showNewUserModal() {
         document.getElementById('new-username').value = '';
         document.getElementById('new-password').value = '';

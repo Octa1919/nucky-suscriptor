@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { subscriber_id } = await req.json();
+    const { subscriber_id, busqueda } = await req.json();
 
     if (!subscriber_id) {
       return new Response(
@@ -25,11 +25,24 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("usuarios")
-      .select("*")
-      .eq("subscriber_id", subscriber_id)
-      .order("created_at", { ascending: false });
+      .select("*", { count: "exact" })
+      .eq("subscriber_id", subscriber_id);
+
+    const termino = typeof busqueda === "string" ? busqueda.trim() : "";
+    if (termino) {
+      // Comas y paréntesis rompen la sintaxis del .or() de PostgREST.
+      const limpio = termino.replace(/[,()]/g, "");
+      const patron = `%${limpio}%`;
+      query = query.or(`username.ilike.${patron},telefono.ilike.${patron}`);
+    }
+
+    // PostgREST corta en 1000 filas sin avisar; por eso la búsqueda se hace acá
+    // (sobre toda la tabla) y no en el navegador sobre lo ya descargado.
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .limit(1000);
 
     if (error) {
       return new Response(
@@ -39,7 +52,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify({ data, truncado: (count ?? data.length) > data.length }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch {
